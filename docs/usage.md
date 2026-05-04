@@ -115,7 +115,7 @@ $result = $shape->validate([]);
 var_dump($result->values()); // []
 ```
 
-Use `default()` when a missing field should be filled. Defaults run through preparation, coercion, and validators. Present input wins over the default. Defaulted fields use `null` in `pristineValues()` because the input field was missing.
+Use `default()` when a missing field should be filled. Defaults run through preparation, coercion, and validators. Present input wins over the default. Defaulted fields stay omitted from `pristineValues()` because they were missing from the input.
 
 ```php
 <?php
@@ -217,7 +217,7 @@ The `Result` object is the primary output of validation. Use it as your source o
 - `errors(grouped: true)` groups errors by shape section.
 - `map()` returns a field-to-messages map.
 - `values()` returns coerced values.
-- `pristineValues()` returns values before coercion. If `Rule::prepare()` is used, these are the prepared values, not the original raw input. Defaulted fields use `null` because the field was missing. Missing optional fields are omitted.
+- `pristineValues()` returns incoming values before coercion. If `Rule::prepare()` is used, these are the prepared values, not the original raw input. Missing optional fields and defaulted fields are omitted.
 
 `Result` and `Violation` implement `JsonSerializable`, so you can return them directly from JSON APIs.
 

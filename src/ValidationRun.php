@@ -12,12 +12,18 @@ final class ValidationRun
 {
 	private ErrorBag $errors;
 
+	/** Marks defaulted fields so pristine output can preserve missing input. */
+	private object $missing;
+
 	public function __construct(
 		private readonly ShapeDefinition $shape,
 		private readonly array $data,
 		private readonly int $level,
 	) {
 		$this->errors = new ErrorBag();
+		// Use a unique per-run sentinel instead of null so explicit null input
+		// remains distinguishable from fields filled by defaults.
+		$this->missing = new \stdClass();
 	}
 
 	public function validate(): Result
@@ -214,7 +220,7 @@ final class ValidationRun
 			);
 		}
 
-		return new \Duon\Sire\Value($read->value->value, null);
+		return new \Duon\Sire\Value($read->value->value, $this->missing);
 	}
 
 	private function readExtraValue(string $field, mixed $value, ?int $listIndex): ?Value
@@ -466,9 +472,16 @@ final class ValidationRun
 	 */
 	private function getPristineValues(array $values): array
 	{
-		return array_map(
-			static fn(Value $item): mixed => $item->pristine,
-			$values,
-		);
+		$pristineValues = [];
+
+		foreach ($values as $field => $value) {
+			if ($value->pristine === $this->missing) {
+				continue;
+			}
+
+			$pristineValues[$field] = $value->pristine;
+		}
+
+		return $pristineValues;
 	}
 }

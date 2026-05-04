@@ -186,7 +186,7 @@ class ShapeTest extends TestCase
 		$this->assertSame('Enabled must be true or false', $result->map()['enabled'][0]);
 		$this->assertSame(true, $result->values()['published']);
 		$this->assertSame(false, $result->values()['archived']);
-		$this->assertNull($result->pristineValues()['archived']);
+		$this->assertArrayNotHasKey('archived', $result->pristineValues());
 	}
 
 	public function testTypeText(): void
@@ -855,8 +855,8 @@ class ShapeTest extends TestCase
 		$this->assertTrue($result->isValid());
 		$this->assertSame('draft', $result->values()['status']);
 		$this->assertSame(13, $result->values()['count']);
-		$this->assertNull($result->pristineValues()['status']);
-		$this->assertNull($result->pristineValues()['count']);
+		$this->assertArrayNotHasKey('status', $result->pristineValues());
+		$this->assertArrayNotHasKey('count', $result->pristineValues());
 	}
 
 	public function testRuleDefaultValueRunsBeforePreparation(): void
@@ -876,7 +876,7 @@ class ShapeTest extends TestCase
 
 		$this->assertTrue($result->isValid());
 		$this->assertSame('hello', $result->values()['slug']);
-		$this->assertNull($result->pristineValues()['slug']);
+		$this->assertArrayNotHasKey('slug', $result->pristineValues());
 	}
 
 	public function testExplicitValueOverridesRuleDefault(): void
@@ -901,7 +901,7 @@ class ShapeTest extends TestCase
 		$this->assertFalse($result->isValid());
 		$this->assertSame('Age must be a whole number', $result->map()['age'][0]);
 		$this->assertSame('old', $result->values()['age']);
-		$this->assertNull($result->pristineValues()['age']);
+		$this->assertArrayNotHasKey('age', $result->pristineValues());
 	}
 
 	public function testInvalidNestedRuleDefaultAddsValidationError(): void
@@ -917,7 +917,7 @@ class ShapeTest extends TestCase
 		$this->assertFalse($result->isValid());
 		$this->assertSame('Email must be a valid email address', $result->map()['child']['email'][0]);
 		$this->assertSame(['email' => 'invalid'], $result->values()['child']);
-		$this->assertNull($result->pristineValues()['child']);
+		$this->assertArrayNotHasKey('child', $result->pristineValues());
 	}
 
 	public function testNullableRuleAllowsNullValue(): void
@@ -964,7 +964,7 @@ class ShapeTest extends TestCase
 
 		$this->assertTrue($result->isValid());
 		$this->assertNull($result->values()['note']);
-		$this->assertNull($result->pristineValues()['note']);
+		$this->assertArrayNotHasKey('note', $result->pristineValues());
 	}
 
 	public function testRequiredNarrowsNullRuleDefault(): void
