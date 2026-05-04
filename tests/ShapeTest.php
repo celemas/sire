@@ -10,6 +10,7 @@ use Duon\Sire\Contract\Coercer;
 use Duon\Sire\Contract\Validator;
 use Duon\Sire\Contract\ValidatorParser;
 use Duon\Sire\Contract\Value;
+use Duon\Sire\EmptyValue;
 use Duon\Sire\Extra;
 use Duon\Sire\Failure;
 use Duon\Sire\Review;
@@ -514,6 +515,24 @@ class ShapeTest extends TestCase
 		$this->expectExceptionMessage('Invalid extra mode "drop"');
 
 		new Shape()->extra('drop');
+	}
+
+	public function testRejectsInvalidEmptyValue(): void
+	{
+		$this->expectException(ValueError::class);
+
+		new Shape()->add('name', 'text')->empty('blank');
+	}
+
+	public function testAcceptsStringEmptyValue(): void
+	{
+		$shape = new Shape();
+		$shape->add('name', 'text')->empty('missing', EmptyValue::Null);
+
+		$result = $shape->validate(['name' => 'Ada']);
+
+		$this->assertTrue($result->isValid());
+		$this->assertSame('Ada', $result->values()['name']);
 	}
 
 	public function testRequiredValidator(): void

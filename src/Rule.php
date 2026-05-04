@@ -15,6 +15,9 @@ final class Rule
 	/** @var list<callable> */
 	private array $finalizers = [];
 
+	/** @var list<EmptyValue> */
+	private array $empty = [EmptyValue::Missing];
+
 	private bool $hasDefault = false;
 
 	private mixed $default = null;
@@ -52,6 +55,17 @@ final class Rule
 	public function finalize(callable $callback): static
 	{
 		$this->finalizers[] = $callback;
+
+		return $this;
+	}
+
+	public function empty(EmptyValue|string ...$empty): static
+	{
+		$this->empty = [];
+
+		foreach ($empty as $value) {
+			$this->empty[] = $value instanceof EmptyValue ? $value : EmptyValue::from($value);
+		}
 
 		return $this;
 	}
@@ -100,6 +114,22 @@ final class Rule
 	public function isOptional(): bool
 	{
 		return $this->optional;
+	}
+
+	public function treatsMissingAsEmpty(): bool
+	{
+		return in_array(EmptyValue::Missing, $this->empty, true);
+	}
+
+	public function isEmptyValue(mixed $value): bool
+	{
+		foreach ($this->empty as $empty) {
+			if ($this->matchesEmpty($empty, $value)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	public function message(string $key, string $message): static
@@ -154,6 +184,17 @@ final class Rule
 		}
 
 		return $value;
+	}
+
+	private function matchesEmpty(EmptyValue $empty, mixed $value): bool
+	{
+		return match ($empty) {
+			EmptyValue::Missing => false,
+			EmptyValue::Null => $value === null,
+			EmptyValue::String => $value === '',
+			EmptyValue::Whitespace => is_string($value) && trim($value) === '',
+			EmptyValue::List => $value === [],
+		};
 	}
 
 	private function messageKey(string $key): string
