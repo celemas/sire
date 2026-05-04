@@ -844,6 +844,82 @@ class ShapeTest extends TestCase
 		$this->assertSame('42', $result->pristineValues()['age']);
 	}
 
+	public function testRuleDefaultValueFillsMissingField(): void
+	{
+		$shape = new Shape();
+		$shape->add('status', 'text')->default('draft');
+		$shape->add('count', 'int')->default('13');
+
+		$result = $shape->validate([]);
+
+		$this->assertTrue($result->isValid());
+		$this->assertSame('draft', $result->values()['status']);
+		$this->assertSame(13, $result->values()['count']);
+		$this->assertNull($result->pristineValues()['status']);
+		$this->assertNull($result->pristineValues()['count']);
+	}
+
+	public function testRuleDefaultValueRunsBeforePreparation(): void
+	{
+		$shape = new Shape();
+		$shape->add('title', 'text');
+		$shape
+			->add('slug', 'text')
+			->default('')
+			->prepare(
+				static fn(mixed $value, array $data): string => $value !== ''
+					? (string) $value
+					: strtolower((string) $data['title']),
+			);
+
+		$result = $shape->validate(['title' => 'Hello']);
+
+		$this->assertTrue($result->isValid());
+		$this->assertSame('hello', $result->values()['slug']);
+		$this->assertNull($result->pristineValues()['slug']);
+	}
+
+	public function testExplicitValueOverridesRuleDefault(): void
+	{
+		$shape = new Shape();
+		$shape->add('status', 'text')->default('draft');
+
+		$result = $shape->validate(['status' => 'published']);
+
+		$this->assertTrue($result->isValid());
+		$this->assertSame('published', $result->values()['status']);
+		$this->assertSame('published', $result->pristineValues()['status']);
+	}
+
+	public function testInvalidRuleDefaultAddsValidationError(): void
+	{
+		$shape = new Shape();
+		$shape->add('age', 'int')->label('Age')->default('old');
+
+		$result = $shape->validate([]);
+
+		$this->assertFalse($result->isValid());
+		$this->assertSame('Age must be a whole number', $result->map()['age'][0]);
+		$this->assertSame('old', $result->values()['age']);
+		$this->assertNull($result->pristineValues()['age']);
+	}
+
+	public function testInvalidNestedRuleDefaultAddsValidationError(): void
+	{
+		$nested = new Shape();
+		$nested->add('email', 'text', 'email')->label('Email');
+
+		$shape = new Shape();
+		$shape->add('child', $nested)->default(['email' => 'invalid']);
+
+		$result = $shape->validate([]);
+
+		$this->assertFalse($result->isValid());
+		$this->assertSame('Email must be a valid email address', $result->map()['child']['email'][0]);
+		$this->assertSame(['email' => 'invalid'], $result->values()['child']);
+		$this->assertNull($result->pristineValues()['child']);
+	}
+
 	public function testRulePreparationReceivesInputData(): void
 	{
 		$shape = new Shape();

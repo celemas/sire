@@ -12,6 +12,10 @@ final class Rule
 	/** @var list<callable> */
 	private array $preparers = [];
 
+	private bool $hasDefault = false;
+
+	private mixed $default = null;
+
 	/** @var array<string, string> */
 	private array $messages = [];
 
@@ -35,6 +39,24 @@ final class Rule
 		$this->preparers[] = $callback;
 
 		return $this;
+	}
+
+	public function default(mixed $value): static
+	{
+		$this->default = $value;
+		$this->hasDefault = true;
+
+		return $this;
+	}
+
+	public function hasDefault(): bool
+	{
+		return $this->hasDefault;
+	}
+
+	public function defaultValue(): mixed
+	{
+		return $this->default;
 	}
 
 	public function message(string $key, string $message): static
