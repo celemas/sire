@@ -12,12 +12,10 @@ use Duon\Sire\Contract\ValidatorParser;
 use Duon\Sire\Contract\Value;
 use Duon\Sire\Extra;
 use Duon\Sire\Failure;
-use Duon\Sire\Result;
 use Duon\Sire\Review;
 use Duon\Sire\Shape;
 use Duon\Sire\Validation;
 use Duon\Sire\ValidatorRegistry;
-use Duon\Sire\Violation;
 use Override;
 use ValueError;
 
@@ -527,13 +525,11 @@ class ShapeTest extends TestCase
 		$shape->add('email', 'text', 'required', 'email');
 
 		$result = $shape->validate(['email' => 'invalid']);
-		$this->assertInstanceOf(Result::class, $result);
 		$this->assertFalse($result->isValid());
 		$this->assertSame('email must be a valid email address', $result->map()['email'][0]);
 
 		$violations = $result->violations();
 		$this->assertCount(1, $violations);
-		$this->assertInstanceOf(Violation::class, $violations[0]);
 		$this->assertSame('email', $violations[0]->field);
 		$this->assertSame('email must be a valid email address', $violations[0]->error);
 

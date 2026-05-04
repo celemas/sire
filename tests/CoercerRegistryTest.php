@@ -25,22 +25,19 @@ class CoercerRegistryTest extends TestCase
 
 		$this->assertNull($registry->get('upper'));
 		$this->assertSame($updatedRegistry->get('upper'), $updatedRegistry->get('upper'));
-		$this->assertInstanceOf(Coercer::class, $updatedRegistry->get('lower'));
+		$this->assertSame('value', $updatedRegistry->get('lower')?->coerce('VALUE')->value);
 	}
 
 	public function testWithDefaultsHasBuiltInCoercers(): void
 	{
 		$registry = CoercerRegistry::withDefaults();
 
-		$this->assertInstanceOf(Coercer::class, $registry->get('text'));
-		$this->assertInstanceOf(Coercer::class, $registry->get('bool'));
-		$integer = $registry->get('int');
-
-		$this->assertInstanceOf(Coercer::class, $integer);
-		$this->assertSame('{label} must be a whole number', $integer->message);
-		$this->assertInstanceOf(Coercer::class, $registry->get('float'));
-		$this->assertInstanceOf(Coercer::class, $registry->get('number'));
-		$this->assertInstanceOf(Coercer::class, $registry->get('list'));
+		$this->assertSame('test', $registry->get('text')?->coerce('test')->value);
+		$this->assertSame(true, $registry->get('bool')?->coerce('yes')->value);
+		$this->assertSame(13, $registry->get('int')?->coerce('13')->value);
+		$this->assertSame(13.0, $registry->get('float')?->coerce('13')->value);
+		$this->assertSame(13, $registry->get('number')?->coerce('13')->value);
+		$this->assertSame([1, 2], $registry->get('list')?->coerce([1, 2])->value);
 	}
 
 	public function testWithDefaultsMemoizesBuiltInCoercers(): void

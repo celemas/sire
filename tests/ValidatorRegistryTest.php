@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Duon\Sire\Tests;
 
 use Duon\Sire\Contract;
-use Duon\Sire\Contract\Value;
 use Duon\Sire\Validation;
 use Duon\Sire\ValidatorRegistry;
+use Duon\Sire\Value;
 use Override;
 use RuntimeException;
 
@@ -24,7 +24,7 @@ class ValidatorRegistryTest extends TestCase
 
 		$this->assertNull($registry->get('starts_with'));
 		$this->assertSame($updatedRegistry->get('starts_with'), $updatedRegistry->get('starts_with'));
-		$this->assertInstanceOf(Contract\Validator::class, $updatedRegistry->get('ends_with'));
+		self::assertValid(self::validator($updatedRegistry, 'ends_with'), new Value('value', 'value'));
 	}
 
 	public function testWithManyHandlesEmptyInput(): void
@@ -39,14 +39,17 @@ class ValidatorRegistryTest extends TestCase
 	{
 		$registry = ValidatorRegistry::withDefaults();
 
-		$this->assertInstanceOf(Contract\Validator::class, $registry->get('required'));
-		$this->assertInstanceOf(Contract\Validator::class, $registry->get('email'));
-		$this->assertInstanceOf(Contract\Validator::class, $registry->get('minlen'));
-		$this->assertInstanceOf(Contract\Validator::class, $registry->get('maxlen'));
-		$this->assertInstanceOf(Contract\Validator::class, $registry->get('min'));
-		$this->assertInstanceOf(Contract\Validator::class, $registry->get('max'));
-		$this->assertInstanceOf(Contract\Validator::class, $registry->get('regex'));
-		$this->assertInstanceOf(Contract\Validator::class, $registry->get('in'));
+		self::assertValid(self::validator($registry, 'required'), new Value('value', 'value'));
+		self::assertValid(
+			self::validator($registry, 'email'),
+			new Value('test@example.com', 'test@example.com'),
+		);
+		self::assertValid(self::validator($registry, 'minlen'), new Value('abc', 'abc'), '2');
+		self::assertValid(self::validator($registry, 'maxlen'), new Value('abc', 'abc'), '3');
+		self::assertValid(self::validator($registry, 'min'), new Value(5, 5), '1');
+		self::assertValid(self::validator($registry, 'max'), new Value(5, 5), '10');
+		self::assertValid(self::validator($registry, 'regex'), new Value('abc', 'abc'), '/^abc$/');
+		self::assertValid(self::validator($registry, 'in'), new Value('a', 'a'), 'a,b');
 	}
 
 	public function testWithDefaultsMemoizesBuiltInValidators(): void
@@ -87,6 +90,21 @@ class ValidatorRegistryTest extends TestCase
 		$this->assertSame($validator, $registry->get('required'));
 	}
 
+	private static function validator(ValidatorRegistry $registry, string $name): Contract\Validator
+	{
+		return (
+			$registry->get($name) ?? throw new RuntimeException(sprintf('Missing validator "%s"', $name))
+		);
+	}
+
+	private static function assertValid(
+		Contract\Validator $validator,
+		Value $value,
+		string ...$args,
+	): void {
+		self::assertNull($validator->validate($value, ...$args)->failure);
+	}
+
 	private static function stringValidator(): Contract\Validator
 	{
 		return new class implements Contract\Validator {
@@ -95,7 +113,7 @@ class ValidatorRegistryTest extends TestCase
 			}
 
 			#[Override]
-			public function validate(Value $value, string ...$args): Contract\Validation
+			public function validate(Contract\Value $value, string ...$args): Contract\Validation
 			{
 				return Validation::from(is_string($value->value));
 			}
