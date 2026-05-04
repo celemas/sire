@@ -12,6 +12,9 @@ final class Rule
 	/** @var list<callable> */
 	private array $preparers = [];
 
+	/** @var list<callable> */
+	private array $finalizers = [];
+
 	private bool $hasDefault = false;
 
 	private mixed $default = null;
@@ -41,6 +44,14 @@ final class Rule
 	public function prepare(callable $callback): static
 	{
 		$this->preparers[] = $callback;
+
+		return $this;
+	}
+
+	/** @param callable(mixed, array<string, mixed>): mixed $callback */
+	public function finalize(callable $callback): static
+	{
+		$this->finalizers[] = $callback;
 
 		return $this;
 	}
@@ -129,6 +140,17 @@ final class Rule
 	{
 		foreach ($this->preparers as $prepare) {
 			$value = $prepare($value, $data);
+		}
+
+		return $value;
+	}
+
+	/** @param array<string, mixed> $values */
+	public function applyFinalization(mixed $value, array $values): mixed
+	{
+		foreach ($this->finalizers as $finalize) {
+			$values[$this->field] = $value;
+			$value = $finalize($value, $values);
 		}
 
 		return $value;

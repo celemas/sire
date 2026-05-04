@@ -1013,6 +1013,136 @@ class ShapeTest extends TestCase
 		$this->assertSame(['name' => 'Prepared'], $result->pristineValues()['child']);
 	}
 
+	public function testRuleFinalizationRunsAfterValidation(): void
+	{
+		$called = false;
+		$shape = new Shape();
+		$shape
+			->add('count', 'int', 'min:2')
+			->finalize(static function (mixed $value, array $values) use (&$called): int {
+				$called = true;
+				self::assertSame(2, $value);
+				self::assertSame(['count' => 2, 'offset' => 3], $values);
+
+				return $value + $values['offset'];
+			});
+		$shape->add('offset', 'int')->default('3');
+
+		$result = $shape->validate(['count' => '2']);
+
+		$this->assertTrue($result->isValid());
+		$this->assertTrue($called);
+		$this->assertSame(5, $result->values()['count']);
+		$this->assertSame(3, $result->values()['offset']);
+		$this->assertSame('2', $result->pristineValues()['count']);
+		$this->assertArrayNotHasKey('offset', $result->pristineValues());
+	}
+
+	public function testRuleFinalizationRunsForDefaults(): void
+	{
+		$shape = new Shape();
+		$shape->add('title', 'text');
+		$shape
+			->add('slug', 'text')
+			->default('')
+			->finalize(static fn(mixed $_value, array $values): string => strtolower(
+				(string) $values['title'],
+			));
+
+		$result = $shape->validate(['title' => 'Hello']);
+
+		$this->assertTrue($result->isValid());
+		$this->assertSame('hello', $result->values()['slug']);
+		$this->assertArrayNotHasKey('slug', $result->pristineValues());
+	}
+
+	public function testReviewCallbacksReceiveFinalizedValues(): void
+	{
+		$called = false;
+		$shape = new Shape();
+		$shape->add('name', 'text')->finalize(
+			static fn(mixed $value): string => strtoupper((string) $value),
+		);
+		$shape->review(static function (Review $context) use (&$called): void {
+			$called = true;
+			self::assertSame(['name' => 'ADA'], $context->values());
+			self::assertSame(['name' => 'ada'], $context->pristineValues());
+		});
+
+		$result = $shape->validate(['name' => 'ada']);
+
+		$this->assertTrue($result->isValid());
+		$this->assertTrue($called);
+		$this->assertSame('ADA', $result->values()['name']);
+		$this->assertSame('ada', $result->pristineValues()['name']);
+	}
+
+	public function testRuleFinalizationDoesNotRunAfterValidationErrors(): void
+	{
+		$called = false;
+		$shape = new Shape();
+		$shape->add('age', 'int')->finalize(static function (mixed $value) use (&$called): mixed {
+			$called = true;
+
+			return $value;
+		});
+
+		$result = $shape->validate(['age' => 'old']);
+
+		$this->assertFalse($result->isValid());
+		$this->assertFalse($called);
+	}
+
+	public function testRuleFinalizationDoesNotRunForOmittedOptionalValues(): void
+	{
+		$called = false;
+		$shape = new Shape();
+		$shape
+			->add('subtitle', 'text')
+			->optional()
+			->finalize(static function (mixed $value) use (&$called): mixed {
+				$called = true;
+
+				return $value;
+			});
+
+		$result = $shape->validate([]);
+
+		$this->assertTrue($result->isValid());
+		$this->assertFalse($called);
+		$this->assertSame([], $result->values());
+	}
+
+	public function testRuleFinalizationReceivesListItemValues(): void
+	{
+		$seen = [];
+		$shape = Shape::list();
+		$shape->add('first', 'text');
+		$shape->add('last', 'text')->finalize(static function (mixed $value, array $values) use (
+			&$seen,
+		): string {
+			$seen[] = $values;
+
+			return $values['first'] . ' ' . $value;
+		});
+
+		$result = $shape->validate([
+			['first' => 'Ada', 'last' => 'Lovelace'],
+			['first' => 'Grace', 'last' => 'Hopper'],
+		]);
+
+		$this->assertTrue($result->isValid());
+		$this->assertSame('Ada Lovelace', $result->values()[0]['last']);
+		$this->assertSame('Grace Hopper', $result->values()[1]['last']);
+		$this->assertSame(
+			[
+				['first' => 'Ada', 'last' => 'Lovelace'],
+				['first' => 'Grace', 'last' => 'Hopper'],
+			],
+			$seen,
+		);
+	}
+
 	public function testOptionalRuleOmitsMissingValue(): void
 	{
 		$shape = new Shape();

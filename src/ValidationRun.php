@@ -43,6 +43,10 @@ final class ValidationRun
 			$validatedValues = $this->validateItem($values);
 		}
 
+		if (!$this->errors->hasErrors()) {
+			$validatedValues = $this->finalizeValues($validatedValues);
+		}
+
 		$extractedValues = $this->extractValues($validatedValues);
 		$pristineValues = $this->extractPristineValues($validatedValues);
 
@@ -110,6 +114,45 @@ final class ValidationRun
 				$this->level,
 			);
 		}
+	}
+
+	/** @param array<string, Value>|list<array<string, Value>> $validatedValues */
+	private function finalizeValues(array $validatedValues): array
+	{
+		if ($this->shape->list) {
+			$values = [];
+
+			foreach ($validatedValues as $item) {
+				/** @var array<string, Value> $item */
+				$values[] = $this->finalizeItem($item);
+			}
+
+			return $values;
+		}
+
+		/** @var array<string, Value> $validatedValues */
+		return $this->finalizeItem($validatedValues);
+	}
+
+	/**
+	 * @param array<string, Value> $values
+	 * @return array<string, Value>
+	 */
+	private function finalizeItem(array $values): array
+	{
+		$itemValues = $this->getValues($values);
+
+		foreach ($this->shape->rules as $field => $rule) {
+			if (!array_key_exists($field, $values)) {
+				continue;
+			}
+
+			$value = $values[$field];
+			$finalValue = $rule->applyFinalization($value->value, $itemValues);
+			$values[$field] = new \Duon\Sire\Value($finalValue, $value->pristine);
+		}
+
+		return $values;
 	}
 
 	/** @param array<string, Value>|list<array<string, Value>> $validatedValues */
