@@ -54,7 +54,7 @@ Use `asList(false)` to switch a configured list shape back to object mode.
 - `Extra::Allow` keeps extra fields as-is in `values()` and `pristineValues()`.
 - `Extra::Forbid` reports extra fields as validation errors.
 
-You can also pass the strings `ignore`, `allow`, and `forbid`. Configure the forbid error with `message('extra', 'Unknown field {field}')`. Extra messages can use `{field}` and `{value}`.
+You can also pass the strings `ignore`, `allow`, and `forbid`. Configure the forbid error with `message('extra', 'Field "{field}" is not allowed')`. Extra messages can use `{field}` and `{value}`.
 
 ## Use built-in types and validators
 

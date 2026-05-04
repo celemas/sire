@@ -24,7 +24,7 @@ final readonly class MessageFormatter
 		string $field,
 		mixed $pristine,
 		?string $defaultKey = null,
-		string $fallback = 'Invalid value',
+		string $fallback = '{label} is invalid',
 		array $args = [],
 		array $messages = [],
 	): string {

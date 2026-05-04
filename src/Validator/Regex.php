@@ -12,7 +12,7 @@ use Override;
 final class Regex implements Contract\Validator
 {
 	public string $message {
-		get => 'Does not match the required pattern';
+		get => '{label} has an invalid format';
 	}
 
 	#[Override]

@@ -12,7 +12,7 @@ use Override;
 final class Maximum implements Contract\Validator
 {
 	public string $message {
-		get => 'Higher than the allowed maximum of %4$s';
+		get => '{label} must be at most {arg1}';
 	}
 
 	#[Override]

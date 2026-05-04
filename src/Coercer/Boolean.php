@@ -13,7 +13,7 @@ use Override;
 final class Boolean implements Contract\Coercer
 {
 	public string $message {
-		get => 'Invalid boolean';
+		get => '{label} must be true or false';
 	}
 
 	#[Override]

@@ -13,7 +13,7 @@ use Override;
 final class FloatingPoint implements Contract\Coercer
 {
 	public string $message {
-		get => 'Invalid number';
+		get => '{label} must be a number';
 	}
 
 	#[Override]

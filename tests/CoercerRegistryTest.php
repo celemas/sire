@@ -37,7 +37,7 @@ class CoercerRegistryTest extends TestCase
 		$integer = $registry->get('int');
 
 		$this->assertInstanceOf(Coercer::class, $integer);
-		$this->assertSame('Invalid number', $integer->message);
+		$this->assertSame('{label} must be a whole number', $integer->message);
 		$this->assertInstanceOf(Coercer::class, $registry->get('float'));
 		$this->assertInstanceOf(Coercer::class, $registry->get('number'));
 		$this->assertInstanceOf(Coercer::class, $registry->get('list'));

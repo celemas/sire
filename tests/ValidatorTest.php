@@ -13,7 +13,7 @@ class ValidatorTest extends TestCase
 	{
 		$validator = new Required();
 
-		$this->assertSame('Required', $validator->message);
+		$this->assertSame('{label} is required', $validator->message);
 		$this->assertInstanceOf(Contract\ValidatesEmpty::class, $validator);
 	}
 

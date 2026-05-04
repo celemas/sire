@@ -13,7 +13,7 @@ use Override;
 final class Integer implements Contract\Coercer
 {
 	public string $message {
-		get => 'Invalid number';
+		get => '{label} must be a whole number';
 	}
 
 	#[Override]

@@ -239,7 +239,7 @@ final class ValidationRun
 			$field,
 			$value,
 			'extra',
-			'Unknown field {field}',
+			'Field "{field}" is not allowed',
 		);
 	}
 

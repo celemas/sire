@@ -12,7 +12,7 @@ use Override;
 final class Email implements Contract\Validator
 {
 	public string $message {
-		get => 'Invalid email address';
+		get => '{label} must be a valid email address';
 	}
 
 	#[Override]

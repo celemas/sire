@@ -12,7 +12,7 @@ use Override;
 final class Text implements Contract\Coercer
 {
 	public string $message {
-		get => 'Invalid text';
+		get => '{label} must be text';
 	}
 
 	#[Override]

@@ -172,6 +172,6 @@ class MessageFormatterTest extends TestCase
 			'value',
 		);
 
-		$this->assertSame('Invalid value', $message);
+		$this->assertSame('Field is invalid', $message);
 	}
 }

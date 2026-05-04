@@ -13,7 +13,7 @@ use Override;
 final class Sequence implements Contract\Coercer
 {
 	public string $message {
-		get => 'Invalid list';
+		get => '{label} must be a list';
 	}
 
 	#[Override]

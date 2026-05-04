@@ -12,7 +12,7 @@ use Override;
 final class MinLength implements Contract\Validator
 {
 	public string $message {
-		get => 'Shorter than the minimum length of %4$s characters';
+		get => '{label} must be at least {arg1} characters';
 	}
 
 	#[Override]

@@ -12,7 +12,7 @@ use Override;
 final class MaxLength implements Contract\Validator
 {
 	public string $message {
-		get => 'Exeeds the maximum length of %4$s characters';
+		get => '{label} must be at most {arg1} characters';
 	}
 
 	#[Override]

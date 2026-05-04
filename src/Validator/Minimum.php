@@ -12,7 +12,7 @@ use Override;
 final class Minimum implements Contract\Validator
 {
 	public string $message {
-		get => 'Lower than the required minimum of %4$s';
+		get => '{label} must be at least {arg1}';
 	}
 
 	#[Override]

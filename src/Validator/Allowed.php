@@ -13,7 +13,7 @@ use Override;
 final class Allowed implements Contract\Validator
 {
 	public string $message {
-		get => 'Invalid value';
+		get => '{label} must be an allowed value';
 	}
 
 	#[Override]

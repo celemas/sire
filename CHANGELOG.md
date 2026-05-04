@@ -18,6 +18,7 @@
 - Renamed `ValidatorDefinitionParser` to `ValidatorParser`.
 - Removed `Shape` subclass hooks and mutable run-state access, including `rules()`, protected `review()`, `addError()`, `toSubValues()`, `$errorList`, and `$errorMap`.
 - Changed the `in` validator to use strict comparisons, so values must match allowed values without PHP loose coercion.
+- Changed built-in default error messages to include labels and named placeholders.
 
 ### Added
 

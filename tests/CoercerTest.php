@@ -15,12 +15,12 @@ class CoercerTest extends TestCase
 {
 	public function testBuiltInCoercersExposeMessages(): void
 	{
-		$this->assertSame('Invalid boolean', new Boolean()->message);
-		$this->assertSame('Invalid number', new FloatingPoint()->message);
-		$this->assertSame('Invalid number', new Integer()->message);
-		$this->assertSame('Invalid number', new Number()->message);
-		$this->assertSame('Invalid list', new Sequence()->message);
-		$this->assertSame('Invalid text', new Text()->message);
+		$this->assertSame('{label} must be true or false', new Boolean()->message);
+		$this->assertSame('{label} must be a number', new FloatingPoint()->message);
+		$this->assertSame('{label} must be a whole number', new Integer()->message);
+		$this->assertSame('{label} must be a number', new Number()->message);
+		$this->assertSame('{label} must be a list', new Sequence()->message);
+		$this->assertSame('{label} must be text', new Text()->message);
 	}
 
 	public function testNumberCoercerPreservesNumberKind(): void

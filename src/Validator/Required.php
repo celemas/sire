@@ -12,7 +12,7 @@ use Override;
 final class Required implements Contract\ValidatesEmpty
 {
 	public string $message {
-		get => 'Required';
+		get => '{label} is required';
 	}
 
 	#[Override]
