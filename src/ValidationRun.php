@@ -87,12 +87,13 @@ final class ValidationRun
 			$this->errors->add(
 				$rule->field,
 				$rule->name(),
-				sprintf(
+				$this->shape->messageFormatter->formatMessage(
+					'validator.' . $validatorName,
 					$validator->message,
 					$rule->name(),
 					$rule->field,
-					print_r($value->pristine, true),
-					...$validatorArgs,
+					$value->pristine,
+					$validatorArgs,
 				),
 				$listIndex,
 				$this->shape->title,

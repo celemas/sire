@@ -87,6 +87,28 @@ class ShapeTest extends TestCase
 		$this->assertSame('Enabled must be yes or no', $result->map()['enabled'][0]);
 	}
 
+	public function testCustomValidatorMessage(): void
+	{
+		$shape = new Shape()->message('validator.required', '{label} is mandatory');
+		$shape->add('name', 'text', 'required')->label('Name');
+
+		$result = $shape->validate(['name' => '']);
+
+		$this->assertFalse($result->isValid());
+		$this->assertSame('Name is mandatory', $result->map()['name'][0]);
+	}
+
+	public function testCustomValidatorMessageWithArgs(): void
+	{
+		$shape = new Shape()->message('validator.min', '{label} must be at least {arg1}, got {value}');
+		$shape->add('age', 'int', 'min:18')->label('Age');
+
+		$result = $shape->validate(['age' => '12']);
+
+		$this->assertFalse($result->isValid());
+		$this->assertSame('Age must be at least 18, got 12', $result->map()['age'][0]);
+	}
+
 	public function testTypeFloat(): void
 	{
 		$testData = [

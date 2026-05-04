@@ -37,6 +37,24 @@ final readonly class MessageFormatter
 	}
 
 	/** @param list<mixed> $args */
+	public function formatMessage(
+		string $key,
+		string $fallback,
+		string $label,
+		string $field,
+		mixed $pristine,
+		array $args = [],
+	): string {
+		return $this->formatTemplate(
+			$this->messages[$key] ?? $fallback,
+			$label,
+			$field,
+			$pristine,
+			$args,
+		);
+	}
+
+	/** @param list<mixed> $args */
 	public function formatTemplate(
 		string $template,
 		string $label,
