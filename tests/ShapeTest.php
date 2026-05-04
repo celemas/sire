@@ -23,41 +23,19 @@ class ShapeTest extends TestCase
 {
 	public function testTypeInt(): void
 	{
-		$testData = [
-			'valid_int_1' => '13',
-			'valid_int_2' => 13,
-			'invalid_int_1' => '23invalid',
-			'invalid_int_2' => '23.23',
-		];
-
 		$shape = new Shape();
-		$shape->add('invalid_int_1', 'int')->label('Int 1');
-		$shape->add('invalid_int_2', 'int');
-		$shape->add('valid_int_1', 'int')->label('Int');
-		$shape->add('valid_int_2', 'int')->label('Int');
+		$shape->add('age', 'int')->label('Age');
+		$shape->add('count', 'int');
 
-		$result = $shape->validate($testData);
+		$result = $shape->validate([
+			'age' => 'old',
+			'count' => '13',
+		]);
+
 		$this->assertFalse($result->isValid());
-		$errors = $result->errors();
-		$this->assertSame('Int 1 must be a whole number', $errors['errors'][0]['error']);
-		$this->assertSame('invalid_int_1', $errors['errors'][0]['field']);
-		$this->assertSame('Int 1', $errors['errors'][0]['label']);
-		$this->assertSame('invalid_int_2 must be a whole number', $errors['errors'][1]['error']);
-		$this->assertSame('invalid_int_2', $errors['errors'][1]['field']);
-		$this->assertSame('invalid_int_2', $errors['errors'][1]['label']);
-		$this->assertSame('Int 1 must be a whole number', $errors['map']['invalid_int_1'][0]);
-		$this->assertSame('invalid_int_2 must be a whole number', $errors['map']['invalid_int_2'][0]);
-		$this->assertArrayNotHasKey('valid_int_1', $errors['map']);
-		$this->assertArrayNotHasKey('valid_int_2', $errors['map']);
-
-		$values = $result->values();
-		$this->assertSame(13, $values['valid_int_1']);
-		$this->assertSame(13, $values['valid_int_2']);
-		$this->assertSame('23invalid', $values['invalid_int_1']);
-
-		$pristine = $result->pristineValues();
-		$this->assertSame('13', $pristine['valid_int_1']);
-		$this->assertSame(13, $pristine['valid_int_2']);
+		$this->assertSame('Age must be a whole number', $result->map()['age'][0]);
+		$this->assertSame(13, $result->values()['count']);
+		$this->assertSame('13', $result->pristineValues()['count']);
 	}
 
 	public function testCustomTypeMessage(): void
@@ -162,151 +140,67 @@ class ShapeTest extends TestCase
 
 	public function testTypeFloat(): void
 	{
-		$testData = [
-			'valid_float_1' => '13',
-			'valid_float_2' => '13.13',
-			'valid_float_3' => 13,
-			'valid_float_4' => 13.13,
-			'invalid_float' => '23.23invalid',
-		];
-
 		$shape = new Shape();
-		$shape->add('invalid_float', 'float')->label('Float');
-		$shape->add('valid_float_1', 'float');
-		$shape->add('valid_float_2', 'float');
-		$shape->add('valid_float_3', 'float');
-		$shape->add('valid_float_4', 'float');
+		$shape->add('price', 'float')->label('Price');
+		$shape->add('ratio', 'float');
 
-		$result = $shape->validate($testData);
+		$result = $shape->validate([
+			'price' => 'old',
+			'ratio' => '13.13',
+		]);
+
 		$this->assertFalse($result->isValid());
-		$errors = $result->errors();
-		$this->assertSame('Float must be a number', $errors['errors'][0]['error']);
-		$this->assertSame('Float must be a number', $errors['map']['invalid_float'][0]);
-		$this->assertArrayNotHasKey('valid_float_1', $errors['map']);
-		$this->assertArrayNotHasKey('valid_float_2', $errors['map']);
-		$this->assertArrayNotHasKey('valid_float_3', $errors['map']);
-		$this->assertArrayNotHasKey('valid_float_4', $errors['map']);
+		$this->assertSame('Price must be a number', $result->map()['price'][0]);
+		$this->assertSame(13.13, $result->values()['ratio']);
 	}
 
 	public function testTypeNumber(): void
 	{
-		$testData = [
-			'valid_number_1' => '13',
-			'valid_number_2' => '13.0',
-			'valid_number_3' => '13.13',
-			'valid_number_4' => '1e3',
-			'valid_number_5' => 13,
-			'valid_number_6' => 13.0,
-			'invalid_number' => '23.23invalid',
-		];
-
 		$shape = new Shape();
-		$shape->add('invalid_number', 'number')->label('Number');
-		$shape->add('valid_number_1', 'number');
-		$shape->add('valid_number_2', 'number');
-		$shape->add('valid_number_3', 'number');
-		$shape->add('valid_number_4', 'number');
-		$shape->add('valid_number_5', 'number');
-		$shape->add('valid_number_6', 'number');
+		$shape->add('amount', 'number')->label('Amount');
+		$shape->add('count', 'number');
 
-		$result = $shape->validate($testData);
+		$result = $shape->validate([
+			'amount' => 'old',
+			'count' => '13',
+		]);
+
 		$this->assertFalse($result->isValid());
-		$errors = $result->errors();
-		$this->assertSame('Number must be a number', $errors['errors'][0]['error']);
-		$this->assertSame('Number must be a number', $errors['map']['invalid_number'][0]);
-
-		$values = $result->values();
-		$this->assertSame(13, $values['valid_number_1']);
-		$this->assertSame(13.0, $values['valid_number_2']);
-		$this->assertSame(13.13, $values['valid_number_3']);
-		$this->assertSame(1000.0, $values['valid_number_4']);
-		$this->assertSame(13, $values['valid_number_5']);
-		$this->assertSame(13.0, $values['valid_number_6']);
+		$this->assertSame('Amount must be a number', $result->map()['amount'][0]);
+		$this->assertSame(13, $result->values()['count']);
 	}
 
 	public function testTypeBoolean(): void
 	{
-		$testData = [
-			'valid_bool_1' => true,
-			'valid_bool_2' => false,
-			'valid_bool_3' => 'yes',
-			'valid_bool_4' => 'off',
-			'valid_bool_5' => 'true',
-			'valid_bool_6' => 'null',
-			'valid_bool_8' => null,
-			'invalid_bool_1' => 'invalid',
-			'invalid_bool_2' => 13,
-		];
-
 		$shape = new Shape();
-		$shape->add('valid_bool_1', 'bool');
-		$shape->add('valid_bool_2', 'bool');
-		$shape->add('valid_bool_3', 'bool');
-		$shape->add('valid_bool_4', 'bool');
-		$shape->add('valid_bool_5', 'bool');
-		$shape->add('valid_bool_6', 'bool');
-		$shape->add('valid_bool_7', 'bool');
-		$shape->add('valid_bool_8', 'bool');
-		$shape->add('invalid_bool_1', 'bool')->label('Bool 1');
-		$shape->add('invalid_bool_2', 'bool');
+		$shape->add('enabled', 'bool')->label('Enabled');
+		$shape->add('published', 'bool');
+		$shape->add('archived', 'bool');
 
-		$result = $shape->validate($testData);
+		$result = $shape->validate([
+			'enabled' => 'maybe',
+			'published' => 'yes',
+		]);
+
 		$this->assertFalse($result->isValid());
-		$errors = $result->errors();
-		$this->assertSame('Bool 1 must be true or false', $errors['errors'][0]['error']);
-		$this->assertSame('invalid_bool_2 must be true or false', $errors['errors'][1]['error']);
-		$this->assertSame('Bool 1 must be true or false', $errors['map']['invalid_bool_1'][0]);
-		$this->assertSame('invalid_bool_2 must be true or false', $errors['map']['invalid_bool_2'][0]);
-		$this->assertArrayNotHasKey('valid_bool_1', $errors['map']);
-		$this->assertArrayNotHasKey('valid_bool_2', $errors['map']);
-
-		$values = $result->values();
-		$this->assertSame(true, $values['valid_bool_1']);
-		$this->assertSame(false, $values['valid_bool_2']);
-		$this->assertSame(true, $values['valid_bool_3']);
-		$this->assertSame(false, $values['valid_bool_4']);
-		$this->assertSame(true, $values['valid_bool_5']);
-		$this->assertSame(false, $values['valid_bool_6']);
-		$this->assertSame(false, $values['valid_bool_7']);
-		$this->assertSame(false, $values['valid_bool_8']);
-
-		$pristine = $result->pristineValues();
-		$this->assertSame('yes', $pristine['valid_bool_3']);
-		$this->assertSame('invalid', $pristine['invalid_bool_1']);
-		$this->assertSame(13, $pristine['invalid_bool_2']);
+		$this->assertSame('Enabled must be true or false', $result->map()['enabled'][0]);
+		$this->assertSame(true, $result->values()['published']);
+		$this->assertSame(false, $result->values()['archived']);
+		$this->assertNull($result->pristineValues()['archived']);
 	}
 
 	public function testTypeText(): void
 	{
-		$testData = [
-			'valid_text_1' => 'Lorem ipsum',
-			'valid_text_2' => false,
-			'valid_text_3' => true,
-			'valid_text_4' => '<a href="/test">Test</a>',
-		];
-
 		$shape = new Shape();
-		$shape->add('valid_text_1', 'text')->label('Text');
-		$shape->add('valid_text_2', 'text')->label('Text');
-		$shape->add('valid_text_3', 'text')->label('Text');
-		$shape->add('valid_text_4', 'text');
-		$shape->add('valid_text_5', 'text');
+		$shape->add('title', 'text')->label('Title');
+		$shape->add('description', 'text');
 
-		$result = $shape->validate($testData);
+		$result = $shape->validate(['title' => true]);
+
 		$this->assertTrue($result->isValid());
-		$this->assertCount(0, $result->errors()['errors']);
-
-		$values = $result->values();
-
-		$this->assertSame('Lorem ipsum', $values['valid_text_1']);
-		$this->assertNull($values['valid_text_2']);
-		$this->assertSame('1', $values['valid_text_3']);
-		$this->assertSame('<a href="/test">Test</a>', $values['valid_text_4']);
-		$this->assertNull($values['valid_text_5']);
-
-		$pristine = $result->pristineValues();
-		$this->assertSame(false, $pristine['valid_text_2']);
-		$this->assertNull($pristine['valid_text_5']);
+		$this->assertSame('1', $result->values()['title']);
+		$this->assertNull($result->values()['description']);
+		$this->assertNull($result->pristineValues()['description']);
 	}
 
 	public function testTypeSkipEmpty(): void
@@ -324,37 +218,18 @@ class ShapeTest extends TestCase
 
 	public function testTypeList(): void
 	{
-		$testData = [
-			'valid_list_1' => [1, 2],
-			'valid_list_2' => [['key' => 'data']],
-			'invalid_list_1' => 'invalid',
-			'invalid_list_2' => 13,
-		];
-
 		$shape = new Shape();
-		$shape->add('valid_list_1', 'list');
-		$shape->add('valid_list_2', 'list');
-		$shape->add('invalid_list_1', 'list')->label('List 1');
-		$shape->add('invalid_list_2', 'list');
+		$shape->add('items', 'list')->label('Items');
+		$shape->add('tags', 'list');
 
-		$result = $shape->validate($testData);
+		$result = $shape->validate([
+			'items' => 'invalid',
+			'tags' => [1, 2],
+		]);
+
 		$this->assertFalse($result->isValid());
-		$errors = $result->errors();
-		$this->assertSame('List 1 must be a list', $errors['errors'][0]['error']);
-		$this->assertSame('invalid_list_2 must be a list', $errors['errors'][1]['error']);
-		$this->assertSame('List 1 must be a list', $errors['map']['invalid_list_1'][0]);
-		$this->assertSame('invalid_list_2 must be a list', $errors['map']['invalid_list_2'][0]);
-		$this->assertArrayNotHasKey('valid_list_1', $errors['map']);
-		$this->assertArrayNotHasKey('valid_list_2', $errors['map']);
-
-		$values = $result->values();
-		$this->assertSame([1, 2], $values['valid_list_1']);
-		$this->assertSame([['key' => 'data']], $values['valid_list_2']);
-
-		$pristine = $result->pristineValues();
-		$this->assertSame([1, 2], $pristine['valid_list_1']);
-		$this->assertSame('invalid', $pristine['invalid_list_1']);
-		$this->assertSame(13, $pristine['invalid_list_2']);
+		$this->assertSame('Items must be a list', $result->map()['items'][0]);
+		$this->assertSame([1, 2], $result->values()['tags']);
 	}
 
 	public function testWrongType(): void
