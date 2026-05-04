@@ -23,6 +23,7 @@
 
 - Added fluent `Shape` configuration with `Shape::list()`, `asList()`, `extra()`, `title()`, `validator()`, `validators()`, `type()`, `types()`, and `validatorParser()`.
 - Added the `Extra` enum to control extra input fields with `ignore`, `allow`, and `forbid` modes.
+- Added the `number` type for values that may be integers or floats.
 - Added `Shape::review()` callbacks with `Review` for post-validation checks after successful normal validation.
 - Added `Rule::prepare()` to normalize present field values before type casting and nested shape validation.
 - Added quoted and escaped arguments for validator DSL definitions.

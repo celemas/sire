@@ -60,7 +60,7 @@ You can also pass the strings `ignore`, `allow`, and `forbid`. Configure the for
 
 Sire supports a small set of built-in types and validators out of the box, so you can start without additional configuration.
 
-- Built-in types: `text`, `int`, `float`, `bool`, `list`
+- Built-in types: `text`, `int`, `float`, `number`, `bool`, `list`
 - Built-in validators: `required`, `email`, `minlen`, `maxlen`, `min`, `max`, `regex`, `in`
 
 The validator DSL uses `:` to separate the validator name from arguments.
@@ -136,7 +136,7 @@ The `Result` object is the primary output of validation. Use it as your source o
 
 ## Customize messages
 
-Use `message()` or `messages()` to override coercion and validator errors for a shape. Built-in type keys are `type.int`, `type.float`, `type.bool`, and `type.list`. Built-in validator keys use the validator name, for example `validator.required`, `validator.email`, `validator.min`, and `validator.max`. Custom coercers and validators use their registered names, for example `type.slug` and `validator.starts_with`.
+Use `message()` or `messages()` to override coercion and validator errors for a shape. Built-in type keys are `type.int`, `type.float`, `type.number`, `type.bool`, and `type.list`. Built-in validator keys use the validator name, for example `validator.required`, `validator.email`, `validator.min`, and `validator.max`. Custom coercers and validators use their registered names, for example `type.slug` and `validator.starts_with`.
 
 ```php
 <?php

@@ -139,6 +139,42 @@ class ShapeTest extends TestCase
 		$this->assertArrayNotHasKey('valid_float_4', $errors['map']);
 	}
 
+	public function testTypeNumber(): void
+	{
+		$testData = [
+			'valid_number_1' => '13',
+			'valid_number_2' => '13.0',
+			'valid_number_3' => '13.13',
+			'valid_number_4' => '1e3',
+			'valid_number_5' => 13,
+			'valid_number_6' => 13.0,
+			'invalid_number' => '23.23invalid',
+		];
+
+		$shape = new Shape();
+		$shape->add('invalid_number', 'number')->label('Number');
+		$shape->add('valid_number_1', 'number');
+		$shape->add('valid_number_2', 'number');
+		$shape->add('valid_number_3', 'number');
+		$shape->add('valid_number_4', 'number');
+		$shape->add('valid_number_5', 'number');
+		$shape->add('valid_number_6', 'number');
+
+		$result = $shape->validate($testData);
+		$this->assertFalse($result->isValid());
+		$errors = $result->errors();
+		$this->assertSame('Invalid number', $errors['errors'][0]['error']);
+		$this->assertSame('Invalid number', $errors['map']['invalid_number'][0]);
+
+		$values = $result->values();
+		$this->assertSame(13, $values['valid_number_1']);
+		$this->assertSame(13.0, $values['valid_number_2']);
+		$this->assertSame(13.13, $values['valid_number_3']);
+		$this->assertSame(1000.0, $values['valid_number_4']);
+		$this->assertSame(13, $values['valid_number_5']);
+		$this->assertSame(13.0, $values['valid_number_6']);
+	}
+
 	public function testTypeBoolean(): void
 	{
 		$testData = [

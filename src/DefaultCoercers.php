@@ -24,6 +24,7 @@ final class DefaultCoercers implements Contract\CoercerRegistry
 			'list' => new Coercer\Sequence(),
 			'float' => new Coercer\FloatingPoint(),
 			'int' => new Coercer\Integer(),
+			'number' => new Coercer\Number(),
 			default => null,
 		};
 
