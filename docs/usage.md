@@ -207,6 +207,36 @@ $user
 
 If a prepare callback throws, the exception is not caught by Sire. If it returns an invalid value for the rule type, normal coercion or nested validation reports the validation error.
 
+## Finalize output after validation
+
+Use `Rule::finalize()` when a field needs a final output transform after coercion and field validators. Finalize callbacks run only when validation has no errors, before review callbacks, and in registration order for each rule.
+
+```php
+<?php
+
+use Duon\Sire\Shape;
+
+$shape = new Shape();
+$shape->add('title', 'text');
+$shape->add('slug', 'text')
+    ->default('')
+    ->finalize(static function (mixed $value, array $values): string {
+        if ($value !== '') {
+            return (string) $value;
+        }
+
+        return strtolower(str_replace(' ', '-', (string) $values['title']));
+    });
+
+$result = $shape->validate(['title' => 'Hello World']);
+
+var_dump($result->values()['slug']); // "hello-world"
+```
+
+Finalize callbacks receive the current field value and the current validated values for the same shape item. In list shapes, the values array contains the current list item. Finalizers transform `values()` only; they do not change `pristineValues()`. They run for present fields and defaulted fields, but not for omitted optional fields.
+
+If a finalize callback throws, the exception is not caught by Sire.
+
 ## Read validation results
 
 The `Result` object is the primary output of validation. Use it as your source of truth in application code.
@@ -216,7 +246,7 @@ The `Result` object is the primary output of validation. Use it as your source o
 - `errors()` returns a structured array output.
 - `errors(grouped: true)` groups errors by shape section.
 - `map()` returns a field-to-messages map.
-- `values()` returns coerced values.
+- `values()` returns coerced and finalized values.
 - `pristineValues()` returns incoming values before coercion. If `Rule::prepare()` is used, these are the prepared values, not the original raw input. Missing optional fields and defaulted fields are omitted.
 
 `Result` and `Violation` implement `JsonSerializable`, so you can return them directly from JSON APIs.
@@ -274,7 +304,7 @@ When no rule or shape-level message is configured, Sire uses the coercer or vali
 
 ## Review validated values
 
-Use `Shape::review()` for cross-field checks or other post-validation checks. Review callbacks run only after normal validation succeeds. If one review callback adds an error, later review callbacks still run so the result can contain all review errors.
+Use `Shape::review()` for cross-field checks or other post-validation checks. Review callbacks run last and see finalized values. They run only after normal validation succeeds. If one review callback adds an error, later review callbacks still run so the result can contain all review errors.
 
 ```php
 <?php
@@ -289,7 +319,7 @@ $shape->add('confirm', 'text', 'required')->label('Password confirmation');
 $shape->review(static function (Review $review): void {
     $values = $review->values();
 
-    if (($values['password'] ?? null) === ($values['confirm'] ?? null)) {
+    if ($values['password'] === $values['confirm']) {
         return;
     }
 

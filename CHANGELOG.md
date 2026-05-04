@@ -30,6 +30,7 @@
 - Added the `number` type for values that may be integers or floats.
 - Added `Shape::review()` callbacks with `Review` for post-validation checks after successful normal validation.
 - Added `Rule::prepare()` to normalize present or defaulted field values before type casting and nested shape validation.
+- Added `Rule::finalize()` to transform valid output values after field validation and before review callbacks.
 - Added `Rule::optional()`, `Rule::default()`, and `Rule::nullable()` for field presence control.
 - Added `Rule::message()` and `Rule::messages()` for field-specific type and validator messages.
 - Added quoted and escaped arguments for validator DSL definitions.
