@@ -6,36 +6,47 @@ namespace Duon\Sire\Coercer;
 
 use Duon\Sire\Coercion;
 use Duon\Sire\Contract;
+use Duon\Sire\Failure;
 use Override;
 
 final readonly class FloatingPoint implements Contract\Coercer
 {
-	/** @param array<string, string> $messages */
-	public function __construct(
-		private array $messages,
-	) {}
-
 	#[Override]
-	public function coerce(mixed $pristine, string $label): Contract\Coercion
+	public function coerce(mixed $pristine): Contract\Coercion
 	{
-		if (is_float($pristine) || is_null($pristine)) {
-			return new Coercion($pristine, $pristine);
+		if (!self::isCoercible($pristine)) {
+			return self::invalid($pristine);
 		}
 
-		if (is_int($pristine)) {
-			return new Coercion((float) $pristine, $pristine);
-		}
+		return new Coercion(self::toFloat($pristine), $pristine);
+	}
 
-		$tmp = trim((string) $pristine);
-
-		if (preg_match('/^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/', $tmp)) {
-			return new Coercion((float) $tmp, $pristine);
-		}
-
+	private static function invalid(mixed $pristine): Coercion
+	{
 		return new Coercion(
 			$pristine,
 			$pristine,
-			sprintf($this->messages['float'], $label),
+			Failure::invalid(),
 		);
+	}
+
+	private static function isCoercible(mixed $value): bool
+	{
+		return (
+			is_null($value)
+			|| is_float($value)
+			|| is_int($value)
+			|| self::isNumericString(trim((string) $value))
+		);
+	}
+
+	private static function isNumericString(string $value): bool
+	{
+		return preg_match('/^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/', $value) === 1;
+	}
+
+	private static function toFloat(mixed $value): ?float
+	{
+		return is_null($value) ? null : (float) $value;
 	}
 }
