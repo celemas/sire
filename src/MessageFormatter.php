@@ -32,8 +32,19 @@ final readonly class MessageFormatter
 
 		$template ??= $failure->fallback ?? 'Invalid value';
 
+		return $this->formatTemplate($template, $label, $field, $pristine, $failure->args);
+	}
+
+	/** @param list<mixed> $args */
+	public function formatTemplate(
+		string $template,
+		string $label,
+		string $field,
+		mixed $pristine,
+		array $args = [],
+	): string {
 		if (self::usesNamedTemplate($template)) {
-			return self::formatNamed($template, $label, $field, $pristine, $failure->args);
+			return self::formatNamed($template, $label, $field, $pristine, $args);
 		}
 
 		return sprintf(
@@ -41,7 +52,7 @@ final readonly class MessageFormatter
 			$label,
 			$field,
 			self::stringify($pristine),
-			...$failure->args,
+			...$args,
 		);
 	}
 

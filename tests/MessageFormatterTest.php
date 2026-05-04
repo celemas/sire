@@ -25,6 +25,21 @@ class MessageFormatterTest extends TestCase
 		$this->assertSame('Age/age/raw/extra', $message);
 	}
 
+	public function testFormatsTemplate(): void
+	{
+		$formatter = new MessageFormatter([]);
+
+		$message = $formatter->formatTemplate(
+			'{label}/{field}/{value}/{arg1}',
+			'Age',
+			'age',
+			'raw',
+			['extra'],
+		);
+
+		$this->assertSame('Age/age/raw/extra', $message);
+	}
+
 	public function testFormatsNamedMessage(): void
 	{
 		$formatter = new MessageFormatter([
