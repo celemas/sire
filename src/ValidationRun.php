@@ -218,7 +218,11 @@ final class ValidationRun
 		mixed $value,
 		array $data,
 		?int $listIndex,
-	): Value {
+	): ?Value {
+		if ($rule->isBlank($value)) {
+			return $this->readEmptyValue($field, $rule, $data, $listIndex);
+		}
+
 		$read = $this->readKnownValue($rule, $value, $data);
 
 		if ($read->nestedError !== null) {
@@ -237,6 +241,33 @@ final class ValidationRun
 		}
 
 		return $read->value;
+	}
+
+	/** @param array<string, mixed> $data */
+	private function readEmptyValue(
+		string $field,
+		Rule $rule,
+		array $data,
+		?int $listIndex,
+	): ?Value {
+		if ($rule->hasDefault()) {
+			return $this->readDefaultValue($field, $rule, $data, $listIndex);
+		}
+
+		if ($rule->isOptional()) {
+			return null;
+		}
+
+		$this->errors->add(
+			$field,
+			$rule->name(),
+			$this->formatMissingFailure($rule),
+			$listIndex,
+			$this->shape->title,
+			$this->level,
+		);
+
+		return null;
 	}
 
 	/** @param array<string, mixed> $data */
@@ -424,12 +455,16 @@ final class ValidationRun
 	private function fillMissingFromRules(array $values, array $data, ?int $listIndex = null): array
 	{
 		foreach ($this->shape->rules as $field => $rule) {
-			if (array_key_exists($field, $values)) {
+			if (array_key_exists($field, $values) || array_key_exists($field, $data)) {
 				continue;
 			}
 
-			if ($rule->hasDefault()) {
-				$values[$field] = $this->readDefaultValue($field, $rule, $data, $listIndex);
+			if ($rule->treatsMissingAsEmpty()) {
+				$value = $this->readEmptyValue($field, $rule, $data, $listIndex);
+
+				if ($value !== null) {
+					$values[$field] = $value;
+				}
 
 				continue;
 			}
