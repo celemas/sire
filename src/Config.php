@@ -105,18 +105,6 @@ final class Config
 	/** @return array<string, string> */
 	private static function defaultMessages(): array
 	{
-		// You can use the following placeholder to get more
-		// information into your error messages:
-		//
-		//     %1$s for the field label if set, otherwise the field name
-		//     %2$s for the field name
-		//     %3$s for the original value
-		//     %4$s for the first validator parameter or failure argument
-		//     %5$s for the next validator parameter or failure argument
-		//     %6$s for the next validator parameter or failure argument and so on
-		//
-		//  e. g. 'type.int' => 'Invalid number "%3$s" in field "%1$s"'
-
 		return [
 			'type.bool' => 'Invalid boolean',
 			'type.float' => 'Invalid number',

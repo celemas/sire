@@ -135,23 +135,25 @@ Use `message()` or `messages()` to override type coercion errors for a shape. Bu
 use Duon\Sire\Shape;
 
 $shape = (new Shape())
-    ->message('type.int', '%1$s must be a whole number')
+    ->message('type.int', '{label} must be a whole number')
     ->messages([
-        'type.bool' => '%1$s must be yes or no',
+        'type.bool' => '{label} must be yes or no',
     ]);
 
 $shape->add('age', 'int')->label('Age');
 $shape->add('enabled', 'bool')->label('Enabled');
 ```
 
-Message templates use `sprintf()` placeholders:
+Type message templates can use named placeholders:
 
-- `%1$s` is the rule label, or the field name when no label is set.
-- `%2$s` is the field name.
-- `%3$s` is the pristine value that reached coercion.
-- `%4$s`, `%5$s`, and later values come from custom `Failure` arguments.
+- `{label}` is the rule label, or the field name when no label is set.
+- `{field}` is the field name.
+- `{value}` is the pristine value that reached coercion.
+- `{arg1}`, `{arg2}`, and later values come from custom `Failure` arguments.
 
-Validator messages still come from each validator's `message` property.
+Use `{{` and `}}` for literal braces. Do not mix named and `sprintf()` placeholders in one template. Validator messages still use each validator's `sprintf()`-style `message` property.
+
+Existing `sprintf()` type message templates still work, with `%1$s`, `%2$s`, `%3$s`, and `%4$s` mapping to `{label}`, `{field}`, `{value}`, and `{arg1}`.
 
 ## Review validated values
 
@@ -277,7 +279,7 @@ $shape->validator(
 );
 
 $shape
-    ->message('type.slug', '%1$s must contain only letters, numbers, and dashes')
+    ->message('type.slug', '{label} must contain only letters, numbers, and dashes')
     ->type(
         'slug',
         new class implements Contract\Coercer {

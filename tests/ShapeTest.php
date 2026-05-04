@@ -64,7 +64,7 @@ class ShapeTest extends TestCase
 	{
 		$shape = new Shape()->message(
 			'type.int',
-			'%1$s (%2$s) must be numeric, got %3$s',
+			'{label} ({field}) must be numeric, got {value}',
 		);
 		$shape->add('age', 'int')->label('Age');
 

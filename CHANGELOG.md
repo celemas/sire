@@ -25,6 +25,7 @@
 - Added `Contract\Validator`, `Contract\ValidatesEmpty`, `Contract\Coercion`, and built-in validator classes.
 - Added `Shape::message()` and `Shape::messages()` for type coercion error messages.
 - Added structured coercion failures through `Failure` and central type message formatting based on the registered type name.
+- Added named placeholders such as `{label}`, `{field}`, `{value}`, and `{arg1}` for type message templates.
 
 ## [0.3.0](https://github.com/duoncode/sire/releases/tag/0.3.0) (2026-02-21)
 
