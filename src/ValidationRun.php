@@ -83,16 +83,19 @@ final class ValidationRun
 			return;
 		}
 
-		if (!$validator->validate($value, ...$validatorArgs)) {
+		$validation = $validator->validate($value, ...$validatorArgs);
+
+		if ($validation->failure !== null) {
 			$this->errors->add(
 				$rule->field,
 				$rule->name(),
-				$this->shape->messageFormatter->formatMessage(
-					'validator.' . $validatorName,
-					$validator->message,
+				$this->shape->messageFormatter->format(
+					$validation->failure,
 					$rule->name(),
 					$rule->field,
 					$value->pristine,
+					'validator.' . $validatorName,
+					$validator->message,
 					$validatorArgs,
 				),
 				$listIndex,

@@ -14,6 +14,7 @@ use Duon\Sire\Failure;
 use Duon\Sire\Result;
 use Duon\Sire\Review;
 use Duon\Sire\Shape;
+use Duon\Sire\Validation;
 use Duon\Sire\ValidatorRegistry;
 use Duon\Sire\Violation;
 use Override;
@@ -1028,11 +1029,11 @@ class ShapeTest extends TestCase
 			public string $message = 'Must start with %4$s';
 
 			#[Override]
-			public function validate(Value $value, string ...$args): bool
+			public function validate(Value $value, string ...$args): \Duon\Sire\Contract\Validation
 			{
 				$prefix = $args[0] ?? '';
 
-				return str_starts_with((string) $value->value, $prefix);
+				return Validation::from(str_starts_with((string) $value->value, $prefix));
 			}
 		};
 	}

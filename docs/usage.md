@@ -254,7 +254,7 @@ Configure a shape fluently when you need project-specific rules, coercion behavi
 - Use `messages()` to override many type or validator messages.
 - Use `validatorParser()` if you need a different DSL split strategy.
 
-Custom validators implement `Duon\Sire\Contract\Validator`, expose a default `message`, and receive `Duon\Sire\Contract\Value`. Validators skip empty values by default; implement `Duon\Sire\Contract\ValidatesEmpty` when a validator must run for empty values. Custom coercers implement `Duon\Sire\Contract\Coercer`, expose a default `message`, and return `Duon\Sire\Contract\Coercion`; use `Duon\Sire\Coercion` when the default immutable result object is enough. Return `Failure::invalid()` when a coercer cannot produce a valid value. Use `Failure::key()` only when one coercer has multiple distinct failure modes.
+Custom validators implement `Duon\Sire\Contract\Validator`, expose a default `message`, and return `Duon\Sire\Contract\Validation`; use `Duon\Sire\Validation` when the default immutable result object is enough. Validators skip empty values by default; implement `Duon\Sire\Contract\ValidatesEmpty` when a validator must run for empty values. Custom coercers implement `Duon\Sire\Contract\Coercer`, expose a default `message`, and return `Duon\Sire\Contract\Coercion`; use `Duon\Sire\Coercion` when the default immutable result object is enough. Return `Failure::invalid()` when a coercer or validator cannot produce a valid value. Use `Failure::key()` only when one coercer or validator has multiple distinct failure modes.
 
 ```php
 <?php
@@ -263,6 +263,7 @@ use Duon\Sire\Coercion;
 use Duon\Sire\Contract;
 use Duon\Sire\Failure;
 use Duon\Sire\Shape;
+use Duon\Sire\Validation;
 use Override;
 
 $shape = new Shape();
@@ -272,9 +273,11 @@ $shape->validator(
         public string $message = 'Must start with {arg1}';
 
         #[Override]
-        public function validate(Contract\Value $value, string ...$args): bool
+        public function validate(Contract\Value $value, string ...$args): Contract\Validation
         {
-            return str_starts_with((string) $value->value, $args[0] ?? '');
+            return Validation::from(
+                str_starts_with((string) $value->value, $args[0] ?? ''),
+            );
         }
     },
 );
