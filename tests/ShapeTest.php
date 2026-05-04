@@ -175,7 +175,7 @@ class ShapeTest extends TestCase
 		$shape = new Shape();
 		$shape->add('enabled', 'bool')->label('Enabled');
 		$shape->add('published', 'bool');
-		$shape->add('archived', 'bool');
+		$shape->add('archived', 'bool')->default(false);
 
 		$result = $shape->validate([
 			'enabled' => 'maybe',
@@ -193,14 +193,14 @@ class ShapeTest extends TestCase
 	{
 		$shape = new Shape();
 		$shape->add('title', 'text')->label('Title');
-		$shape->add('description', 'text');
+		$shape->add('description', 'text')->optional();
 
 		$result = $shape->validate(['title' => true]);
 
 		$this->assertTrue($result->isValid());
 		$this->assertSame('1', $result->values()['title']);
-		$this->assertNull($result->values()['description']);
-		$this->assertNull($result->pristineValues()['description']);
+		$this->assertArrayNotHasKey('description', $result->values());
+		$this->assertArrayNotHasKey('description', $result->pristineValues());
 	}
 
 	public function testTypeSkipEmpty(): void
@@ -1013,21 +1013,72 @@ class ShapeTest extends TestCase
 		$this->assertSame(['name' => 'Prepared'], $result->pristineValues()['child']);
 	}
 
+	public function testOptionalRuleOmitsMissingValue(): void
+	{
+		$shape = new Shape();
+		$shape->add('subtitle', 'text')->optional();
+
+		$result = $shape->validate([]);
+
+		$this->assertTrue($result->isValid());
+		$this->assertSame([], $result->values());
+		$this->assertSame([], $result->pristineValues());
+	}
+
+	public function testOptionalRuleValidatesPresentValue(): void
+	{
+		$shape = new Shape();
+		$shape->add('age', 'int')->optional();
+
+		$result = $shape->validate(['age' => '13']);
+
+		$this->assertTrue($result->isValid());
+		$this->assertSame(13, $result->values()['age']);
+	}
+
+	public function testMissingRuleAddsValidationError(): void
+	{
+		$shape = new Shape();
+		$shape->add('title', 'text')->label('Title');
+
+		$result = $shape->validate([]);
+
+		$this->assertFalse($result->isValid());
+		$this->assertSame('Title is required', $result->map()['title'][0]);
+		$this->assertSame([], $result->values());
+		$this->assertSame([], $result->pristineValues());
+	}
+
+	public function testRuleMissingMessageOverridesShapeMessage(): void
+	{
+		$shape = new Shape();
+		$shape->message('missing', 'Shape missing');
+		$shape->add('title', 'text')->label('Title')->message('missing', '{label} is missing');
+
+		$result = $shape->validate([]);
+
+		$this->assertFalse($result->isValid());
+		$this->assertSame('Title is missing', $result->map()['title'][0]);
+	}
+
 	public function testRulePreparationDoesNotRunForMissingValues(): void
 	{
 		$called = false;
 		$shape = new Shape();
-		$shape->add('missing', 'text')->prepare(static function (mixed $value) use (&$called): mixed {
-			$called = true;
+		$shape
+			->add('missing', 'text')
+			->optional()
+			->prepare(static function (mixed $value) use (&$called): mixed {
+				$called = true;
 
-			return $value;
-		});
+				return $value;
+			});
 
 		$result = $shape->validate([]);
 
 		$this->assertTrue($result->isValid());
 		$this->assertFalse($called);
-		$this->assertNull($result->values()['missing']);
+		$this->assertArrayNotHasKey('missing', $result->values());
 	}
 
 	public function testSubShape(): void
@@ -1111,14 +1162,14 @@ class ShapeTest extends TestCase
 		$shape->add('int', 'int', 'required');
 		$shape->add('text', 'text', 'required');
 		$shape->add('single_shape', new SubShape());
-		$shape->add('list_shape', new SubShape(true));
+		$shape->add('list_shape', new SubShape(true))->optional();
 
 		$result = $shape->validate($testData);
 		$this->assertTrue($result->isValid());
 		$values = $result->values();
 		$this->assertSame(13, $values[0]['int']);
 		$this->assertSame(23, $values[0]['single_shape']['inner_int']);
-		$this->assertNull($values[0]['list_shape']);
+		$this->assertArrayNotHasKey('list_shape', $values[0]);
 		$this->assertSame('Text 2', $values[1]['text']);
 		$this->assertSame('example@example.com', $values[1]['single_shape']['inner_email']);
 		$this->assertSame('example@example.com', $values[1]['list_shape'][0]['inner_email']);
@@ -1127,7 +1178,7 @@ class ShapeTest extends TestCase
 		$pristineValues = $result->pristineValues();
 		$this->assertSame(13, $pristineValues[0]['int']);
 		$this->assertSame(23, $pristineValues[0]['single_shape']['inner_int']);
-		$this->assertNull($pristineValues[0]['list_shape']);
+		$this->assertArrayNotHasKey('list_shape', $pristineValues[0]);
 		$this->assertSame('Text 2', $pristineValues[1]['text']);
 		$this->assertSame('example@example.com', $pristineValues[1]['single_shape']['inner_email']);
 		$this->assertSame('example@example.com', $pristineValues[1]['list_shape'][0]['inner_email']);
@@ -1170,7 +1221,7 @@ class ShapeTest extends TestCase
 		$groups = $result->errors(grouped: true)['errors'];
 		$this->assertCount(3, $groups);
 		$this->assertSame('List Root', $groups[0]['title']);
-		$this->assertSame('email must be a valid email address', $groups[0]['errors'][2]['error']);
+		$this->assertSame('email must be a valid email address', $groups[0]['errors'][3]['error']);
 		$this->assertSame('List Sub', $groups[1]['title']);
 		$this->assertSame('Int must be a whole number', $groups[1]['errors'][0]['error']);
 		$this->assertSame('Single Sub', $groups[2]['title']);

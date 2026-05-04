@@ -298,6 +298,19 @@ final class ValidationRun
 		);
 	}
 
+	private function formatMissingFailure(Rule $rule): string
+	{
+		return $this->shape->messageFormatter->format(
+			Failure::key('missing'),
+			$rule->name(),
+			$rule->field,
+			null,
+			'missing',
+			'{label} is required',
+			messages: $rule->messageOverrides(),
+		);
+	}
+
 	private function formatCoercionFailure(
 		Contract\Coercion $coercion,
 		Rule $rule,
@@ -372,13 +385,18 @@ final class ValidationRun
 				continue;
 			}
 
-			if ($rule->type() === 'bool') {
-				$values[$field] = new \Duon\Sire\Value(false, null);
-
+			if ($rule->isOptional()) {
 				continue;
 			}
 
-			$values[$field] = new \Duon\Sire\Value(null, null);
+			$this->errors->add(
+				$field,
+				$rule->name(),
+				$this->formatMissingFailure($rule),
+				$listIndex,
+				$this->shape->title,
+				$this->level,
+			);
 		}
 
 		return $values;
@@ -413,6 +431,10 @@ final class ValidationRun
 	private function validateItem(array $values, ?int $listIndex = null): array
 	{
 		foreach ($this->shape->rules as $field => $rule) {
+			if (!array_key_exists($field, $values)) {
+				continue;
+			}
+
 			foreach ($rule->validators as $validator) {
 				$this->validateField(
 					$rule,

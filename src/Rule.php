@@ -18,6 +18,8 @@ final class Rule
 
 	private bool $nullable = false;
 
+	private bool $optional = false;
+
 	/** @var array<string, string> */
 	private array $messages = [];
 
@@ -62,6 +64,13 @@ final class Rule
 		return $this;
 	}
 
+	public function optional(): static
+	{
+		$this->optional = true;
+
+		return $this;
+	}
+
 	public function hasDefault(): bool
 	{
 		return $this->hasDefault;
@@ -75,6 +84,11 @@ final class Rule
 	public function isNullable(): bool
 	{
 		return $this->nullable;
+	}
+
+	public function isOptional(): bool
+	{
+		return $this->optional;
 	}
 
 	public function message(string $key, string $message): static
@@ -126,7 +140,7 @@ final class Rule
 			return 'type.' . $this->type();
 		}
 
-		if ($key === 'null') {
+		if ($key === 'missing' || $key === 'null') {
 			return $key;
 		}
 
