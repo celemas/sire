@@ -11,7 +11,9 @@ use Override;
 /** @api */
 final class Email implements Contract\Validator
 {
-	public string $message = 'Invalid email address';
+	public string $message {
+		get => 'Invalid email address';
+	}
 
 	#[Override]
 	public function validate(Contract\Value $value, string ...$args): Contract\Validation

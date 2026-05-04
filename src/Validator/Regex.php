@@ -11,7 +11,9 @@ use Override;
 /** @api */
 final class Regex implements Contract\Validator
 {
-	public string $message = 'Does not match the required pattern';
+	public string $message {
+		get => 'Does not match the required pattern';
+	}
 
 	#[Override]
 	public function validate(Contract\Value $value, string ...$args): Contract\Validation

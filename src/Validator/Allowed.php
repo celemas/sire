@@ -12,7 +12,9 @@ use Override;
 /** @api */
 final class Allowed implements Contract\Validator
 {
-	public string $message = 'Invalid value';
+	public string $message {
+		get => 'Invalid value';
+	}
 
 	#[Override]
 	public function validate(Contract\Value $value, string ...$args): Contract\Validation

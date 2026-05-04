@@ -348,7 +348,9 @@ class ShapeTest extends TestCase
 		$shape = new Shape()->type(
 			'slug',
 			new class implements Coercer {
-				public string $message = 'Invalid slug';
+				public string $message {
+					get => 'Invalid slug';
+				}
 
 				#[Override]
 				public function coerce(mixed $pristine): \Duon\Sire\Contract\Coercion
@@ -381,7 +383,9 @@ class ShapeTest extends TestCase
 			->type(
 				'slug',
 				new class implements Coercer {
-					public string $message = 'Invalid slug';
+					public string $message {
+						get => 'Invalid slug';
+					}
 
 					#[Override]
 					public function coerce(mixed $pristine): \Duon\Sire\Contract\Coercion
@@ -406,7 +410,9 @@ class ShapeTest extends TestCase
 	{
 		$registry = new CoercerRegistry([
 			'upper' => new class implements Coercer {
-				public string $message = 'Invalid value';
+				public string $message {
+					get => 'Invalid value';
+				}
 
 				#[Override]
 				public function coerce(mixed $pristine): \Duon\Sire\Contract\Coercion
@@ -1026,7 +1032,9 @@ class ShapeTest extends TestCase
 	private static function startsWithValidator(): Validator
 	{
 		return new class implements Validator {
-			public string $message = 'Must start with %4$s';
+			public string $message {
+				get => 'Must start with %4$s';
+			}
 
 			#[Override]
 			public function validate(Value $value, string ...$args): \Duon\Sire\Contract\Validation

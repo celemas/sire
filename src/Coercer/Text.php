@@ -11,7 +11,9 @@ use Override;
 /** @api */
 final class Text implements Contract\Coercer
 {
-	public string $message = 'Invalid text';
+	public string $message {
+		get => 'Invalid text';
+	}
 
 	#[Override]
 	public function coerce(mixed $pristine): Contract\Coercion

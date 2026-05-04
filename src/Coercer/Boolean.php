@@ -12,7 +12,9 @@ use Override;
 /** @api */
 final class Boolean implements Contract\Coercer
 {
-	public string $message = 'Invalid boolean';
+	public string $message {
+		get => 'Invalid boolean';
+	}
 
 	#[Override]
 	public function coerce(mixed $pristine): Contract\Coercion

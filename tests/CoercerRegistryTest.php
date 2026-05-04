@@ -84,7 +84,9 @@ class CoercerRegistryTest extends TestCase
 	private static function coercer(Closure $callback): Coercer
 	{
 		return new class($callback) implements Coercer {
-			public string $message = 'Invalid value';
+			public string $message {
+				get => 'Invalid value';
+			}
 
 			/** @param Closure(mixed): mixed $callback */
 			public function __construct(

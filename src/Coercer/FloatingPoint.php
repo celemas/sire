@@ -12,7 +12,9 @@ use Override;
 /** @api */
 final class FloatingPoint implements Contract\Coercer
 {
-	public string $message = 'Invalid number';
+	public string $message {
+		get => 'Invalid number';
+	}
 
 	#[Override]
 	public function coerce(mixed $pristine): Contract\Coercion

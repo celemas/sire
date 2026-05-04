@@ -12,7 +12,9 @@ use Override;
 /** @api */
 final class Sequence implements Contract\Coercer
 {
-	public string $message = 'Invalid list';
+	public string $message {
+		get => 'Invalid list';
+	}
 
 	#[Override]
 	public function coerce(mixed $pristine): Contract\Coercion

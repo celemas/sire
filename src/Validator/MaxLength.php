@@ -11,7 +11,9 @@ use Override;
 /** @api */
 final class MaxLength implements Contract\Validator
 {
-	public string $message = 'Exeeds the maximum length of %4$s characters';
+	public string $message {
+		get => 'Exeeds the maximum length of %4$s characters';
+	}
 
 	#[Override]
 	public function validate(Contract\Value $value, string ...$args): Contract\Validation

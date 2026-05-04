@@ -90,7 +90,9 @@ class ValidatorRegistryTest extends TestCase
 	private static function stringValidator(): Contract\Validator
 	{
 		return new class implements Contract\Validator {
-			public string $message = 'Must match';
+			public string $message {
+				get => 'Must match';
+			}
 
 			#[Override]
 			public function validate(Value $value, string ...$args): Contract\Validation

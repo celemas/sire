@@ -11,7 +11,9 @@ use Override;
 /** @api */
 final class Minimum implements Contract\Validator
 {
-	public string $message = 'Lower than the required minimum of %4$s';
+	public string $message {
+		get => 'Lower than the required minimum of %4$s';
+	}
 
 	#[Override]
 	public function validate(Contract\Value $value, string ...$args): Contract\Validation

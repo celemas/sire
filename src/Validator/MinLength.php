@@ -11,7 +11,9 @@ use Override;
 /** @api */
 final class MinLength implements Contract\Validator
 {
-	public string $message = 'Shorter than the minimum length of %4$s characters';
+	public string $message {
+		get => 'Shorter than the minimum length of %4$s characters';
+	}
 
 	#[Override]
 	public function validate(Contract\Value $value, string ...$args): Contract\Validation

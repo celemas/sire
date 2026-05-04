@@ -11,7 +11,9 @@ use Override;
 /** @api */
 final class Maximum implements Contract\Validator
 {
-	public string $message = 'Higher than the allowed maximum of %4$s';
+	public string $message {
+		get => 'Higher than the allowed maximum of %4$s';
+	}
 
 	#[Override]
 	public function validate(Contract\Value $value, string ...$args): Contract\Validation

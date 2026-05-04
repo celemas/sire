@@ -270,7 +270,9 @@ $shape = new Shape();
 $shape->validator(
     'starts_with',
     new class implements Contract\Validator {
-        public string $message = 'Must start with {arg1}';
+        public string $message {
+            get => 'Must start with {arg1}';
+        }
 
         #[Override]
         public function validate(Contract\Value $value, string ...$args): Contract\Validation
@@ -287,7 +289,9 @@ $shape
     ->type(
         'slug',
         new class implements Contract\Coercer {
-            public string $message = 'Invalid slug';
+            public string $message {
+                get => 'Invalid slug';
+            }
 
             #[Override]
             public function coerce(mixed $pristine): Contract\Coercion
