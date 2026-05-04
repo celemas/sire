@@ -149,34 +149,58 @@ final class ValidationRun
 		foreach ($data as $field => $value) {
 			$field = (string) $field;
 			$rule = $this->shape->rules[$field] ?? null;
+			$value = $rule instanceof Rule
+				? $this->readRuleValue($field, $rule, $value, $listIndex)
+				: $this->readExtraValue($field, $value, $listIndex);
 
-			if ($rule) {
-				$read = $this->readKnownValue($rule, $value);
-
-				if ($read->nestedError !== null) {
-					$this->errors->addNested($field, $read->nestedError, $listIndex);
-				}
-
-				if ($read->error !== null) {
-					$this->errors->add(
-						$field,
-						$rule->name(),
-						$read->error,
-						$listIndex,
-						$this->shape->title,
-						$this->level,
-					);
-				}
-
-				$values[$field] = $read->value;
-			} else {
-				if ($this->shape->keepUnknown) {
-					$values[$field] = new \Duon\Sire\Value($value, $value);
-				}
+			if ($value !== null) {
+				$values[$field] = $value;
 			}
 		}
 
 		return $values;
+	}
+
+	private function readRuleValue(string $field, Rule $rule, mixed $value, ?int $listIndex): Value
+	{
+		$read = $this->readKnownValue($rule, $value);
+
+		if ($read->nestedError !== null) {
+			$this->errors->addNested($field, $read->nestedError, $listIndex);
+		}
+
+		if ($read->error !== null) {
+			$this->errors->add(
+				$field,
+				$rule->name(),
+				$read->error,
+				$listIndex,
+				$this->shape->title,
+				$this->level,
+			);
+		}
+
+		return $read->value;
+	}
+
+	private function readExtraValue(string $field, mixed $value, ?int $listIndex): ?Value
+	{
+		if ($this->shape->extra === Extra::Allow) {
+			return new \Duon\Sire\Value($value, $value);
+		}
+
+		if ($this->shape->extra === Extra::Forbid) {
+			$this->errors->add(
+				$field,
+				$field,
+				$this->formatExtraFailure($field, $value),
+				$listIndex,
+				$this->shape->title,
+				$this->level,
+			);
+		}
+
+		return null;
 	}
 
 	private function readKnownValue(Rule $rule, mixed $value): ReadValue
@@ -203,6 +227,18 @@ final class ValidationRun
 		return new ReadValue(
 			new \Duon\Sire\Value($coercion->value, $coercion->pristine),
 			$error,
+		);
+	}
+
+	private function formatExtraFailure(string $field, mixed $value): string
+	{
+		return $this->shape->messageFormatter->format(
+			Failure::invalid(),
+			$field,
+			$field,
+			$value,
+			'extra',
+			'Unknown field {field}',
 		);
 	}
 

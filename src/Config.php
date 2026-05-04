@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace Duon\Sire;
 
 use Closure;
+use ValueError;
 
 /** @internal */
 final class Config
 {
 	private bool $list = false;
 
-	private bool $keepUnknown = false;
+	private Extra $extra = Extra::Ignore;
 
 	private ?string $title = null;
 
@@ -35,9 +36,18 @@ final class Config
 		$this->list = $list;
 	}
 
-	public function keepUnknown(bool $keep = true): void
+	public function extra(Extra|string $extra): void
 	{
-		$this->keepUnknown = $keep;
+		if ($extra instanceof Extra) {
+			$this->extra = $extra;
+
+			return;
+		}
+
+		$this->extra = Extra::tryFrom($extra) ?? throw new ValueError(sprintf(
+			'Invalid extra mode "%s"',
+			$extra,
+		));
 	}
 
 	public function title(?string $title): void
@@ -91,7 +101,7 @@ final class Config
 	{
 		return new ShapeDefinition(
 			$this->list,
-			$this->keepUnknown,
+			$this->extra,
 			$this->title,
 			$rules,
 			$this->resolvedValidatorRegistry(),

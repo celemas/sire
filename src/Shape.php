@@ -36,9 +36,9 @@ final class Shape implements Contract\Shape
 		return $this;
 	}
 
-	public function keepUnknown(bool $keep = true): self
+	public function extra(Extra|string $extra): self
 	{
-		$this->config->keepUnknown($keep);
+		$this->config->extra($extra);
 
 		return $this;
 	}

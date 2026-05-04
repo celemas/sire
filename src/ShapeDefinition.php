@@ -15,7 +15,7 @@ final readonly class ShapeDefinition
 	 */
 	public function __construct(
 		public bool $list,
-		public bool $keepUnknown,
+		public Extra $extra,
 		public ?string $title,
 		public array $rules,
 		public Contract\ValidatorRegistry $validators,

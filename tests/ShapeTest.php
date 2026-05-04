@@ -10,6 +10,7 @@ use Duon\Sire\Contract\Coercer;
 use Duon\Sire\Contract\Validator;
 use Duon\Sire\Contract\ValidatorParser;
 use Duon\Sire\Contract\Value;
+use Duon\Sire\Extra;
 use Duon\Sire\Failure;
 use Duon\Sire\Result;
 use Duon\Sire\Review;
@@ -492,7 +493,7 @@ class ShapeTest extends TestCase
 		$this->assertSame('13', $pristine['unknown_2']);
 		$this->assertArrayNotHasKey('unknown_3', $pristine);
 
-		$shape = new Shape()->keepUnknown();
+		$shape = new Shape()->extra(Extra::Allow);
 		$shape->add('unknown_1', 'text');
 		$shape->add('unknown_2', 'int');
 
@@ -511,6 +512,50 @@ class ShapeTest extends TestCase
 		$this->assertSame('13', $pristine['unknown_2']);
 		$this->assertSame('Unknown', $pristine['unknown_3']);
 		$this->assertSame('23', $pristine['unknown_4']);
+	}
+
+	public function testForbidsExtraData(): void
+	{
+		$shape = new Shape()->extra(Extra::Forbid);
+		$shape->add('name', 'text');
+
+		$result = $shape->validate([
+			'name' => 'Jane',
+			'role' => 'admin',
+		]);
+
+		$this->assertFalse($result->isValid());
+		$this->assertSame(['role' => ['Unknown field role']], $result->map());
+		$this->assertSame(['name' => 'Jane'], $result->values());
+		$this->assertSame(['name' => 'Jane'], $result->pristineValues());
+
+		$violations = $result->violations();
+		$this->assertSame('Unknown field role', $violations[0]->error);
+		$this->assertSame('role', $violations[0]->field);
+		$this->assertSame('role', $violations[0]->label);
+	}
+
+	public function testForbidExtraDataUsesConfiguredMessage(): void
+	{
+		$shape = new Shape()
+			->extra('forbid')
+			->message('extra', 'Unexpected {field}: {value}');
+		$shape->add('name', 'text');
+
+		$result = $shape->validate([
+			'name' => 'Jane',
+			'role' => 'admin',
+		]);
+
+		$this->assertSame(['role' => ['Unexpected role: admin']], $result->map());
+	}
+
+	public function testRejectsInvalidExtraMode(): void
+	{
+		$this->expectException(ValueError::class);
+		$this->expectExceptionMessage('Invalid extra mode "drop"');
+
+		new Shape()->extra('drop');
 	}
 
 	public function testRequiredValidator(): void

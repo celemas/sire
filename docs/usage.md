@@ -38,14 +38,23 @@ var_dump($result->values());
 ```php
 <?php
 
+use Duon\Sire\Extra;
 use Duon\Sire\Shape;
 
 $shape = Shape::list()
     ->title('Users')
-    ->keepUnknown();
+    ->extra(Extra::Allow);
 ```
 
 Use `asList(false)` to switch a configured list shape back to object mode.
+
+`extra()` controls input fields that do not have a rule:
+
+- `Extra::Ignore` drops extra fields. This is the default.
+- `Extra::Allow` keeps extra fields as-is in `values()` and `pristineValues()`.
+- `Extra::Forbid` reports extra fields as validation errors.
+
+You can also pass the strings `ignore`, `allow`, and `forbid`. Configure the forbid error with `message('extra', 'Unknown field {field}')`. Extra messages can use `{field}` and `{value}`.
 
 ## Use built-in types and validators
 
@@ -250,8 +259,8 @@ Configure a shape fluently when you need project-specific rules, coercion behavi
 - Use `validators()` to replace the validator registry.
 - Use `type()` to add or replace one base type with its coercer.
 - Use `types()` to replace the coercer registry.
-- Use `message()` to override one type or validator message.
-- Use `messages()` to override many type or validator messages.
+- Use `message()` to override one type, validator, or extra-field message.
+- Use `messages()` to override many type, validator, or extra-field messages.
 - Use `validatorParser()` if you need a different DSL split strategy.
 
 Custom validators implement `Duon\Sire\Contract\Validator`, expose a default `message`, and return `Duon\Sire\Contract\Validation`; use `Duon\Sire\Validation` when the default immutable result object is enough. Validators skip empty values by default; implement `Duon\Sire\Contract\ValidatesEmpty` when a validator must run for empty values. Custom coercers implement `Duon\Sire\Contract\Coercer`, expose a default `message`, and return `Duon\Sire\Contract\Coercion`; use `Duon\Sire\Coercion` when the default immutable result object is enough. Return `Failure::invalid()` when a coercer or validator cannot produce a valid value. Use `Failure::key()` only when one coercer or validator has multiple distinct failure modes.

@@ -12,7 +12,8 @@
 - Added a required `message` property to `Contract\Coercer`.
 - Changed `CoercerRegistry::withDefaults()` to no longer accept message configuration.
 - Removed `skipEmpty` from `Contract\Validator`; regular validators now skip empty values and validators that must run on empty values implement `Contract\ValidatesEmpty`.
-- Replaced `Shape` constructor configuration, including `list`, `keepUnknown`, `title`, registry, parser, and `langs` arguments, with fluent configuration methods.
+- Replaced `Shape` constructor configuration, including `list`, `extra`, `title`, registry, parser, and `langs` arguments, with fluent configuration methods.
+- Replaced `Shape::keepUnknown()` with `Shape::extra(Extra::Allow)`.
 - Renamed `ValidationResult` to `Result` and updated `Contract\Shape::validate()` accordingly.
 - Renamed `ValidatorDefinitionParser` to `ValidatorParser`.
 - Removed `Shape` subclass hooks and mutable run-state access, including `rules()`, protected `review()`, `addError()`, `toSubValues()`, `$errorList`, and `$errorMap`.
@@ -20,7 +21,8 @@
 
 ### Added
 
-- Added fluent `Shape` configuration with `Shape::list()`, `asList()`, `keepUnknown()`, `title()`, `validator()`, `validators()`, `type()`, `types()`, and `validatorParser()`.
+- Added fluent `Shape` configuration with `Shape::list()`, `asList()`, `extra()`, `title()`, `validator()`, `validators()`, `type()`, `types()`, and `validatorParser()`.
+- Added the `Extra` enum to control extra input fields with `ignore`, `allow`, and `forbid` modes.
 - Added `Shape::review()` callbacks with `Review` for post-validation checks after successful normal validation.
 - Added `Rule::prepare()` to normalize present field values before type casting and nested shape validation.
 - Added quoted and escaped arguments for validator DSL definitions.
