@@ -9,5 +9,5 @@ use Duon\Sire\Result;
 /** @api */
 interface Shape
 {
-	public function validate(array $data, int $level = 1): Result;
+	public function validate(array $data): Result;
 }

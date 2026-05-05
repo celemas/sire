@@ -4,103 +4,79 @@ declare(strict_types=1);
 
 namespace Duon\Sire\Tests;
 
+use Duon\Sire\Issue;
 use Duon\Sire\Result;
-use Duon\Sire\Violation;
 
 class ResultTest extends TestCase
 {
-	public function testViolationFromArray(): void
+	public function testIssueOutput(): void
 	{
-		$violation = Violation::fromArray([
-			'error' => 'Invalid value',
-			'title' => 'Main',
-			'level' => 2,
-			'item' => 1,
-			'field' => 'email',
-			'label' => 'Email',
+		$issue = new Issue(['users', 1, 'email'], 'validator.email', 'Invalid value', [
+			'arg1' => 'extra',
 		]);
 
-		$this->assertSame('Invalid value', $violation->error);
-		$this->assertSame('Main', $violation->title);
-		$this->assertSame(2, $violation->level);
-		$this->assertSame(1, $violation->item);
-		$this->assertSame('email', $violation->field);
-		$this->assertSame('Email', $violation->label);
+		$this->assertSame(['users', 1, 'email'], $issue->path);
+		$this->assertSame('validator.email', $issue->code);
+		$this->assertSame('Invalid value', $issue->message);
+		$this->assertSame(['arg1' => 'extra'], $issue->params);
 		$this->assertSame(
 			[
-				'error' => 'Invalid value',
-				'title' => 'Main',
-				'level' => 2,
-				'item' => 1,
-				'field' => 'email',
-				'label' => 'Email',
+				'path' => ['users', 1, 'email'],
+				'code' => 'validator.email',
+				'message' => 'Invalid value',
+				'params' => ['arg1' => 'extra'],
 			],
-			$violation->toArray(),
+			$issue->toArray(),
 		);
 	}
 
-	public function testResultErrors(): void
+	public function testResultIssuesAndMessages(): void
 	{
 		$result = new Result(
-			false,
-			'Main',
-			['email' => ['Invalid value']],
 			[
-				new Violation('Invalid value', 'Main', 1, null, 'email', 'Email'),
-				new Violation('Invalid nested', null, 2, null, 'other', 'Other'),
+				new Issue(['email'], 'validator.email', 'Invalid value'),
+				new Issue(['profile', 'name'], 'missing', 'Name is required'),
 			],
-			['email' => 'x'],
 			['email' => 'x'],
 		);
 
 		$this->assertFalse($result->isValid());
-		$this->assertCount(2, $result->violations());
-		$this->assertSame(['email' => ['Invalid value']], $result->map());
+		$this->assertCount(2, $result->issues());
+		$this->assertSame(['Invalid value'], $result->messages('email'));
+		$this->assertSame('Invalid value', $result->first('email'));
+		$this->assertTrue($result->has('profile.name'));
+		$this->assertFalse($result->has('missing'));
 		$this->assertSame(['email' => 'x'], $result->values());
-		$this->assertSame(['email' => 'x'], $result->pristineValues());
-
-		$errors = $result->errors();
-		$this->assertFalse($errors['grouped']);
-		$this->assertCount(2, $errors['errors']);
-
-		$grouped = $result->errors(grouped: true);
-		$this->assertTrue($grouped['grouped']);
-		$this->assertCount(2, $grouped['errors']);
-		$this->assertSame('Main', $grouped['errors'][0]['title']);
-		$this->assertNull($grouped['errors'][1]['title']);
 	}
 
 	public function testResultValid(): void
 	{
-		$result = new Result(false, null, [], [], [], []);
+		$result = new Result([], []);
 
 		$this->assertTrue($result->isValid());
-		$this->assertCount(0, $result->violations());
-		$this->assertSame([], $result->map());
-		$this->assertCount(0, $result->errors()['errors']);
+		$this->assertCount(0, $result->issues());
+		$this->assertSame([], $result->messages('email'));
+		$this->assertNull($result->first('email'));
+		$this->assertFalse($result->has('email'));
 	}
 
 	public function testResultJsonSerializable(): void
 	{
 		$result = new Result(
-			false,
-			'Main',
-			['email' => ['Invalid value']],
 			[
-				new Violation('Invalid value', 'Main', 1, null, 'email', 'Email'),
+				new Issue(['email'], 'validator.email', 'Invalid value'),
 			],
-			['email' => 'invalid'],
 			['email' => 'invalid'],
 		);
 
 		$json = json_encode($result, JSON_THROW_ON_ERROR);
 		$data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
 
-		$this->assertArrayHasKey('isValid', $data);
-		$this->assertSame(false, $data['isValid']);
-		$this->assertSame('Main', $data['title']);
-		$this->assertSame('Invalid value', $data['violations'][0]['error']);
-		$this->assertSame('invalid', $data['values']['email']);
-		$this->assertSame('invalid', $data['pristineValues']['email']);
+		$this->assertArrayHasKey('valid', $data);
+		$this->assertSame(false, $data['valid']);
+		$this->assertSame(['email'], $data['issues'][0]['path']);
+		$this->assertSame('validator.email', $data['issues'][0]['code']);
+		$this->assertSame('Invalid value', $data['issues'][0]['message']);
+		$this->assertArrayNotHasKey('values', $data);
 	}
 }

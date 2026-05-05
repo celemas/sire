@@ -25,7 +25,7 @@ $result = $shape->validate([
 ]);
 
 if (!$result->isValid()) {
-    var_dump($result->errors());
+    var_dump($result->issues());
 }
 
 var_dump($result->values());
@@ -33,7 +33,7 @@ var_dump($result->values());
 
 ## Configure shape behavior
 
-`new Shape()` creates an object shape. Configure shape metadata and behavior with fluent methods.
+`new Shape()` creates an object shape. Configure shape behavior with fluent methods.
 
 ```php
 <?php
@@ -42,7 +42,6 @@ use Duon\Sire\Extra;
 use Duon\Sire\Shape;
 
 $shape = Shape::list()
-    ->title('Users')
     ->extra(Extra::Allow);
 ```
 
@@ -51,7 +50,7 @@ Use `asList(false)` to switch a configured list shape back to object mode.
 `extra()` controls input fields that do not have a rule:
 
 - `Extra::Ignore` drops extra fields. This is the default.
-- `Extra::Allow` keeps extra fields as-is in `values()` and `pristineValues()`.
+- `Extra::Allow` keeps extra fields as-is in `values()`.
 - `Extra::Forbid` reports extra fields as validation errors.
 
 You can also pass the strings `ignore`, `allow`, and `forbid`. Configure the forbid error with `message('extra', 'Field "{field}" is not allowed')`. Extra messages can use `{field}` and `{value}`.
@@ -85,7 +84,7 @@ Sire throws a `ValueError` if a validator definition is malformed, for example f
 
 ## Control field presence
 
-Fields are required by default. A missing field reports a validation error and is omitted from `values()` and `pristineValues()`.
+Fields are required by default. A missing field reports a validation error and is omitted from `values()`.
 
 ```php
 <?php
@@ -97,7 +96,7 @@ $shape->add('title', 'text')->label('Title');
 
 $result = $shape->validate([]);
 
-var_dump($result->map()['title'][0]); // "Title is required"
+var_dump($result->first('title')); // "Title is required"
 ```
 
 Use `optional()` when a missing field should have no effect on validation output.
@@ -115,7 +114,7 @@ $result = $shape->validate([]);
 var_dump($result->values()); // []
 ```
 
-Use `default()` when an empty field should be filled. By default, only missing input counts as empty. Defaults run through preparation, coercion, validators, and finalizers. Present non-empty input wins over the default. Defaulted fields stay omitted from `pristineValues()` because the effective input was empty.
+Use `default()` when an empty field should be filled. By default, only missing input counts as empty. Defaults run through preparation, coercion, validators, and finalizers. Present non-empty input wins over the default.
 
 ```php
 <?php
@@ -263,7 +262,7 @@ $result = $shape->validate(['title' => 'Hello World']);
 var_dump($result->values()['slug']); // "hello-world"
 ```
 
-Finalize callbacks receive the current field value and the current validated values for the same shape item. In list shapes, the values array contains the current list item. Finalizers transform `values()` only; they do not change `pristineValues()`. They run for present fields and defaulted fields, but not for omitted optional fields.
+Finalize callbacks receive the current field value and the current validated values for the same shape item. In list shapes, the values array contains the current list item. They run for present fields and defaulted fields, but not for omitted optional fields.
 
 If a finalize callback throws, the exception is not caught by Sire.
 
@@ -271,15 +270,16 @@ If a finalize callback throws, the exception is not caught by Sire.
 
 The `Result` object is the primary output of validation. Use it as your source of truth in application code.
 
-- `isValid()` returns `true` when no violations exist.
-- `violations()` returns typed `Violation` objects.
-- `errors()` returns a structured array output.
-- `errors(grouped: true)` groups errors by shape section.
-- `map()` returns a field-to-messages map.
+- `isValid()` returns `true` when no issues exist.
+- `issues()` returns typed `Issue` objects with `path`, `code`, `message`, and `params`.
+- `messages($path)` returns all messages for one exact path.
+- `first($path)` returns the first message for one exact path, or `null`.
+- `has($path)` returns whether one exact path has messages.
 - `values()` returns coerced and finalized values.
-- `pristineValues()` returns incoming values before coercion. If `Rule::prepare()` is used, these are the prepared values, not the original raw input. Missing optional fields and defaulted fields are omitted.
 
-`Result` and `Violation` implement `JsonSerializable`, so you can return them directly from JSON APIs.
+Paths can be dot strings such as `address.zip` or arrays such as `[0, 'email']` for list items. Calling `messages()` or `first()` without a path reads root-level form errors.
+
+`Result` and `Issue` implement `JsonSerializable`. JSON output contains `valid` and `issues`; it does not include submitted or validated values.
 
 ## Customize messages
 
@@ -355,13 +355,13 @@ $shape->review(static function (Review $review): void {
 
     $review->addError(
         'confirm',
-        'Password confirmation',
         'Passwords do not match',
+        'password.confirmed',
     );
 });
 ```
 
-`Review` exposes the validated values, pristine values, list flag, shape title, validation level, and `addError()`.
+`Review` exposes the validated values, list flag, and `addError()`.
 
 ## Validate nested objects and lists
 
@@ -409,9 +409,9 @@ final class LoginShape implements Contract\Shape
     }
 
     #[Override]
-    public function validate(array $data, int $level = 1): Result
+    public function validate(array $data): Result
     {
-        return $this->shape->validate($data, $level);
+        return $this->shape->validate($data);
     }
 }
 ```

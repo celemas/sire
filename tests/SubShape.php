@@ -13,17 +13,16 @@ final class SubShape implements Contract\Shape
 {
 	private Shape $shape;
 
-	public function __construct(bool $list = false, ?string $title = null)
+	public function __construct(bool $list = false)
 	{
 		$this->shape = $list ? Shape::list() : new Shape();
-		$this->shape->title($title);
 		$this->shape->add('inner_int', 'int', 'required')->label('Int');
 		$this->shape->add('inner_email', 'text', 'required', 'email')->label('Email');
 	}
 
 	#[Override]
-	public function validate(array $data, int $level = 1): Result
+	public function validate(array $data): Result
 	{
-		return $this->shape->validate($data, $level);
+		return $this->shape->validate($data);
 	}
 }

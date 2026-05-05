@@ -8,136 +8,106 @@ use JsonSerializable;
 use Override;
 
 /** @api */
-final class Result implements JsonSerializable
+final readonly class Result implements JsonSerializable
 {
 	/**
-	 * @param list<Violation> $violations
-	 * @param array<string, mixed> $values
-	 * @param array<string, mixed> $pristineValues
+	 * @param list<Issue> $issues
+	 * @param array<array-key, mixed> $values
 	 */
 	public function __construct(
-		public readonly bool $isList,
-		public readonly ?string $title,
-		private array $map,
-		private array $violations,
+		private array $issues,
 		private array $values,
-		private array $pristineValues,
 	) {}
 
 	public function isValid(): bool
 	{
-		return count($this->violations) === 0;
+		return $this->issues === [];
 	}
 
-	/** @return list<Violation> */
-	public function violations(): array
+	/** @return list<Issue> */
+	public function issues(): array
 	{
-		return $this->violations;
+		return $this->issues;
 	}
 
-	public function map(): array
-	{
-		return $this->map;
-	}
-
-	/** @return array<string, mixed> */
+	/** @return array<array-key, mixed> */
 	public function values(): array
 	{
 		return $this->values;
 	}
 
-	/** @return array<string, mixed> */
-	public function pristineValues(): array
+	/**
+	 * @param string|int|list<string|int> $path
+	 * @return list<string>
+	 */
+	public function messages(string|int|array $path = []): array
 	{
-		return $this->pristineValues;
-	}
+		$path = self::path($path);
+		$messages = [];
 
-	public function errors(bool $grouped = false): array
-	{
-		$result = [
-			'isList' => $this->isList,
-			'title' => $this->title,
-			'map' => $this->map,
-			'grouped' => $grouped,
-		];
+		foreach ($this->issues as $issue) {
+			if ($issue->path !== $path) {
+				continue;
+			}
 
-		if ($grouped) {
-			$result['errors'] = $this->groupedErrors();
-
-			return $result;
+			$messages[] = $issue->message;
 		}
 
-		$result['errors'] = array_map(
-			static fn(Violation $violation): array => $violation->toArray(),
-			$this->violations,
-		);
-
-		return $result;
+		return $messages;
 	}
 
-	/** @return array{isValid: bool, isList: bool, title: ?string, map: array, violations: list<Violation>, values: array<string, mixed>, pristineValues: array<string, mixed>} */
+	/** @param string|int|list<string|int> $path */
+	public function first(string|int|array $path = []): ?string
+	{
+		return $this->messages($path)[0] ?? null;
+	}
+
+	/** @param string|int|list<string|int> $path */
+	public function has(string|int|array $path = []): bool
+	{
+		return $this->messages($path) !== [];
+	}
+
+	/** @return array{valid: bool, issues: list<Issue>} */
 	#[Override]
 	public function jsonSerialize(): array
 	{
 		return [
-			'isValid' => $this->isValid(),
-			'isList' => $this->isList,
-			'title' => $this->title,
-			'map' => $this->map,
-			'violations' => $this->violations,
-			'values' => $this->values,
-			'pristineValues' => $this->pristineValues,
+			'valid' => $this->isValid(),
+			'issues' => $this->issues,
 		];
 	}
 
-	/** @return list<array{title: ?string, errors: array<int, array{error: string, title: ?string, level: int, item: ?int, field: string, label: string}>}> */
-	private function groupedErrors(): array
+	/**
+	 * @param string|int|list<string|int> $path
+	 * @return list<string|int>
+	 */
+	private static function path(string|int|array $path): array
 	{
-		$errors = array_map(
-			static fn(Violation $violation): array => $violation->toArray(),
-			$this->violations,
-		);
+		if (is_int($path)) {
+			return [$path];
+		}
 
-		$sections = [];
-
-		foreach ($errors as $error) {
-			$item = ['title' => $error['title'], 'level' => (string) $error['level']];
-
-			if (in_array($item, $sections, true)) {
-				continue;
+		if (is_string($path)) {
+			if ($path === '') {
+				return [];
 			}
 
-			$sections[] = $item;
+			return self::normalizePath(explode('.', $path));
 		}
 
-		usort($sections, static function ($a, $b): int {
-			$aa = $a['level'] . $a['title'];
-			$bb = $b['level'] . $b['title'];
-
-			return $aa > $bb ? 1 : -1;
-		});
-
-		/** @var array<string, array<int, array{error: string, title: ?string, level: int, item: ?int, field: string, label: string}>> $groups */
-		$groups = [];
-
-		foreach ($errors as $error) {
-			$groups[$this->titleKey($error['title'])][] = $error;
-		}
-
-		$result = [];
-
-		foreach ($sections as $section) {
-			$result[] = [
-				'title' => $section['title'],
-				'errors' => $groups[$this->titleKey($section['title'])],
-			];
-		}
-
-		return $result;
+		return $path;
 	}
 
-	private function titleKey(?string $title): string
+	/**
+	 * @param list<string> $path
+	 * @return list<string|int>
+	 */
+	private static function normalizePath(array $path): array
 	{
-		return $title ?? '__root__';
+		return array_map(
+			static fn(string $part): string|int => ctype_digit($part) ? (int) $part : $part,
+			$path,
+		);
 	}
 }

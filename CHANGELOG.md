@@ -15,6 +15,10 @@
 - Replaced `Shape` constructor configuration, including `list`, `extra`, `title`, registry, parser, and `langs` arguments, with fluent configuration methods.
 - Replaced `Shape::keepUnknown()` with `Shape::extra(Extra::Allow)`.
 - Renamed `ValidationResult` to `Result` and updated `Contract\Shape::validate()` accordingly.
+- Replaced `Violation`, `violations()`, `errors()`, and `map()` with path-aware `Issue` objects plus `Result::issues()`, `messages()`, `first()`, and `has()`.
+- Removed `Result::pristineValues()` and removed values from default JSON serialization; serialized results now contain `valid` and `issues` only.
+- Removed `Shape::title()` and the validation `level` argument.
+- Simplified `Review::addError()` to accept `path`, `message`, `code`, and `params`.
 - Renamed `ValidatorDefinitionParser` to `ValidatorParser`.
 - Removed `Shape` subclass hooks and mutable run-state access, including `rules()`, protected `review()`, `addError()`, `toSubValues()`, `$errorList`, and `$errorMap`.
 - Changed the `in` validator to use strict comparisons, so values must match allowed values without PHP loose coercion.
@@ -25,7 +29,7 @@
 
 ### Added
 
-- Added fluent `Shape` configuration with `Shape::list()`, `asList()`, `extra()`, `title()`, `validator()`, `validators()`, `type()`, `types()`, and `validatorParser()`.
+- Added fluent `Shape` configuration with `Shape::list()`, `asList()`, `extra()`, `validator()`, `validators()`, `type()`, `types()`, and `validatorParser()`.
 - Added the `Extra` enum to control extra input fields with `ignore`, `allow`, and `forbid` modes.
 - Added the `number` type for values that may be integers or floats.
 - Added `Shape::review()` callbacks with `Review` for post-validation checks after successful normal validation.

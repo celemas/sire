@@ -12,18 +12,11 @@ final class ValidationRun
 {
 	private ErrorBag $errors;
 
-	/** Marks defaulted fields so pristine output can preserve missing input. */
-	private object $missing;
-
 	public function __construct(
 		private readonly ShapeDefinition $shape,
 		private readonly array $data,
-		private readonly int $level,
 	) {
 		$this->errors = new ErrorBag();
-		// Use a unique per-run sentinel instead of null so explicit null input
-		// remains distinguishable from fields filled by defaults.
-		$this->missing = new \stdClass();
 	}
 
 	public function validate(): Result
@@ -33,9 +26,7 @@ final class ValidationRun
 
 		if ($this->shape->list) {
 			foreach ($values as $listIndex => $subValues) {
-				assert(is_int($listIndex), 'Expected list shape values to use integer indexes');
 				/** @var array<string, Value> $subValues */
-				$this->errors->seedListItem($listIndex);
 				$validatedValues[] = $this->validateItem($subValues, $listIndex);
 			}
 		} else {
@@ -48,19 +39,14 @@ final class ValidationRun
 		}
 
 		$extractedValues = $this->extractValues($validatedValues);
-		$pristineValues = $this->extractPristineValues($validatedValues);
 
 		if (!$this->errors->hasErrors()) {
-			$this->review($extractedValues, $pristineValues);
+			$this->review($extractedValues);
 		}
 
 		return new Result(
-			$this->shape->list,
-			$this->shape->title,
-			$this->errors->map(),
-			$this->errors->violations(),
+			$this->errors->issues(),
 			$extractedValues,
-			$pristineValues,
 		);
 	}
 
@@ -73,7 +59,7 @@ final class ValidationRun
 		Rule $rule,
 		Value $value,
 		string $validatorDefinition,
-		?int $listIndex,
+		string|int|null $listIndex,
 	): void {
 		$parsedValidator = $this->shape->validatorParser->parse($validatorDefinition);
 		$validatorName = $parsedValidator['name'];
@@ -97,9 +83,8 @@ final class ValidationRun
 
 		if ($validation->failure !== null) {
 			$this->errors->add(
-				$rule->field,
-				$rule->name(),
-				$this->shape->messageFormatter->format(
+				self::path($rule->field, $listIndex),
+				$this->formatFailure(
 					$validation->failure,
 					$rule->name(),
 					$rule->field,
@@ -109,9 +94,6 @@ final class ValidationRun
 					$validatorArgs,
 					$rule->messageOverrides(),
 				),
-				$listIndex,
-				$this->shape->title,
-				$this->level,
 			);
 		}
 	}
@@ -173,26 +155,8 @@ final class ValidationRun
 		return $this->getValues($validatedValues);
 	}
 
-	/** @param array<string, Value>|list<array<string, Value>> $validatedValues */
-	private function extractPristineValues(array $validatedValues): array
-	{
-		if ($this->shape->list) {
-			$pristineValues = [];
-
-			foreach ($validatedValues as $item) {
-				/** @var array<string, Value> $item */
-				$pristineValues[] = $this->getPristineValues($item);
-			}
-
-			return $pristineValues;
-		}
-
-		/** @var array<string, Value> $validatedValues */
-		return $this->getPristineValues($validatedValues);
-	}
-
 	/** @return array<string, Value> */
-	private function readFromData(array $data, ?int $listIndex = null): array
+	private function readFromData(array $data, string|int|null $listIndex = null): array
 	{
 		$values = [];
 
@@ -217,7 +181,7 @@ final class ValidationRun
 		Rule $rule,
 		mixed $value,
 		array $data,
-		?int $listIndex,
+		string|int|null $listIndex,
 	): ?Value {
 		if ($rule->isBlank($value)) {
 			return $this->readEmptyValue($field, $rule, $data, $listIndex);
@@ -225,19 +189,12 @@ final class ValidationRun
 
 		$read = $this->readKnownValue($rule, $value, $data);
 
-		if ($read->nestedError !== null) {
-			$this->errors->addNested($field, $read->nestedError, $listIndex);
+		if ($read->nestedResult !== null) {
+			$this->errors->addNested(self::path($field, $listIndex), $read->nestedResult);
 		}
 
-		if ($read->error !== null) {
-			$this->errors->add(
-				$field,
-				$rule->name(),
-				$read->error,
-				$listIndex,
-				$this->shape->title,
-				$this->level,
-			);
+		if ($read->issue !== null) {
+			$this->errors->add(self::path($field, $listIndex), $read->issue);
 		}
 
 		return $read->value;
@@ -248,7 +205,7 @@ final class ValidationRun
 		string $field,
 		Rule $rule,
 		array $data,
-		?int $listIndex,
+		string|int|null $listIndex,
 	): ?Value {
 		if ($rule->hasDefault()) {
 			return $this->readDefaultValue($field, $rule, $data, $listIndex);
@@ -259,12 +216,8 @@ final class ValidationRun
 		}
 
 		$this->errors->add(
-			$field,
-			$rule->name(),
+			self::path($field, $listIndex),
 			$this->formatMissingFailure($rule),
-			$listIndex,
-			$this->shape->title,
-			$this->level,
 		);
 
 		return null;
@@ -275,29 +228,22 @@ final class ValidationRun
 		string $field,
 		Rule $rule,
 		array $data,
-		?int $listIndex,
+		string|int|null $listIndex,
 	): Value {
 		$read = $this->readKnownValue($rule, $rule->defaultValue(), $data);
 
-		if ($read->nestedError !== null) {
-			$this->errors->addNested($field, $read->nestedError, $listIndex);
+		if ($read->nestedResult !== null) {
+			$this->errors->addNested(self::path($field, $listIndex), $read->nestedResult);
 		}
 
-		if ($read->error !== null) {
-			$this->errors->add(
-				$field,
-				$rule->name(),
-				$read->error,
-				$listIndex,
-				$this->shape->title,
-				$this->level,
-			);
+		if ($read->issue !== null) {
+			$this->errors->add(self::path($field, $listIndex), $read->issue);
 		}
 
-		return new \Duon\Sire\Value($read->value->value, $this->missing);
+		return $read->value;
 	}
 
-	private function readExtraValue(string $field, mixed $value, ?int $listIndex): ?Value
+	private function readExtraValue(string $field, mixed $value, string|int|null $listIndex): ?Value
 	{
 		if ($this->shape->extra === Extra::Allow) {
 			return new \Duon\Sire\Value($value, $value);
@@ -305,12 +251,8 @@ final class ValidationRun
 
 		if ($this->shape->extra === Extra::Forbid) {
 			$this->errors->add(
-				$field,
-				$field,
+				self::path($field, $listIndex),
 				$this->formatExtraFailure($field, $value),
-				$listIndex,
-				$this->shape->title,
-				$this->level,
 			);
 		}
 
@@ -335,7 +277,7 @@ final class ValidationRun
 			$shape = $rule->type;
 			assert($shape instanceof Contract\Shape, 'Expected shape rule type to be a shape instance');
 
-			return $this->toSubValues($value, $shape);
+			return $this->toSubValues($value, $rule, $shape);
 		}
 
 		$coercer = $this->shape->coercers->get($type);
@@ -345,17 +287,16 @@ final class ValidationRun
 		}
 
 		$coercion = $coercer->coerce($value);
-		$error = $this->formatCoercionFailure($coercion, $rule, $coercer);
 
 		return new ReadValue(
 			new \Duon\Sire\Value($coercion->value, $coercion->pristine),
-			$error,
+			$this->formatCoercionFailure($coercion, $rule, $coercer),
 		);
 	}
 
-	private function formatExtraFailure(string $field, mixed $value): string
+	private function formatExtraFailure(string $field, mixed $value): Issue
 	{
-		return $this->shape->messageFormatter->format(
+		return $this->formatFailure(
 			Failure::invalid(),
 			$field,
 			$field,
@@ -365,9 +306,9 @@ final class ValidationRun
 		);
 	}
 
-	private function formatNullFailure(Rule $rule): string
+	private function formatNullFailure(Rule $rule): Issue
 	{
-		return $this->shape->messageFormatter->format(
+		return $this->formatFailure(
 			Failure::key('null'),
 			$rule->name(),
 			$rule->field,
@@ -378,9 +319,9 @@ final class ValidationRun
 		);
 	}
 
-	private function formatMissingFailure(Rule $rule): string
+	private function formatMissingFailure(Rule $rule): Issue
 	{
-		return $this->shape->messageFormatter->format(
+		return $this->formatFailure(
 			Failure::key('missing'),
 			$rule->name(),
 			$rule->field,
@@ -395,12 +336,12 @@ final class ValidationRun
 		Contract\Coercion $coercion,
 		Rule $rule,
 		Contract\Coercer $coercer,
-	): ?string {
+	): ?Issue {
 		if ($coercion->failure === null) {
 			return null;
 		}
 
-		return $this->shape->messageFormatter->format(
+		return $this->formatFailure(
 			$coercion->failure,
 			$rule->name(),
 			$rule->field,
@@ -411,9 +352,62 @@ final class ValidationRun
 		);
 	}
 
-	private function toSubValues(mixed $pristine, Contract\Shape $shape): ReadValue
+	private function formatShapeFailure(Rule $rule, mixed $value): Issue
 	{
-		$result = $shape->validate($pristine, $this->level + 1);
+		return $this->formatFailure(
+			Failure::invalid(),
+			$rule->name(),
+			$rule->field,
+			$value,
+			'type.shape',
+			'{label} must be an array',
+			messages: $rule->messageOverrides(),
+		);
+	}
+
+	/**
+	 * @param list<mixed> $args
+	 * @param array<string, string> $messages
+	 */
+	private function formatFailure(
+		Failure $failure,
+		string $label,
+		string $field,
+		mixed $pristine,
+		?string $defaultKey,
+		string $fallback,
+		array $args = [],
+		array $messages = [],
+	): Issue {
+		$args = $failure->args === [] ? $args : $failure->args;
+
+		return new Issue(
+			[],
+			$failure->key !== '' ? $failure->key : $defaultKey ?? 'invalid',
+			$this->shape->messageFormatter->format(
+				$failure,
+				$label,
+				$field,
+				$pristine,
+				$defaultKey,
+				$fallback,
+				$args,
+				$messages,
+			),
+			self::params($args),
+		);
+	}
+
+	private function toSubValues(mixed $pristine, Rule $rule, Contract\Shape $shape): ReadValue
+	{
+		if (!is_array($pristine)) {
+			return new ReadValue(
+				new \Duon\Sire\Value($pristine, $pristine),
+				$this->formatShapeFailure($rule, $pristine),
+			);
+		}
+
+		$result = $shape->validate($pristine);
 
 		if ($result->isValid()) {
 			return new ReadValue(new \Duon\Sire\Value($result->values(), $pristine));
@@ -421,26 +415,17 @@ final class ValidationRun
 
 		return new ReadValue(
 			new \Duon\Sire\Value($pristine, $pristine),
-			nestedError: [
-				'errors' => $result->violations(),
-				'map' => $result->map(),
-			],
+			nestedResult: $result,
 		);
 	}
 
-	/**
-	 * @param array<string, mixed> $values
-	 * @param array<string, mixed> $pristineValues
-	 */
-	private function review(array $values, array $pristineValues): void
+	/** @param array<string, mixed>|list<array<string, mixed>> $values */
+	private function review(array $values): void
 	{
 		$context = new Review(
 			$this->errors,
 			$values,
-			$pristineValues,
 			$this->shape->list,
-			$this->shape->title,
-			$this->level,
 		);
 
 		foreach ($this->shape->reviewCallbacks as $review) {
@@ -451,9 +436,13 @@ final class ValidationRun
 	/**
 	 * @param array<string, Value> $values
 	 * @param array<string, mixed> $data
+	 * @return array<string, Value>
 	 */
-	private function fillMissingFromRules(array $values, array $data, ?int $listIndex = null): array
-	{
+	private function fillMissingFromRules(
+		array $values,
+		array $data,
+		string|int|null $listIndex = null,
+	): array {
 		foreach ($this->shape->rules as $field => $rule) {
 			if (array_key_exists($field, $values) || array_key_exists($field, $data)) {
 				continue;
@@ -474,12 +463,8 @@ final class ValidationRun
 			}
 
 			$this->errors->add(
-				$field,
-				$rule->name(),
+				self::path($field, $listIndex),
 				$this->formatMissingFailure($rule),
-				$listIndex,
-				$this->shape->title,
-				$this->level,
 			);
 		}
 
@@ -493,11 +478,19 @@ final class ValidationRun
 			$values = [];
 
 			foreach ($data as $listIndex => $item) {
-				assert(is_int($listIndex), 'Expected list shape data to use integer indexes');
-				/** @var array<string, mixed> $subData */
-				$subData = $item;
-				$subValues = $this->readFromData($subData, $listIndex);
-				$values[] = $this->fillMissingFromRules($subValues, $subData, $listIndex);
+				if (!is_array($item)) {
+					$this->errors->add(
+						[$listIndex],
+						new Issue([], 'type.shape', 'Item must be an array'),
+					);
+					$values[] = [];
+
+					continue;
+				}
+
+				/** @var array<string, mixed> $item */
+				$subValues = $this->readFromData($item, $listIndex);
+				$values[] = $this->fillMissingFromRules($subValues, $item, $listIndex);
 			}
 
 			return $values;
@@ -512,7 +505,7 @@ final class ValidationRun
 	 * @param array<string, Value> $values
 	 * @return array<string, Value>
 	 */
-	private function validateItem(array $values, ?int $listIndex = null): array
+	private function validateItem(array $values, string|int|null $listIndex = null): array
 	{
 		foreach ($this->shape->rules as $field => $rule) {
 			if (!array_key_exists($field, $values)) {
@@ -544,22 +537,28 @@ final class ValidationRun
 		);
 	}
 
-	/**
-	 * @param array<string, Value> $values
-	 * @return array<string, mixed>
-	 */
-	private function getPristineValues(array $values): array
+	/** @return list<string|int> */
+	private static function path(string $field, string|int|null $listIndex): array
 	{
-		$pristineValues = [];
-
-		foreach ($values as $field => $value) {
-			if ($value->pristine === $this->missing) {
-				continue;
-			}
-
-			$pristineValues[$field] = $value->pristine;
+		if ($listIndex === null) {
+			return [$field];
 		}
 
-		return $pristineValues;
+		return [$listIndex, $field];
+	}
+
+	/**
+	 * @param list<mixed> $args
+	 * @return array<string, mixed>
+	 */
+	private static function params(array $args): array
+	{
+		$params = [];
+
+		foreach ($args as $index => $arg) {
+			$params['arg' . ($index + 1)] = $arg;
+		}
+
+		return $params;
 	}
 }
