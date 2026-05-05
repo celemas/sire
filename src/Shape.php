@@ -10,7 +10,7 @@ use Override;
 use ValueError;
 
 /** @api */
-final class Shape implements Contract\Parser, Contract\Validator
+final class Shape implements Contract\Shape
 {
 	private Config $config;
 
