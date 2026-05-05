@@ -4,7 +4,7 @@ title: Introduction
 
 # Sire Validation Library
 
-Sire is a PHP validation library that lets you define shapes with a compact field DSL, validate arbitrary input, and consume a typed validation result.
+Sire is a PHP validation library that lets you define shapes with a compact rule DSL, validate arbitrary input, and consume a typed validation result.
 
 > **Note:** This is a preview feature currently under active development.
 

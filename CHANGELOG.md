@@ -4,8 +4,12 @@
 
 ### Breaking
 
+- Renamed field definitions from `Rule` to `Field`.
+- Renamed field checks from validators to rules, including `Contract\Validator` to `Contract\Rule`, `ValidatorRegistry` to `RuleRegistry`, `ValidatorParser` to `RuleParser`, and the fluent `Shape::validator*()` methods to `Shape::rule*()` methods.
+- Renamed `Contract\Shape` to `Contract\Validator` for reusable shape validators.
+- Changed field rule issue and message keys from `validator.*` to `rule.*`.
 - Made `Shape` and `Value` final; custom shapes now need composition through `Contract\Validator` instead of subclassing.
-- Removed the closure-backed `Rule` adapter; custom rules now implement `Contract\Rule`.
+- Removed the closure-backed custom rule adapter; custom rules now implement `Contract\Rule`.
 - Changed `Contract\Rule::validate()` to return `Contract\Validation` instead of `bool`.
 - Removed coercion errors from `Contract\Value`; custom coercers now return `Contract\Coercion` with direct `value`, `pristine`, and `failure` properties.
 - Changed `Contract\Coercer::coerce()` to receive only the pristine value.
@@ -19,7 +23,7 @@
 - Removed `Result::pristineValues()` and removed values from default JSON serialization; serialized results now contain `valid` and `issues` only.
 - Removed `Shape::title()` and the validation `level` argument.
 - Simplified `Review::addError()` to accept `path`, `message`, `code`, and `params`.
-- Renamed `RuleDefinitionParser` to `RuleParser`.
+- Renamed field rule parser APIs to `RuleParser`.
 - Removed `Shape` subclass hooks and mutable run-state access, including subclass field definitions, protected `review()`, `addError()`, `toSubValues()`, `$errorList`, and `$errorMap`.
 - Changed the `in` rule to use strict comparisons, so values must match allowed values without PHP loose coercion.
 - Changed built-in default error messages to include labels and named placeholders.
@@ -51,8 +55,8 @@ Codename: Jonas
 
 ### Changed
 
-- Breaking: Renamed `Schema` class to `Shape` and `Contract\Schema` interface to `Contract\Validator`.
-- Breaking: `Field::type()` now returns `'shape'` instead of `'schema'` for sub-shape fields.
+- Breaking: Renamed `Schema` class to `Shape` and `Contract\Schema` interface to `Contract\Shape`.
+- Breaking: `Rule::type()` now returns `'shape'` instead of `'schema'` for sub-shape fields.
 - Breaking: Exception messages updated to reference "shape" instead of "schema" (`"Shape definition error: field must not be empty"`, `"Wrong shape type"`).
 
 ## [0.2.0](https://github.com/duoncode/sire/releases/tag/0.2.0) (2026-02-01)
@@ -68,5 +72,5 @@ Initial release.
 ### Added
 
 - PHP validation library with fluent API
-- Built-in rules for common data types
+- Built-in validators for common data types
 - HTML sanitization via symfony/html-sanitizer integration

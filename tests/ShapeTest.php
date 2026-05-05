@@ -422,6 +422,7 @@ class ShapeTest extends TestCase
 			);
 
 		$this->assertInstanceOf(Parser::class, $shape);
+		$this->assertInstanceOf(\Duon\Sire\Contract\Validator::class, $shape);
 		$this->assertSame(
 			['age' => 21, 'status' => 'DRAFT'],
 			$shape->parse(['age' => '21']),
