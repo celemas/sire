@@ -49,6 +49,26 @@ class ResultTest extends TestCase
 		$this->assertSame(['email' => 'x'], $result->values());
 	}
 
+	public function testResultPathHelpersAcceptRootAndIntegerPaths(): void
+	{
+		$result = new Result(
+			[
+				new Issue([], 'form', 'Form error'),
+				new Issue([0], 'row', 'First row error'),
+				new Issue(['items', 0, 'name'], 'item.name', 'Name error'),
+			],
+			[],
+		);
+
+		$this->assertSame(['Form error'], $result->messages(''));
+		$this->assertSame('Form error', $result->first(''));
+		$this->assertTrue($result->has(''));
+		$this->assertSame(['First row error'], $result->messages(0));
+		$this->assertSame('First row error', $result->first(0));
+		$this->assertTrue($result->has(0));
+		$this->assertSame(['Name error'], $result->messages('items.0.name'));
+	}
+
 	public function testResultValid(): void
 	{
 		$result = new Result([], []);

@@ -766,6 +766,24 @@ class ShapeTest extends TestCase
 		$this->assertSame('email.taken', $result->issues()[0]->code);
 	}
 
+	public function testReviewCallbackAddsErrorsForRootIntegerAndArrayPaths(): void
+	{
+		$shape = new Shape();
+		$shape->review(static function (Review $context): void {
+			$context->addError('', 'Form error', 'form');
+			$context->addError(0, 'First row error', 'row');
+			$context->addError(['items', 0, 'name'], 'Name error', 'item.name');
+		});
+
+		$result = $shape->validate([]);
+
+		$this->assertFalse($result->isValid());
+		$this->assertCount(3, $result->issues());
+		$this->assertSame('Form error', $result->first(''));
+		$this->assertSame('First row error', $result->first(0));
+		$this->assertSame('Name error', $result->first(['items', 0, 'name']));
+	}
+
 	public function testAllReviewCallbacksRunOnceReviewStarts(): void
 	{
 		$shape = new Shape();
@@ -1206,6 +1224,20 @@ class ShapeTest extends TestCase
 		);
 	}
 
+	public function testSubShapeRejectsNonArrayValue(): void
+	{
+		$shape = new Shape();
+		$shape->add('profile', new SubShape())->label('Profile');
+
+		$result = $shape->validate(['profile' => 'invalid']);
+
+		$this->assertFalse($result->isValid());
+		$this->assertCount(1, $result->issues());
+		$this->assertSame('Profile must be an array', $result->first('profile'));
+		$this->assertSame(['profile'], $result->issues()[0]->path);
+		$this->assertSame('type.shape', $result->issues()[0]->code);
+	}
+
 	public function testListShape(): void
 	{
 		$testData = [
@@ -1253,6 +1285,24 @@ class ShapeTest extends TestCase
 		$this->assertSame('example@example.com', $values[1]['single_shape']['inner_email']);
 		$this->assertSame('example@example.com', $values[1]['list_shape'][0]['inner_email']);
 		$this->assertSame(47, $values[1]['list_shape'][1]['inner_int']);
+	}
+
+	public function testListShapeRejectsNonArrayItems(): void
+	{
+		$shape = Shape::list();
+		$shape->add('name', 'text')->optional();
+
+		$result = $shape->validate([
+			'invalid',
+			['name' => 'Ada'],
+		]);
+
+		$this->assertFalse($result->isValid());
+		$this->assertCount(1, $result->issues());
+		$this->assertSame('Item must be an array', $result->first(0));
+		$this->assertSame([0], $result->issues()[0]->path);
+		$this->assertSame('type.shape', $result->issues()[0]->code);
+		$this->assertSame([[], ['name' => 'Ada']], $result->values());
 	}
 
 	public function testInvalidListShape(): void
