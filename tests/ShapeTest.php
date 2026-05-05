@@ -7,9 +7,11 @@ namespace Duon\Sire\Tests;
 use Duon\Sire\CoercerRegistry;
 use Duon\Sire\Coercion;
 use Duon\Sire\Contract\Coercer;
+use Duon\Sire\Contract\Parser;
 use Duon\Sire\Contract\Validator;
 use Duon\Sire\Contract\ValidatorParser;
 use Duon\Sire\Contract\Value;
+use Duon\Sire\Exception\ValidationError;
 use Duon\Sire\Extra;
 use Duon\Sire\Failure;
 use Duon\Sire\Review;
@@ -406,6 +408,62 @@ class ShapeTest extends TestCase
 		$this->assertSame('email must be a valid email address', $issues[0]->message);
 
 		$this->assertSame('invalid', $result->values()['email']);
+	}
+
+	public function testParseReturnsValidatedValues(): void
+	{
+		$shape = new Shape();
+		$shape->add('age', 'int')->label('Age');
+		$shape
+			->add('status', 'text')
+			->default('draft')
+			->finalize(
+				static fn(mixed $value): string => strtoupper((string) $value),
+			);
+
+		$this->assertInstanceOf(Parser::class, $shape);
+		$this->assertSame(
+			['age' => 21, 'status' => 'DRAFT'],
+			$shape->parse(['age' => '21']),
+		);
+	}
+
+	public function testParseThrowsValidationErrorForInvalidData(): void
+	{
+		$shape = new Shape();
+		$shape->add('email', 'text', 'required', 'email');
+
+		try {
+			$shape->parse(['email' => 'invalid']);
+			$this->fail('Expected validation error');
+		} catch (ValidationError $error) {
+			$result = $error->result();
+
+			$this->assertSame('Validation failed', $error->getMessage());
+			$this->assertFalse($result->isValid());
+			$this->assertSame('email must be a valid email address', $result->first('email'));
+			$this->assertSame('invalid', $result->values()['email']);
+		}
+	}
+
+	public function testParseThrowsValidationErrorForReviewErrors(): void
+	{
+		$shape = new Shape();
+		$shape->add('email', 'text', 'required', 'email');
+		$shape->review(static function (Review $review): void {
+			$review->addError('email', 'Already used', 'email.taken');
+		});
+
+		try {
+			$shape->parse(['email' => 'taken@example.com']);
+			$this->fail('Expected validation error');
+		} catch (ValidationError $error) {
+			$result = $error->result();
+
+			$this->assertFalse($result->isValid());
+			$this->assertSame('Already used', $result->first('email'));
+			$this->assertSame('taken@example.com', $result->values()['email']);
+		}
 	}
 
 	public function testResultBeforeValidation(): void

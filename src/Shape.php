@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace Duon\Sire;
 
 use Closure;
+use Duon\Sire\Exception\ValidationError;
 use Override;
 use ValueError;
 
 /** @api */
-final class Shape implements Contract\Shape
+final class Shape implements Contract\Parser, Contract\Shape
 {
 	private Config $config;
 
@@ -128,6 +129,22 @@ final class Shape implements Contract\Shape
 			$this->definition(),
 			$data,
 		)->validate();
+	}
+
+	/**
+	 * @return array<array-key, mixed>
+	 * @throws ValidationError
+	 */
+	#[Override]
+	public function parse(array $data): array
+	{
+		$result = $this->validate($data);
+
+		if (!$result->isValid()) {
+			throw new ValidationError($result);
+		}
+
+		return $result->values();
 	}
 
 	private function definition(): ShapeDefinition

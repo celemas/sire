@@ -43,6 +43,7 @@
 - Added `Shape::message()` and `Shape::messages()` for coercion and validator error messages.
 - Added structured coercion failures through `Failure` and central type message formatting based on the registered type name.
 - Added named placeholders such as `{label}`, `{field}`, `{value}`, and `{arg1}` for coercion and validator message templates.
+- Added `Shape::parse()` and `Contract\Parser` to return valid values directly or throw `Exception\ValidationError`.
 
 ## [0.3.0](https://github.com/duoncode/sire/releases/tag/0.3.0) (2026-02-21)
 

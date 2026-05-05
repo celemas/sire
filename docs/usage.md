@@ -31,6 +31,28 @@ if (!$result->isValid()) {
 var_dump($result->values());
 ```
 
+## Parse valid values or throw
+
+Use `parse()` when invalid input should stop the current flow. It returns the same coerced and finalized values as `Result::values()` after validation and review both succeed. It throws `Duon\Sire\Exception\ValidationError` when the data is invalid.
+
+```php
+<?php
+
+use Duon\Sire\Exception\ValidationError;
+use Duon\Sire\Shape;
+
+$shape = new Shape();
+$shape->add('email', 'text', 'required', 'email');
+
+try {
+    $values = $shape->parse(['email' => 'test@example.com']);
+} catch (ValidationError $error) {
+    var_dump($error->result()->issues());
+}
+```
+
+Use `validate()` when you need to branch on validation state without exceptions.
+
 ## Configure shape behavior
 
 `new Shape()` creates an object shape. Configure shape behavior with fluent methods.
@@ -268,7 +290,7 @@ If a finalize callback throws, the exception is not caught by Sire.
 
 ## Read validation results
 
-The `Result` object is the primary output of validation. Use it as your source of truth in application code.
+The `Result` object is the primary output of validation. Use it as your source of truth when you call `validate()`. Use `Shape::parse()` when you want valid values directly or a `ValidationError` exception.
 
 - `isValid()` returns `true` when no issues exist.
 - `issues()` returns typed `Issue` objects with `path`, `code`, `message`, and `params`.
@@ -416,7 +438,7 @@ final class LoginShape implements Contract\Shape
 }
 ```
 
-Delegating shapes can be used anywhere a nested shape is accepted because Sire rules accept `Contract\Shape`.
+Delegating shapes can be used anywhere a nested shape is accepted because Sire rules accept `Contract\Shape`. If a custom shape also exposes `parse()`, implement `Contract\Parser` and delegate both methods.
 
 ## Extend validators and coercers
 
