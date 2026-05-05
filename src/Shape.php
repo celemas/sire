@@ -140,7 +140,7 @@ final class Shape implements Contract\Shape
 	{
 		$result = $this->validate($data);
 
-		if (!$result->isValid()) {
+		if (!$result->valid()) {
 			throw new ValidationError($result);
 		}
 

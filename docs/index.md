@@ -27,7 +27,7 @@ Sire uses a shape object that defines fields, field types, and rules. A validati
 - Compose reusable custom shapes through `Contract\Validator`.
 - Call `Shape::validate()` to get a `Result`.
 - Call `Shape::parse()` to get valid values directly or throw a `ValidationError`.
-- Read `isValid()`, `issues()`, `messages()`, `first()`, and `values()` on the result.
+- Read `valid()`, `issues()`, `messages()`, `first()`, and `values()` on the result.
 
 ## Next steps
 

@@ -410,7 +410,7 @@ final class ValidationRun
 
 		$result = $shape->validate($pristine);
 
-		if ($result->isValid()) {
+		if ($result->valid()) {
 			return new ReadValue(new \Duon\Sire\Value($result->values(), $pristine));
 		}
 

@@ -24,7 +24,7 @@ $result = $shape->validate([
     'age' => '21',
 ]);
 
-if (!$result->isValid()) {
+if (!$result->valid()) {
     var_dump($result->issues());
 }
 
@@ -292,7 +292,7 @@ If a finalize callback throws, the exception is not caught by Sire.
 
 The `Result` object is the primary output of validation. Use it as your source of truth when you call `validate()`. Use `Shape::parse()` when you want valid values directly or a `ValidationError` exception.
 
-- `isValid()` returns `true` when no issues exist.
+- `valid()` returns `true` when no issues exist.
 - `issues()` returns typed `Issue` objects with `path`, `code`, `message`, and `params`.
 - `messages($path)` returns all messages for one exact path.
 - `first($path)` returns the first message for one exact path, or `null`.

@@ -24,7 +24,7 @@ class EmptyTest extends TestCase
 
 		$result = $shape->validate(['name' => 'Ada']);
 
-		$this->assertTrue($result->isValid());
+		$this->assertTrue($result->valid());
 		$this->assertSame('Ada', $result->values()['name']);
 	}
 
@@ -35,7 +35,7 @@ class EmptyTest extends TestCase
 
 		$result = $shape->validate(['status' => null]);
 
-		$this->assertFalse($result->isValid());
+		$this->assertFalse($result->valid());
 		$this->assertSame('Status must not be null', $result->first('status'));
 		$this->assertNull($result->values()['status']);
 	}
@@ -51,9 +51,9 @@ class EmptyTest extends TestCase
 		$nullResult = $shape->validate(['status' => null]);
 		$missingResult = $shape->validate([]);
 
-		$this->assertTrue($nullResult->isValid());
+		$this->assertTrue($nullResult->valid());
 		$this->assertSame('draft', $nullResult->values()['status']);
-		$this->assertTrue($missingResult->isValid());
+		$this->assertTrue($missingResult->valid());
 		$this->assertSame('draft', $missingResult->values()['status']);
 	}
 
@@ -64,7 +64,7 @@ class EmptyTest extends TestCase
 
 		$result = $shape->validate([]);
 
-		$this->assertFalse($result->isValid());
+		$this->assertFalse($result->valid());
 		$this->assertSame('status is required', $result->first('status'));
 		$this->assertSame([], $result->values());
 	}
@@ -77,9 +77,9 @@ class EmptyTest extends TestCase
 		$emptyResult = $shape->validate(['status' => '']);
 		$spaceResult = $shape->validate(['status' => ' ']);
 
-		$this->assertTrue($emptyResult->isValid());
+		$this->assertTrue($emptyResult->valid());
 		$this->assertSame('draft', $emptyResult->values()['status']);
-		$this->assertTrue($spaceResult->isValid());
+		$this->assertTrue($spaceResult->valid());
 		$this->assertSame(' ', $spaceResult->values()['status']);
 	}
 
@@ -91,9 +91,9 @@ class EmptyTest extends TestCase
 		$emptyResult = $shape->validate(['status' => '']);
 		$blankResult = $shape->validate(['status' => " \n\t"]);
 
-		$this->assertTrue($emptyResult->isValid());
+		$this->assertTrue($emptyResult->valid());
 		$this->assertSame('draft', $emptyResult->values()['status']);
-		$this->assertTrue($blankResult->isValid());
+		$this->assertTrue($blankResult->valid());
 		$this->assertSame('draft', $blankResult->values()['status']);
 	}
 
@@ -104,7 +104,7 @@ class EmptyTest extends TestCase
 
 		$result = $shape->validate(['items' => []]);
 
-		$this->assertTrue($result->isValid());
+		$this->assertTrue($result->valid());
 		$this->assertSame(['draft'], $result->values()['items']);
 	}
 
@@ -124,7 +124,7 @@ class EmptyTest extends TestCase
 
 		$result = $shape->validate(['name' => null]);
 
-		$this->assertTrue($result->isValid());
+		$this->assertTrue($result->valid());
 		$this->assertFalse($called);
 		$this->assertSame([], $result->values());
 	}
@@ -136,7 +136,7 @@ class EmptyTest extends TestCase
 
 		$result = $shape->validate([]);
 
-		$this->assertTrue($result->isValid());
+		$this->assertTrue($result->valid());
 		$this->assertSame([], $result->values());
 	}
 
@@ -147,7 +147,7 @@ class EmptyTest extends TestCase
 
 		$result = $shape->validate(['title' => '']);
 
-		$this->assertFalse($result->isValid());
+		$this->assertFalse($result->valid());
 		$this->assertSame('Title is required', $result->first('title'));
 		$this->assertSame([], $result->values());
 	}
@@ -162,7 +162,7 @@ class EmptyTest extends TestCase
 
 		$result = $shape->validate(['status' => 'published']);
 
-		$this->assertTrue($result->isValid());
+		$this->assertTrue($result->valid());
 		$this->assertSame('published', $result->values()['status']);
 	}
 }

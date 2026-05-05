@@ -40,7 +40,7 @@ class ResultTest extends TestCase
 			['email' => 'x'],
 		);
 
-		$this->assertFalse($result->isValid());
+		$this->assertFalse($result->valid());
 		$this->assertCount(2, $result->issues());
 		$this->assertSame(['Invalid value'], $result->messages('email'));
 		$this->assertSame('Invalid value', $result->first('email'));
@@ -73,7 +73,7 @@ class ResultTest extends TestCase
 	{
 		$result = new Result([], []);
 
-		$this->assertTrue($result->isValid());
+		$this->assertTrue($result->valid());
 		$this->assertCount(0, $result->issues());
 		$this->assertSame([], $result->messages('email'));
 		$this->assertNull($result->first('email'));

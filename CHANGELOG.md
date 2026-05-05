@@ -4,6 +4,7 @@
 
 ### Breaking
 
+- Renamed `Result::isValid()` to `Result::valid()`.
 - Renamed field definitions from `Rule` to `Field`.
 - Renamed field checks from validators to rules, including `Contract\Validator` to `Contract\Rule`, `ValidatorRegistry` to `RuleRegistry`, `ValidatorParser` to `RuleParser`, and the fluent `Shape::validator*()` methods to `Shape::rule*()` methods.
 - Renamed `Contract\Shape` to `Contract\Validator` for reusable shape validators.
