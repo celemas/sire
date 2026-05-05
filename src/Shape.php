@@ -43,13 +43,6 @@ final class Shape implements Contract\Shape
 		return $this;
 	}
 
-	public function title(?string $title): self
-	{
-		$this->config->title($title);
-
-		return $this;
-	}
-
 	public function validator(string $name, Contract\Validator $validator): self
 	{
 		$this->config->validator($name, $validator);
@@ -129,12 +122,11 @@ final class Shape implements Contract\Shape
 	}
 
 	#[Override]
-	public function validate(array $data, int $level = 1): Result
+	public function validate(array $data): Result
 	{
 		return new ValidationRun(
 			$this->definition(),
 			$data,
-			$level,
 		)->validate();
 	}
 

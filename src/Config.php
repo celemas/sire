@@ -14,8 +14,6 @@ final class Config
 
 	private Extra $extra = Extra::Ignore;
 
-	private ?string $title = null;
-
 	/** @var array<string, string> */
 	private array $messages = [];
 
@@ -48,11 +46,6 @@ final class Config
 			'Invalid extra mode "%s"',
 			$extra,
 		));
-	}
-
-	public function title(?string $title): void
-	{
-		$this->title = $title;
 	}
 
 	public function validator(string $name, Contract\Validator $validator): void
@@ -102,7 +95,6 @@ final class Config
 		return new ShapeDefinition(
 			$this->list,
 			$this->extra,
-			$this->title,
 			$rules,
 			$this->resolvedValidatorRegistry(),
 			$this->resolvedCoercerRegistry(),

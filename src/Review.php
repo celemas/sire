@@ -10,25 +10,22 @@ final readonly class Review
 	public function __construct(
 		private ErrorBag $errors,
 		private array $values,
-		private array $pristineValues,
 		private bool $list,
-		private ?string $title,
-		private int $level,
 	) {}
 
+	/**
+	 * @param string|int|list<string|int> $path
+	 * @param array<string, mixed> $params
+	 */
 	public function addError(
-		string $field,
-		string $label,
+		string|int|array $path,
 		string $message,
-		?int $listIndex = null,
+		string $code = 'custom',
+		array $params = [],
 	): void {
 		$this->errors->add(
-			$field,
-			$label,
-			$message,
-			$listIndex,
-			$this->title,
-			$this->level,
+			self::path($path),
+			new Issue([], $code, $message, $params),
 		);
 	}
 
@@ -37,25 +34,42 @@ final readonly class Review
 		return $this->list;
 	}
 
-	public function level(): int
-	{
-		return $this->level;
-	}
-
-	/** @return array<string, mixed> */
-	public function pristineValues(): array
-	{
-		return $this->pristineValues;
-	}
-
-	public function title(): ?string
-	{
-		return $this->title;
-	}
-
-	/** @return array<string, mixed> */
+	/** @return array<array-key, mixed> */
 	public function values(): array
 	{
 		return $this->values;
+	}
+
+	/**
+	 * @param string|int|list<string|int> $path
+	 * @return list<string|int>
+	 */
+	private static function path(string|int|array $path): array
+	{
+		if (is_int($path)) {
+			return [$path];
+		}
+
+		if (is_string($path)) {
+			if ($path === '') {
+				return [];
+			}
+
+			return self::normalizePath(explode('.', $path));
+		}
+
+		return $path;
+	}
+
+	/**
+	 * @param list<string> $path
+	 * @return list<string|int>
+	 */
+	private static function normalizePath(array $path): array
+	{
+		return array_map(
+			static fn(string $part): string|int => ctype_digit($part) ? (int) $part : $part,
+			$path,
+		);
 	}
 }

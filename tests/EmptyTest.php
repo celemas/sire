@@ -36,9 +36,8 @@ class EmptyTest extends TestCase
 		$result = $shape->validate(['status' => null]);
 
 		$this->assertFalse($result->isValid());
-		$this->assertSame('Status must not be null', $result->map()['status'][0]);
+		$this->assertSame('Status must not be null', $result->first('status'));
 		$this->assertNull($result->values()['status']);
-		$this->assertNull($result->pristineValues()['status']);
 	}
 
 	public function testRuleEmptyNullDefaultFillsNullAndMissingValues(): void
@@ -54,10 +53,8 @@ class EmptyTest extends TestCase
 
 		$this->assertTrue($nullResult->isValid());
 		$this->assertSame('draft', $nullResult->values()['status']);
-		$this->assertArrayNotHasKey('status', $nullResult->pristineValues());
 		$this->assertTrue($missingResult->isValid());
 		$this->assertSame('draft', $missingResult->values()['status']);
-		$this->assertArrayNotHasKey('status', $missingResult->pristineValues());
 	}
 
 	public function testRuleEmptyNullDefaultDoesNotFillMissingWithoutMissingEmpty(): void
@@ -68,7 +65,7 @@ class EmptyTest extends TestCase
 		$result = $shape->validate([]);
 
 		$this->assertFalse($result->isValid());
-		$this->assertSame('status is required', $result->map()['status'][0]);
+		$this->assertSame('status is required', $result->first('status'));
 		$this->assertSame([], $result->values());
 	}
 
@@ -82,10 +79,8 @@ class EmptyTest extends TestCase
 
 		$this->assertTrue($emptyResult->isValid());
 		$this->assertSame('draft', $emptyResult->values()['status']);
-		$this->assertArrayNotHasKey('status', $emptyResult->pristineValues());
 		$this->assertTrue($spaceResult->isValid());
 		$this->assertSame(' ', $spaceResult->values()['status']);
-		$this->assertSame(' ', $spaceResult->pristineValues()['status']);
 	}
 
 	public function testRuleEmptyWhitespaceDefaultFillsBlankStrings(): void
@@ -100,7 +95,6 @@ class EmptyTest extends TestCase
 		$this->assertSame('draft', $emptyResult->values()['status']);
 		$this->assertTrue($blankResult->isValid());
 		$this->assertSame('draft', $blankResult->values()['status']);
-		$this->assertArrayNotHasKey('status', $blankResult->pristineValues());
 	}
 
 	public function testRuleEmptyListDefaultFillsEmptyList(): void
@@ -112,7 +106,6 @@ class EmptyTest extends TestCase
 
 		$this->assertTrue($result->isValid());
 		$this->assertSame(['draft'], $result->values()['items']);
-		$this->assertArrayNotHasKey('items', $result->pristineValues());
 	}
 
 	public function testRuleEmptyNullOptionalOmitsNullWithoutPreparation(): void
@@ -134,7 +127,6 @@ class EmptyTest extends TestCase
 		$this->assertTrue($result->isValid());
 		$this->assertFalse($called);
 		$this->assertSame([], $result->values());
-		$this->assertSame([], $result->pristineValues());
 	}
 
 	public function testOptionalRuleOmitsMissingWhenMissingIsNotEmpty(): void
@@ -146,7 +138,6 @@ class EmptyTest extends TestCase
 
 		$this->assertTrue($result->isValid());
 		$this->assertSame([], $result->values());
-		$this->assertSame([], $result->pristineValues());
 	}
 
 	public function testRuleBlankWithoutDefaultAddsMissingError(): void
@@ -157,9 +148,8 @@ class EmptyTest extends TestCase
 		$result = $shape->validate(['title' => '']);
 
 		$this->assertFalse($result->isValid());
-		$this->assertSame('Title is required', $result->map()['title'][0]);
+		$this->assertSame('Title is required', $result->first('title'));
 		$this->assertSame([], $result->values());
-		$this->assertSame([], $result->pristineValues());
 	}
 
 	public function testPresentValueOverridesRuleEmptyDefault(): void
@@ -174,6 +164,5 @@ class EmptyTest extends TestCase
 
 		$this->assertTrue($result->isValid());
 		$this->assertSame('published', $result->values()['status']);
-		$this->assertSame('published', $result->pristineValues()['status']);
 	}
 }

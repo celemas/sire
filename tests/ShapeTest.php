@@ -33,9 +33,8 @@ class ShapeTest extends TestCase
 		]);
 
 		$this->assertFalse($result->isValid());
-		$this->assertSame('Age must be a whole number', $result->map()['age'][0]);
+		$this->assertSame('Age must be a whole number', $result->first('age'));
 		$this->assertSame(13, $result->values()['count']);
-		$this->assertSame('13', $result->pristineValues()['count']);
 	}
 
 	public function testCustomTypeMessage(): void
@@ -49,7 +48,7 @@ class ShapeTest extends TestCase
 		$result = $shape->validate(['age' => 'old']);
 
 		$this->assertFalse($result->isValid());
-		$this->assertSame('Age (age) must be numeric, got old', $result->map()['age'][0]);
+		$this->assertSame('Age (age) must be numeric, got old', $result->first('age'));
 	}
 
 	public function testCustomTypeMessages(): void
@@ -62,7 +61,7 @@ class ShapeTest extends TestCase
 		$result = $shape->validate(['enabled' => 'maybe']);
 
 		$this->assertFalse($result->isValid());
-		$this->assertSame('Enabled must be yes or no', $result->map()['enabled'][0]);
+		$this->assertSame('Enabled must be yes or no', $result->first('enabled'));
 	}
 
 	public function testCustomValidatorMessage(): void
@@ -73,7 +72,7 @@ class ShapeTest extends TestCase
 		$result = $shape->validate(['name' => '']);
 
 		$this->assertFalse($result->isValid());
-		$this->assertSame('Name is mandatory', $result->map()['name'][0]);
+		$this->assertSame('Name is mandatory', $result->first('name'));
 	}
 
 	public function testCustomValidatorMessageWithArgs(): void
@@ -84,7 +83,7 @@ class ShapeTest extends TestCase
 		$result = $shape->validate(['age' => '12']);
 
 		$this->assertFalse($result->isValid());
-		$this->assertSame('Age must be at least 18, got 12', $result->map()['age'][0]);
+		$this->assertSame('Age must be at least 18, got 12', $result->first('age'));
 	}
 
 	public function testRuleTypeMessageOverridesShapeMessage(): void
@@ -99,8 +98,8 @@ class ShapeTest extends TestCase
 		]);
 
 		$this->assertFalse($result->isValid());
-		$this->assertSame('Age must be a whole number', $result->map()['age'][0]);
-		$this->assertSame('Global int error', $result->map()['count'][0]);
+		$this->assertSame('Age must be a whole number', $result->first('age'));
+		$this->assertSame('Global int error', $result->first('count'));
 	}
 
 	public function testRuleValidatorMessageOverridesShapeMessage(): void
@@ -115,8 +114,8 @@ class ShapeTest extends TestCase
 		]);
 
 		$this->assertFalse($result->isValid());
-		$this->assertSame('Age must be at most 120, got 130', $result->map()['age'][0]);
-		$this->assertSame('Global max 10', $result->map()['score'][0]);
+		$this->assertSame('Age must be at most 120, got 130', $result->first('age'));
+		$this->assertSame('Global max 10', $result->first('score'));
 	}
 
 	public function testRuleMessagesSupportExplicitKeys(): void
@@ -130,12 +129,12 @@ class ShapeTest extends TestCase
 		$result = $shape->validate(['age' => 'old']);
 
 		$this->assertFalse($result->isValid());
-		$this->assertSame('Age must be numeric', $result->map()['age'][0]);
+		$this->assertSame('Age must be numeric', $result->first('age'));
 
 		$result = $shape->validate(['age' => '121']);
 
 		$this->assertFalse($result->isValid());
-		$this->assertSame('Age must be at most 120', $result->map()['age'][0]);
+		$this->assertSame('Age must be at most 120', $result->first('age'));
 	}
 
 	public function testTypeFloat(): void
@@ -150,7 +149,7 @@ class ShapeTest extends TestCase
 		]);
 
 		$this->assertFalse($result->isValid());
-		$this->assertSame('Price must be a number', $result->map()['price'][0]);
+		$this->assertSame('Price must be a number', $result->first('price'));
 		$this->assertSame(13.13, $result->values()['ratio']);
 	}
 
@@ -166,7 +165,7 @@ class ShapeTest extends TestCase
 		]);
 
 		$this->assertFalse($result->isValid());
-		$this->assertSame('Amount must be a number', $result->map()['amount'][0]);
+		$this->assertSame('Amount must be a number', $result->first('amount'));
 		$this->assertSame(13, $result->values()['count']);
 	}
 
@@ -183,10 +182,9 @@ class ShapeTest extends TestCase
 		]);
 
 		$this->assertFalse($result->isValid());
-		$this->assertSame('Enabled must be true or false', $result->map()['enabled'][0]);
+		$this->assertSame('Enabled must be true or false', $result->first('enabled'));
 		$this->assertSame(true, $result->values()['published']);
 		$this->assertSame(false, $result->values()['archived']);
-		$this->assertArrayNotHasKey('archived', $result->pristineValues());
 	}
 
 	public function testTypeText(): void
@@ -200,7 +198,6 @@ class ShapeTest extends TestCase
 		$this->assertTrue($result->isValid());
 		$this->assertSame('1', $result->values()['title']);
 		$this->assertArrayNotHasKey('description', $result->values());
-		$this->assertArrayNotHasKey('description', $result->pristineValues());
 	}
 
 	public function testTypeSkipEmpty(): void
@@ -228,7 +225,7 @@ class ShapeTest extends TestCase
 		]);
 
 		$this->assertFalse($result->isValid());
-		$this->assertSame('Items must be a list', $result->map()['items'][0]);
+		$this->assertSame('Items must be a list', $result->first('items'));
 		$this->assertSame([1, 2], $result->values()['tags']);
 	}
 
@@ -266,10 +263,10 @@ class ShapeTest extends TestCase
 		$this->assertTrue($result->isValid());
 		$result = $shape->validate(['field' => 'barfoo']);
 		$this->assertFalse($result->isValid());
-		$this->assertSame('Must start with foo', $result->errors()['map']['field'][0]);
+		$this->assertSame('Must start with foo', $result->first('field'));
 		$result = $shape->validate(['field' => '']);
 		$this->assertFalse($result->isValid());
-		$this->assertSame('field is required', $result->errors()['map']['field'][0]);
+		$this->assertSame('field is required', $result->first('field'));
 	}
 
 	public function testCustomValidatorParser(): void
@@ -301,7 +298,7 @@ class ShapeTest extends TestCase
 		$this->assertTrue($result->isValid());
 		$result = $shape->validate(['field' => 'barfoo']);
 		$this->assertFalse($result->isValid());
-		$this->assertSame('Must start with foo', $result->errors()['map']['field'][0]);
+		$this->assertSame('Must start with foo', $result->first('field'));
 	}
 
 	public function testCustomCoercer(): void
@@ -334,7 +331,7 @@ class ShapeTest extends TestCase
 		$this->assertTrue($result->isValid());
 		$result = $shape->validate(['slug' => 'Not A Slug']);
 		$this->assertFalse($result->isValid());
-		$this->assertSame('Invalid slug', $result->errors()['map']['slug'][0]);
+		$this->assertSame('Invalid slug', $result->first('slug'));
 	}
 
 	public function testCustomCoercerUsesTypeMessage(): void
@@ -364,7 +361,7 @@ class ShapeTest extends TestCase
 		$result = $shape->validate(['slug' => 'Not A Slug']);
 
 		$this->assertFalse($result->isValid());
-		$this->assertSame('Custom slug error', $result->errors()['map']['slug'][0]);
+		$this->assertSame('Custom slug error', $result->first('slug'));
 	}
 
 	public function testCustomCoercerRegistry(): void
@@ -391,7 +388,6 @@ class ShapeTest extends TestCase
 		$result = $shape->validate(['field' => 'value']);
 		$this->assertTrue($result->isValid());
 		$this->assertSame('VALUE', $result->values()['field']);
-		$this->assertSame('value', $result->pristineValues()['field']);
 	}
 
 	public function testResult(): void
@@ -401,15 +397,15 @@ class ShapeTest extends TestCase
 
 		$result = $shape->validate(['email' => 'invalid']);
 		$this->assertFalse($result->isValid());
-		$this->assertSame('email must be a valid email address', $result->map()['email'][0]);
+		$this->assertSame('email must be a valid email address', $result->first('email'));
 
-		$violations = $result->violations();
-		$this->assertCount(1, $violations);
-		$this->assertSame('email', $violations[0]->field);
-		$this->assertSame('email must be a valid email address', $violations[0]->error);
+		$issues = $result->issues();
+		$this->assertCount(1, $issues);
+		$this->assertSame(['email'], $issues[0]->path);
+		$this->assertSame('validator.email', $issues[0]->code);
+		$this->assertSame('email must be a valid email address', $issues[0]->message);
 
 		$this->assertSame('invalid', $result->values()['email']);
-		$this->assertSame('invalid', $result->pristineValues()['email']);
 	}
 
 	public function testResultBeforeValidation(): void
@@ -418,10 +414,9 @@ class ShapeTest extends TestCase
 
 		$result = $shape->validate([]);
 		$this->assertTrue($result->isValid());
-		$this->assertCount(0, $result->violations());
-		$this->assertSame([], $result->map());
+		$this->assertCount(0, $result->issues());
+		$this->assertSame([], $result->messages('email'));
 		$this->assertSame([], $result->values());
-		$this->assertSame([], $result->pristineValues());
 	}
 
 	public function testUnknownData(): void
@@ -439,17 +434,12 @@ class ShapeTest extends TestCase
 
 		$result = $shape->validate($testData);
 		$this->assertTrue($result->isValid());
-		$this->assertCount(0, $result->errors()['errors']);
+		$this->assertCount(0, $result->issues());
 
 		$values = $result->values();
 		$this->assertSame('Test', $values['unknown_1']);
 		$this->assertSame(13, $values['unknown_2']);
 		$this->assertArrayNotHasKey('unknown_3', $values);
-
-		$pristine = $result->pristineValues();
-		$this->assertSame('Test', $pristine['unknown_1']);
-		$this->assertSame('13', $pristine['unknown_2']);
-		$this->assertArrayNotHasKey('unknown_3', $pristine);
 
 		$shape = new Shape()->extra(Extra::Allow);
 		$shape->add('unknown_1', 'text');
@@ -457,19 +447,13 @@ class ShapeTest extends TestCase
 
 		$result = $shape->validate($testData);
 		$this->assertTrue($result->isValid());
-		$this->assertCount(0, $result->errors()['errors']);
+		$this->assertCount(0, $result->issues());
 
 		$values = $result->values();
 		$this->assertSame('Test', $values['unknown_1']);
 		$this->assertSame(13, $values['unknown_2']);
 		$this->assertSame('Unknown', $values['unknown_3']);
 		$this->assertSame('23', $values['unknown_4']);
-
-		$pristine = $result->pristineValues();
-		$this->assertSame('Test', $pristine['unknown_1']);
-		$this->assertSame('13', $pristine['unknown_2']);
-		$this->assertSame('Unknown', $pristine['unknown_3']);
-		$this->assertSame('23', $pristine['unknown_4']);
 	}
 
 	public function testForbidsExtraData(): void
@@ -483,14 +467,13 @@ class ShapeTest extends TestCase
 		]);
 
 		$this->assertFalse($result->isValid());
-		$this->assertSame(['role' => ['Field "role" is not allowed']], $result->map());
+		$this->assertSame('Field "role" is not allowed', $result->first('role'));
 		$this->assertSame(['name' => 'Jane'], $result->values());
-		$this->assertSame(['name' => 'Jane'], $result->pristineValues());
 
-		$violations = $result->violations();
-		$this->assertSame('Field "role" is not allowed', $violations[0]->error);
-		$this->assertSame('role', $violations[0]->field);
-		$this->assertSame('role', $violations[0]->label);
+		$issues = $result->issues();
+		$this->assertSame('Field "role" is not allowed', $issues[0]->message);
+		$this->assertSame(['role'], $issues[0]->path);
+		$this->assertSame('extra', $issues[0]->code);
 	}
 
 	public function testForbidExtraDataUsesConfiguredMessage(): void
@@ -505,7 +488,7 @@ class ShapeTest extends TestCase
 			'role' => 'admin',
 		]);
 
-		$this->assertSame(['role' => ['Unexpected role: admin']], $result->map());
+		$this->assertSame('Unexpected role: admin', $result->first('role'));
 	}
 
 	public function testRejectsInvalidExtraMode(): void
@@ -540,11 +523,10 @@ class ShapeTest extends TestCase
 
 		$result = $shape->validate($testData);
 		$this->assertFalse($result->isValid());
-		$errors = $result->errors();
-		$this->assertCount(3, $errors['errors']);
-		$this->assertSame('invalid_1 is required', $errors['map']['invalid_1'][0]);
-		$this->assertSame('Required 2 is required', $errors['map']['invalid_2'][0]);
-		$this->assertSame('invalid_3 is required', $errors['map']['invalid_3'][0]);
+		$this->assertCount(3, $result->issues());
+		$this->assertSame('invalid_1 is required', $result->first('invalid_1'));
+		$this->assertSame('Required 2 is required', $result->first('invalid_2'));
+		$this->assertSame('invalid_3 is required', $result->first('invalid_3'));
 	}
 
 	public function testEmailValidator(): void
@@ -560,9 +542,8 @@ class ShapeTest extends TestCase
 
 		$result = $shape->validate($testData);
 		$this->assertFalse($result->isValid());
-		$errors = $result->errors();
-		$this->assertCount(1, $errors['errors']);
-		$this->assertSame('Email must be a valid email address', $errors['map']['invalid_email'][0]);
+		$this->assertCount(1, $result->issues());
+		$this->assertSame('Email must be a valid email address', $result->first('invalid_email'));
 	}
 
 	public function testEmailValidatorWithDnsCheck(): void
@@ -578,11 +559,10 @@ class ShapeTest extends TestCase
 
 		$result = $shape->validate($testData);
 		$this->assertFalse($result->isValid());
-		$errors = $result->errors();
-		$this->assertCount(1, $errors['errors']);
+		$this->assertCount(1, $result->issues());
 		$this->assertSame(
 			'invalid_email must be a valid email address',
-			$errors['map']['invalid_email'][0],
+			$result->first('invalid_email'),
 		);
 	}
 
@@ -607,10 +587,9 @@ class ShapeTest extends TestCase
 
 		$result = $shape->validate($testData);
 		$this->assertFalse($result->isValid());
-		$errors = $result->errors();
-		$this->assertCount(2, $errors['errors']);
-		$this->assertSame('Min must be at least 10', $errors['map']['invalid_1'][0]);
-		$this->assertSame('invalid_2 must be at least 10', $errors['map']['invalid_2'][0]);
+		$this->assertCount(2, $result->issues());
+		$this->assertSame('Min must be at least 10', $result->first('invalid_1'));
+		$this->assertSame('invalid_2 must be at least 10', $result->first('invalid_2'));
 	}
 
 	public function testMaxValueValidator(): void
@@ -634,10 +613,9 @@ class ShapeTest extends TestCase
 
 		$result = $shape->validate($testData);
 		$this->assertFalse($result->isValid());
-		$errors = $result->errors();
-		$this->assertCount(2, $errors['errors']);
-		$this->assertSame('invalid_1 must be at most 13', $errors['map']['invalid_1'][0]);
-		$this->assertSame('Max must be at most 13', $errors['map']['invalid_2'][0]);
+		$this->assertCount(2, $result->issues());
+		$this->assertSame('invalid_1 must be at most 13', $result->first('invalid_1'));
+		$this->assertSame('Max must be at most 13', $result->first('invalid_2'));
 	}
 
 	public function testMinLengthValidator(): void
@@ -655,11 +633,10 @@ class ShapeTest extends TestCase
 
 		$result = $shape->validate($testData);
 		$this->assertFalse($result->isValid());
-		$errors = $result->errors();
-		$this->assertCount(1, $errors['errors']);
+		$this->assertCount(1, $result->issues());
 		$this->assertSame(
 			'invalid must be at least 10 characters',
-			$errors['map']['invalid'][0],
+			$result->first('invalid'),
 		);
 	}
 
@@ -678,11 +655,10 @@ class ShapeTest extends TestCase
 
 		$result = $shape->validate($testData);
 		$this->assertFalse($result->isValid());
-		$errors = $result->errors();
-		$this->assertCount(1, $errors['errors']);
+		$this->assertCount(1, $result->issues());
 		$this->assertSame(
 			'invalid must be at most 10 characters',
-			$errors['map']['invalid'][0],
+			$result->first('invalid'),
 		);
 	}
 
@@ -703,9 +679,8 @@ class ShapeTest extends TestCase
 
 		$result = $shape->validate($testData);
 		$this->assertFalse($result->isValid());
-		$errors = $result->errors();
-		$this->assertCount(2, $errors['errors']);
-		$this->assertSame('invalid has an invalid format', $errors['map']['invalid'][0]);
+		$this->assertCount(2, $result->issues());
+		$this->assertSame('invalid has an invalid format', $result->first('invalid'));
 	}
 
 	public function testInValidator(): void
@@ -723,9 +698,8 @@ class ShapeTest extends TestCase
 
 		$result = $shape->validate($testData);
 		$this->assertFalse($result->isValid());
-		$errors = $result->errors();
-		$this->assertCount(1, $errors['errors']);
-		$this->assertSame('invalid must be an allowed value', $errors['map']['invalid'][0]);
+		$this->assertCount(1, $result->issues());
+		$this->assertSame('invalid must be an allowed value', $result->first('invalid'));
 	}
 
 	public function testInValidatorWithQuotedAndEscapedValues(): void
@@ -745,12 +719,11 @@ class ShapeTest extends TestCase
 
 		$result = $shape->validate($testData);
 		$this->assertFalse($result->isValid());
-		$errors = $result->errors();
-		$this->assertCount(1, $errors['errors']);
-		$this->assertSame('invalid must be an allowed value', $errors['map']['invalid'][0]);
-		$this->assertArrayNotHasKey('quoted_comma', $errors['map']);
-		$this->assertArrayNotHasKey('escaped_comma', $errors['map']);
-		$this->assertArrayNotHasKey('quoted_colon', $errors['map']);
+		$this->assertCount(1, $result->issues());
+		$this->assertSame('invalid must be an allowed value', $result->first('invalid'));
+		$this->assertFalse($result->has('quoted_comma'));
+		$this->assertFalse($result->has('escaped_comma'));
+		$this->assertFalse($result->has('quoted_colon'));
 	}
 
 	public function testEscapedAndQuotedColonArgument(): void
@@ -770,50 +743,62 @@ class ShapeTest extends TestCase
 		]);
 
 		$this->assertFalse($result->isValid());
-		$errors = $result->errors();
-		$this->assertCount(1, $errors['errors']);
-		$this->assertSame('Must start with http://', $errors['map']['invalid'][0]);
+		$this->assertCount(1, $result->issues());
+		$this->assertSame('Must start with http://', $result->first('invalid'));
 	}
 
 	public function testReviewCallbackAddsErrors(): void
 	{
-		$shape = new Shape()->title('Review Title');
+		$shape = new Shape();
 		$shape->add('email', 'text', 'required')->label('Email');
 		$shape->review(static function (Review $context): void {
 			self::assertSame(['email' => 'taken@example.com'], $context->values());
-			self::assertSame(['email' => 'taken@example.com'], $context->pristineValues());
 			self::assertFalse($context->isList());
-			self::assertSame('Review Title', $context->title());
-			self::assertSame(3, $context->level());
 
-			$context->addError('email', 'Email', 'Already used');
+			$context->addError('email', 'Already used', 'email.taken');
 		});
 
-		$result = $shape->validate(['email' => 'taken@example.com'], 3);
+		$result = $shape->validate(['email' => 'taken@example.com']);
 
 		$this->assertFalse($result->isValid());
-		$this->assertSame('Already used', $result->map()['email'][0]);
+		$this->assertSame('Already used', $result->first('email'));
 		$this->assertSame('taken@example.com', $result->values()['email']);
-		$this->assertSame('taken@example.com', $result->pristineValues()['email']);
-		$this->assertSame('Review Title', $result->violations()[0]->title);
-		$this->assertSame(3, $result->violations()[0]->level);
+		$this->assertSame('email.taken', $result->issues()[0]->code);
+	}
+
+	public function testReviewCallbackAddsErrorsForRootIntegerAndArrayPaths(): void
+	{
+		$shape = new Shape();
+		$shape->review(static function (Review $context): void {
+			$context->addError('', 'Form error', 'form');
+			$context->addError(0, 'First row error', 'row');
+			$context->addError(['items', 0, 'name'], 'Name error', 'item.name');
+		});
+
+		$result = $shape->validate([]);
+
+		$this->assertFalse($result->isValid());
+		$this->assertCount(3, $result->issues());
+		$this->assertSame('Form error', $result->first(''));
+		$this->assertSame('First row error', $result->first(0));
+		$this->assertSame('Name error', $result->first(['items', 0, 'name']));
 	}
 
 	public function testAllReviewCallbacksRunOnceReviewStarts(): void
 	{
 		$shape = new Shape();
 		$shape->review(static function (Review $context): void {
-			$context->addError('first', 'First', 'First error');
+			$context->addError('first', 'First error');
 		});
 		$shape->review(static function (Review $context): void {
-			$context->addError('second', 'Second', 'Second error');
+			$context->addError('second', 'Second error');
 		});
 
 		$result = $shape->validate([]);
 
 		$this->assertFalse($result->isValid());
-		$this->assertSame('First error', $result->map()['first'][0]);
-		$this->assertSame('Second error', $result->map()['second'][0]);
+		$this->assertSame('First error', $result->first('first'));
+		$this->assertSame('Second error', $result->first('second'));
 	}
 
 	public function testReviewCallbacksDoNotRunAfterValidationErrors(): void
@@ -829,7 +814,7 @@ class ShapeTest extends TestCase
 
 		$this->assertFalse($result->isValid());
 		$this->assertFalse($called);
-		$this->assertSame('email is required', $result->map()['email'][0]);
+		$this->assertSame('email is required', $result->first('email'));
 	}
 
 	public function testRulePreparationRunsBeforeScalarValidation(): void
@@ -841,7 +826,6 @@ class ShapeTest extends TestCase
 
 		$this->assertTrue($result->isValid());
 		$this->assertSame(42, $result->values()['age']);
-		$this->assertSame('42', $result->pristineValues()['age']);
 	}
 
 	public function testRuleDefaultValueFillsMissingField(): void
@@ -855,8 +839,6 @@ class ShapeTest extends TestCase
 		$this->assertTrue($result->isValid());
 		$this->assertSame('draft', $result->values()['status']);
 		$this->assertSame(13, $result->values()['count']);
-		$this->assertArrayNotHasKey('status', $result->pristineValues());
-		$this->assertArrayNotHasKey('count', $result->pristineValues());
 	}
 
 	public function testRuleDefaultValueRunsBeforePreparation(): void
@@ -876,7 +858,6 @@ class ShapeTest extends TestCase
 
 		$this->assertTrue($result->isValid());
 		$this->assertSame('hello', $result->values()['slug']);
-		$this->assertArrayNotHasKey('slug', $result->pristineValues());
 	}
 
 	public function testExplicitValueOverridesRuleDefault(): void
@@ -888,7 +869,6 @@ class ShapeTest extends TestCase
 
 		$this->assertTrue($result->isValid());
 		$this->assertSame('published', $result->values()['status']);
-		$this->assertSame('published', $result->pristineValues()['status']);
 	}
 
 	public function testInvalidRuleDefaultAddsValidationError(): void
@@ -899,9 +879,8 @@ class ShapeTest extends TestCase
 		$result = $shape->validate([]);
 
 		$this->assertFalse($result->isValid());
-		$this->assertSame('Age must be a whole number', $result->map()['age'][0]);
+		$this->assertSame('Age must be a whole number', $result->first('age'));
 		$this->assertSame('old', $result->values()['age']);
-		$this->assertArrayNotHasKey('age', $result->pristineValues());
 	}
 
 	public function testInvalidNestedRuleDefaultAddsValidationError(): void
@@ -915,9 +894,8 @@ class ShapeTest extends TestCase
 		$result = $shape->validate([]);
 
 		$this->assertFalse($result->isValid());
-		$this->assertSame('Email must be a valid email address', $result->map()['child']['email'][0]);
+		$this->assertSame('Email must be a valid email address', $result->first('child.email'));
 		$this->assertSame(['email' => 'invalid'], $result->values()['child']);
-		$this->assertArrayNotHasKey('child', $result->pristineValues());
 	}
 
 	public function testNullableRuleAllowsNullValue(): void
@@ -929,7 +907,6 @@ class ShapeTest extends TestCase
 
 		$this->assertTrue($result->isValid());
 		$this->assertNull($result->values()['items']);
-		$this->assertNull($result->pristineValues()['items']);
 	}
 
 	public function testNonNullableRuleRejectsNullValue(): void
@@ -940,7 +917,7 @@ class ShapeTest extends TestCase
 		$result = $shape->validate(['items' => null]);
 
 		$this->assertFalse($result->isValid());
-		$this->assertSame('Items must not be null', $result->map()['items'][0]);
+		$this->assertSame('Items must not be null', $result->first('items'));
 	}
 
 	public function testRuleNullMessageOverridesShapeMessage(): void
@@ -952,7 +929,7 @@ class ShapeTest extends TestCase
 		$result = $shape->validate(['items' => null]);
 
 		$this->assertFalse($result->isValid());
-		$this->assertSame('Items cannot be null', $result->map()['items'][0]);
+		$this->assertSame('Items cannot be null', $result->first('items'));
 	}
 
 	public function testNullRuleDefaultImpliesNullable(): void
@@ -964,7 +941,6 @@ class ShapeTest extends TestCase
 
 		$this->assertTrue($result->isValid());
 		$this->assertNull($result->values()['note']);
-		$this->assertArrayNotHasKey('note', $result->pristineValues());
 	}
 
 	public function testRequiredNarrowsNullRuleDefault(): void
@@ -975,7 +951,7 @@ class ShapeTest extends TestCase
 		$result = $shape->validate([]);
 
 		$this->assertFalse($result->isValid());
-		$this->assertSame('note is required', $result->map()['note'][0]);
+		$this->assertSame('note is required', $result->first('note'));
 	}
 
 	public function testRulePreparationReceivesInputData(): void
@@ -1010,7 +986,6 @@ class ShapeTest extends TestCase
 
 		$this->assertTrue($result->isValid());
 		$this->assertSame('Prepared', $result->values()['child']['name']);
-		$this->assertSame(['name' => 'Prepared'], $result->pristineValues()['child']);
 	}
 
 	public function testRuleFinalizationRunsAfterValidation(): void
@@ -1034,8 +1009,6 @@ class ShapeTest extends TestCase
 		$this->assertTrue($called);
 		$this->assertSame(5, $result->values()['count']);
 		$this->assertSame(3, $result->values()['offset']);
-		$this->assertSame('2', $result->pristineValues()['count']);
-		$this->assertArrayNotHasKey('offset', $result->pristineValues());
 	}
 
 	public function testRuleFinalizationRunsForDefaults(): void
@@ -1053,7 +1026,6 @@ class ShapeTest extends TestCase
 
 		$this->assertTrue($result->isValid());
 		$this->assertSame('hello', $result->values()['slug']);
-		$this->assertArrayNotHasKey('slug', $result->pristineValues());
 	}
 
 	public function testReviewCallbacksReceiveFinalizedValues(): void
@@ -1066,7 +1038,6 @@ class ShapeTest extends TestCase
 		$shape->review(static function (Review $context) use (&$called): void {
 			$called = true;
 			self::assertSame(['name' => 'ADA'], $context->values());
-			self::assertSame(['name' => 'ada'], $context->pristineValues());
 		});
 
 		$result = $shape->validate(['name' => 'ada']);
@@ -1074,7 +1045,6 @@ class ShapeTest extends TestCase
 		$this->assertTrue($result->isValid());
 		$this->assertTrue($called);
 		$this->assertSame('ADA', $result->values()['name']);
-		$this->assertSame('ada', $result->pristineValues()['name']);
 	}
 
 	public function testRuleFinalizationDoesNotRunAfterValidationErrors(): void
@@ -1152,7 +1122,6 @@ class ShapeTest extends TestCase
 
 		$this->assertTrue($result->isValid());
 		$this->assertSame([], $result->values());
-		$this->assertSame([], $result->pristineValues());
 	}
 
 	public function testOptionalRuleValidatesPresentValue(): void
@@ -1174,9 +1143,8 @@ class ShapeTest extends TestCase
 		$result = $shape->validate([]);
 
 		$this->assertFalse($result->isValid());
-		$this->assertSame('Title is required', $result->map()['title'][0]);
+		$this->assertSame('Title is required', $result->first('title'));
 		$this->assertSame([], $result->values());
-		$this->assertSame([], $result->pristineValues());
 	}
 
 	public function testRuleMissingMessageOverridesShapeMessage(): void
@@ -1188,7 +1156,7 @@ class ShapeTest extends TestCase
 		$result = $shape->validate([]);
 
 		$this->assertFalse($result->isValid());
-		$this->assertSame('Title is missing', $result->map()['title'][0]);
+		$this->assertSame('Title is missing', $result->first('title'));
 	}
 
 	public function testRulePreparationDoesNotRunForMissingValues(): void
@@ -1248,13 +1216,26 @@ class ShapeTest extends TestCase
 
 		$result = $shape->validate($testData);
 		$this->assertFalse($result->isValid());
-		$errors = $result->errors();
-		$this->assertCount(2, $errors['errors']);
-		$this->assertSame('text is required', $errors['map']['text'][0]);
+		$this->assertCount(2, $result->issues());
+		$this->assertSame('text is required', $result->first('text'));
 		$this->assertSame(
 			'Email must be a valid email address',
-			$errors['map']['shape']['inner_email'][0],
+			$result->first('shape.inner_email'),
 		);
+	}
+
+	public function testSubShapeRejectsNonArrayValue(): void
+	{
+		$shape = new Shape();
+		$shape->add('profile', new SubShape())->label('Profile');
+
+		$result = $shape->validate(['profile' => 'invalid']);
+
+		$this->assertFalse($result->isValid());
+		$this->assertCount(1, $result->issues());
+		$this->assertSame('Profile must be an array', $result->first('profile'));
+		$this->assertSame(['profile'], $result->issues()[0]->path);
+		$this->assertSame('type.shape', $result->issues()[0]->code);
 	}
 
 	public function testListShape(): void
@@ -1304,15 +1285,24 @@ class ShapeTest extends TestCase
 		$this->assertSame('example@example.com', $values[1]['single_shape']['inner_email']);
 		$this->assertSame('example@example.com', $values[1]['list_shape'][0]['inner_email']);
 		$this->assertSame(47, $values[1]['list_shape'][1]['inner_int']);
+	}
 
-		$pristineValues = $result->pristineValues();
-		$this->assertSame(13, $pristineValues[0]['int']);
-		$this->assertSame(23, $pristineValues[0]['single_shape']['inner_int']);
-		$this->assertArrayNotHasKey('list_shape', $pristineValues[0]);
-		$this->assertSame('Text 2', $pristineValues[1]['text']);
-		$this->assertSame('example@example.com', $pristineValues[1]['single_shape']['inner_email']);
-		$this->assertSame('example@example.com', $pristineValues[1]['list_shape'][0]['inner_email']);
-		$this->assertSame('47', $pristineValues[1]['list_shape'][1]['inner_int']);
+	public function testListShapeRejectsNonArrayItems(): void
+	{
+		$shape = Shape::list();
+		$shape->add('name', 'text')->optional();
+
+		$result = $shape->validate([
+			'invalid',
+			['name' => 'Ada'],
+		]);
+
+		$this->assertFalse($result->isValid());
+		$this->assertCount(1, $result->issues());
+		$this->assertSame('Item must be an array', $result->first(0));
+		$this->assertSame([0], $result->issues()[0]->path);
+		$this->assertSame('type.shape', $result->issues()[0]->code);
+		$this->assertSame([[], ['name' => 'Ada']], $result->values());
 	}
 
 	public function testInvalidListShape(): void
@@ -1322,40 +1312,39 @@ class ShapeTest extends TestCase
 
 		$result = $shape->validate($testData);
 		$this->assertFalse($result->isValid());
-		$errors = $result->errors();
-		$this->assertCount(5, $errors);
-		$this->assertSame('text is required', $errors['map'][0]['text'][0]);
-		$this->assertSame('Int is required', $errors['map'][0]['single_shape']['inner_int'][0]);
-		$this->assertSame('Single Shape is required', $errors['map'][1]['single_shape'][0]);
+		$this->assertCount(9, $result->issues());
+		$this->assertSame('text is required', $result->first([0, 'text']));
+		$this->assertSame('Int is required', $result->first([0, 'single_shape', 'inner_int']));
+		$this->assertSame('Single Shape is required', $result->first([1, 'single_shape']));
+		$this->assertSame('email must be a valid email address', $result->first([1, 'email']));
 		$this->assertSame(
 			'Email must be a valid email address',
-			$errors['map'][3]['single_shape']['inner_email'][0],
+			$result->first([3, 'single_shape', 'inner_email']),
 		);
 		$this->assertSame(
 			'Int must be a whole number',
-			$errors['map'][3]['list_shape'][0]['inner_int'][0],
+			$result->first([3, 'list_shape', 0, 'inner_int']),
 		);
 		$this->assertSame(
 			'Email must be a valid email address',
-			$errors['map'][3]['list_shape'][2]['inner_email'][0],
+			$result->first([3, 'list_shape', 2, 'inner_email']),
 		);
 	}
 
-	public function testGroupedErrors(): void
+	public function testIssuePathsContainNestedListLocations(): void
 	{
 		$testData = $this->getListData();
 		$shape = $this->getListShape();
 
 		$result = $shape->validate($testData);
 		$this->assertFalse($result->isValid());
-		$groups = $result->errors(grouped: true)['errors'];
-		$this->assertCount(3, $groups);
-		$this->assertSame('List Root', $groups[0]['title']);
-		$this->assertSame('email must be a valid email address', $groups[0]['errors'][3]['error']);
-		$this->assertSame('List Sub', $groups[1]['title']);
-		$this->assertSame('Int must be a whole number', $groups[1]['errors'][0]['error']);
-		$this->assertSame('Single Sub', $groups[2]['title']);
-		$this->assertSame('Email must be a valid email address', $groups[2]['errors'][1]['error']);
+
+		$issues = $result->issues();
+		$this->assertSame([0, 'single_shape', 'inner_int'], $issues[0]->path);
+		$this->assertSame('missing', $issues[0]->code);
+		$this->assertSame([3, 'list_shape', 0, 'inner_int'], $issues[5]->path);
+		$this->assertSame('type.int', $issues[5]->code);
+		$this->assertSame(['arg1' => '10'], $issues[8]->params);
 	}
 
 	public function testEmptyFieldName(): void
@@ -1409,8 +1398,7 @@ class ShapeTest extends TestCase
 
 		$result = $shape->validate($testData);
 		$this->assertFalse($result->isValid());
-		$errors = $result->errors();
-		$this->assertCount(1, $errors['errors']);
-		$this->assertSame('text has an invalid format', $errors['map']['text'][0]);
+		$this->assertCount(1, $result->issues());
+		$this->assertSame('text has an invalid format', $result->first('text'));
 	}
 }
