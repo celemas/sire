@@ -11,5 +11,6 @@ final readonly class Coercion implements Contract\Coercion
 		public mixed $value,
 		public mixed $pristine,
 		public ?Failure $failure = null,
+		public bool $empty = false,
 	) {}
 }

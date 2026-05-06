@@ -5,7 +5,11 @@ declare(strict_types=1);
 namespace Duon\Sire\Tests;
 
 use Duon\Sire\Blank;
+use Duon\Sire\Coercion;
+use Duon\Sire\Contract;
 use Duon\Sire\Shape;
+use Duon\Sire\Validation;
+use Override;
 use ValueError;
 
 class EmptyTest extends TestCase
@@ -164,5 +168,93 @@ class EmptyTest extends TestCase
 
 		$this->assertTrue($result->valid());
 		$this->assertSame('published', $result->values()['status']);
+	}
+
+	public function testCoercerDefinedEmptyValueSkipsNormalRules(): void
+	{
+		$rule = new class implements Contract\Rule {
+			public bool $called = false;
+
+			public string $message {
+				get => 'Should not run';
+			}
+
+			#[Override]
+			public function validate(Contract\Value $value, string ...$args): Contract\Validation
+			{
+				$this->called = true;
+
+				return Validation::invalid();
+			}
+		};
+
+		$shape = new Shape();
+		$shape->type('marker', self::emptyMarkerCoercer());
+		$shape->rule('tracked', $rule);
+		$shape->add('marker', 'marker', 'tracked');
+
+		$result = $shape->validate(['marker' => 'empty']);
+
+		$this->assertTrue($result->valid());
+		$this->assertFalse($rule->called);
+		$this->assertSame('empty', $result->values()['marker']);
+	}
+
+	public function testRequiredUsesCoercerDefinedEmptyValue(): void
+	{
+		$shape = new Shape();
+		$shape->type('marker', self::emptyMarkerCoercer());
+		$shape->add('marker', 'marker', 'required');
+
+		$result = $shape->validate(['marker' => 'empty']);
+
+		$this->assertFalse($result->valid());
+		$this->assertSame('marker is required', $result->first('marker'));
+	}
+
+	public function testBooleanFalseRunsNormalRules(): void
+	{
+		$rule = new class implements Contract\Rule {
+			public bool $called = false;
+
+			public string $message {
+				get => 'Must be true';
+			}
+
+			#[Override]
+			public function validate(Contract\Value $value, string ...$args): Contract\Validation
+			{
+				$this->called = true;
+
+				return Validation::invalid();
+			}
+		};
+
+		$shape = new Shape();
+		$shape->rule('must_be_true', $rule);
+		$shape->add('enabled', 'bool', 'must_be_true');
+
+		$result = $shape->validate(['enabled' => false]);
+
+		$this->assertFalse($result->valid());
+		$this->assertTrue($rule->called);
+		$this->assertSame('Must be true', $result->first('enabled'));
+	}
+
+	private static function emptyMarkerCoercer(): Contract\Coercer
+	{
+		return new class implements Contract\Coercer {
+			public string $message {
+				get => 'Invalid marker';
+			}
+
+			#[Override]
+			public function coerce(mixed $pristine): Contract\Coercion
+			{
+				$value = (string) $pristine;
+
+				return new Coercion($value, $pristine, empty: $value === 'empty');
+			}
+		};
 	}
 }

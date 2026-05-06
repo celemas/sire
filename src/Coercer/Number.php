@@ -23,7 +23,9 @@ final class Number implements Contract\Coercer
 			return self::invalid($pristine);
 		}
 
-		return new Coercion(self::toNumber($pristine), $pristine);
+		$value = self::toNumber($pristine);
+
+		return new Coercion($value, $pristine, empty: $value === null);
 	}
 
 	private static function invalid(mixed $pristine): Coercion
@@ -32,6 +34,7 @@ final class Number implements Contract\Coercer
 			$pristine,
 			$pristine,
 			Failure::invalid(),
+			empty: self::isEmpty($pristine),
 		);
 	}
 
@@ -48,6 +51,11 @@ final class Number implements Contract\Coercer
 	private static function isNumericString(string $value): bool
 	{
 		return preg_match('/^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/', $value) === 1;
+	}
+
+	private static function isEmpty(mixed $value): bool
+	{
+		return $value === null || is_string($value) && trim($value) === '';
 	}
 
 	private static function toNumber(mixed $value): int|float|null

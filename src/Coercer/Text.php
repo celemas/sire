@@ -28,7 +28,9 @@ final class Text implements Contract\Coercer
 			);
 		}
 
-		return new Coercion(self::toText($pristine), $pristine);
+		$value = self::toText($pristine);
+
+		return new Coercion($value, $pristine, empty: self::isEmpty($value));
 	}
 
 	private static function isCoercible(mixed $value): bool
@@ -45,5 +47,10 @@ final class Text implements Contract\Coercer
 	private static function toText(mixed $value): ?string
 	{
 		return $value === null ? null : (string) $value;
+	}
+
+	private static function isEmpty(?string $value): bool
+	{
+		return $value === null || $value === '';
 	}
 }

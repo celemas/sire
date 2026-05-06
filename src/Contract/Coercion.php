@@ -14,4 +14,6 @@ interface Coercion
 	public mixed $pristine { get; }
 
 	public ?Failure $failure { get; }
+
+	public bool $empty { get; }
 }

@@ -19,18 +19,42 @@ final class Integer implements Contract\Coercer
 	#[Override]
 	public function coerce(mixed $pristine): Contract\Coercion
 	{
-		if (is_int($pristine) || is_null($pristine)) {
-			return new Coercion($pristine, $pristine);
+		if (!self::isCoercible($pristine)) {
+			return self::invalid($pristine);
 		}
 
-		if (preg_match('/^([0-9]|-[1-9]|-?[1-9][0-9]*)$/i', trim((string) $pristine))) {
-			return new Coercion((int) $pristine, $pristine);
-		}
+		$value = self::toInteger($pristine);
 
+		return new Coercion($value, $pristine, empty: $value === null);
+	}
+
+	private static function invalid(mixed $pristine): Coercion
+	{
 		return new Coercion(
 			$pristine,
 			$pristine,
 			Failure::invalid(),
+			empty: self::isEmpty($pristine),
 		);
+	}
+
+	private static function isCoercible(mixed $value): bool
+	{
+		return $value === null || is_int($value) || self::isIntegerString($value);
+	}
+
+	private static function isIntegerString(mixed $value): bool
+	{
+		return preg_match('/^([0-9]|-[1-9]|-?[1-9][0-9]*)$/i', trim((string) $value)) === 1;
+	}
+
+	private static function isEmpty(mixed $value): bool
+	{
+		return $value === null || is_string($value) && trim($value) === '';
+	}
+
+	private static function toInteger(mixed $value): ?int
+	{
+		return $value === null ? null : (int) $value;
 	}
 }

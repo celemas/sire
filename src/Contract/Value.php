@@ -10,4 +10,6 @@ interface Value
 	public mixed $value { get; }
 
 	public mixed $pristine { get; }
+
+	public bool $empty { get; }
 }

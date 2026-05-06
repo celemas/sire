@@ -23,13 +23,19 @@ final class Sequence implements Contract\Coercer
 			is_array($pristine)
 			&& ($pristine === [] || array_keys($pristine) === range(0, count($pristine) - 1))
 		) {
-			return new Coercion($pristine, $pristine);
+			return new Coercion($pristine, $pristine, empty: $pristine === []);
 		}
 
 		return new Coercion(
 			$pristine,
 			$pristine,
 			Failure::invalid(),
+			empty: self::isEmpty($pristine),
 		);
+	}
+
+	private static function isEmpty(mixed $value): bool
+	{
+		return $value === null || $value === '' || $value === [];
 	}
 }

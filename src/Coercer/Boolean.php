@@ -23,6 +23,10 @@ final class Boolean implements Contract\Coercer
 			return new Coercion($pristine, $pristine);
 		}
 
+		if (self::isEmpty($pristine)) {
+			return new Coercion(false, $pristine, empty: true);
+		}
+
 		if (!$pristine) {
 			return new Coercion(false, $pristine);
 		}
@@ -42,5 +46,10 @@ final class Boolean implements Contract\Coercer
 			$pristine,
 			Failure::invalid(),
 		);
+	}
+
+	private static function isEmpty(mixed $value): bool
+	{
+		return $value === null || $value === '' || $value === [];
 	}
 }

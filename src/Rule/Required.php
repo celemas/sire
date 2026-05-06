@@ -18,16 +18,6 @@ final class Required implements Contract\ValidatesEmpty
 	#[Override]
 	public function validate(Contract\Value $value, string ...$args): Contract\Validation
 	{
-		$val = $value->value;
-
-		if ($val === null || $val === '') {
-			return Validation::invalid();
-		}
-
-		if (is_array($val) && $val === []) {
-			return Validation::invalid();
-		}
-
-		return Validation::valid();
+		return Validation::from(!$value->empty);
 	}
 }

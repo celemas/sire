@@ -50,11 +50,6 @@ final class ValidationRun
 		);
 	}
 
-	private static function isSkippableEmptyValue(mixed $value): bool
-	{
-		return $value === [] || $value === null || $value === false || $value === '';
-	}
-
 	private function validateField(
 		Field $definition,
 		Value $value,
@@ -73,7 +68,7 @@ final class ValidationRun
 			);
 		}
 
-		if (!$rule instanceof Contract\ValidatesEmpty && self::isSkippableEmptyValue($value->value)) {
+		if (!$rule instanceof Contract\ValidatesEmpty && $value->empty) {
 			return;
 		}
 
@@ -129,7 +124,7 @@ final class ValidationRun
 
 			$value = $values[$field];
 			$finalValue = $definition->applyFinalization($value->value, $itemValues);
-			$values[$field] = new \Duon\Sire\Value($finalValue, $value->pristine);
+			$values[$field] = new \Duon\Sire\Value($finalValue, $value->pristine, $value->empty);
 		}
 
 		return $values;
@@ -244,7 +239,7 @@ final class ValidationRun
 	private function readExtraValue(string $field, mixed $value, string|int|null $listIndex): ?Value
 	{
 		if ($this->shape->extra === Extra::Allow) {
-			return new \Duon\Sire\Value($value, $value);
+			return new \Duon\Sire\Value($value, $value, self::isRawEmptyValue($value));
 		}
 
 		if ($this->shape->extra === Extra::Forbid) {
@@ -264,7 +259,7 @@ final class ValidationRun
 
 		if ($value === null) {
 			return new ReadValue(
-				new \Duon\Sire\Value(null, null),
+				new \Duon\Sire\Value(null, null, true),
 				$definition->isNullable() ? null : $this->formatNullFailure($definition),
 			);
 		}
@@ -287,7 +282,7 @@ final class ValidationRun
 		$coercion = $coercer->coerce($value);
 
 		return new ReadValue(
-			new \Duon\Sire\Value($coercion->value, $coercion->pristine),
+			new \Duon\Sire\Value($coercion->value, $coercion->pristine, $coercion->empty),
 			$this->formatCoercionFailure($coercion, $definition, $coercer),
 		);
 	}
@@ -403,7 +398,7 @@ final class ValidationRun
 	): ReadValue {
 		if (!is_array($pristine)) {
 			return new ReadValue(
-				new \Duon\Sire\Value($pristine, $pristine),
+				new \Duon\Sire\Value($pristine, $pristine, self::isRawEmptyValue($pristine)),
 				$this->formatShapeFailure($definition, $pristine),
 			);
 		}
@@ -411,11 +406,13 @@ final class ValidationRun
 		$result = $shape->validate($pristine);
 
 		if ($result->valid()) {
-			return new ReadValue(new \Duon\Sire\Value($result->values(), $pristine));
+			$values = $result->values();
+
+			return new ReadValue(new \Duon\Sire\Value($values, $pristine, $values === []));
 		}
 
 		return new ReadValue(
-			new \Duon\Sire\Value($pristine, $pristine),
+			new \Duon\Sire\Value($pristine, $pristine, self::isRawEmptyValue($pristine)),
 			nestedResult: $result,
 		);
 	}
@@ -546,6 +543,11 @@ final class ValidationRun
 		}
 
 		return [$listIndex, $field];
+	}
+
+	private static function isRawEmptyValue(mixed $value): bool
+	{
+		return $value === null || $value === [] || $value === '';
 	}
 
 	/**

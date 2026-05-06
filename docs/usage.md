@@ -195,9 +195,9 @@ $shape->add('discount_code', 'text', 'maxlen:64')
     ->nullable();
 ```
 
-The `required` rule checks the final normalized value. It rejects `null`, `''`, and `[]`; it accepts `false`, `0`, `0.0`, and `'0'` as present values. Combine it with defaults or nullable fields when a field may be accepted structurally but must still contain a non-empty value after normalization.
+The `required` rule checks the coerced value's `Value::$empty` flag. Built-in coercers mark `null`, `''`, and `[]` as empty where those values are meaningful for the type; they accept `false`, `0`, `0.0`, and `'0'` as present values. Custom coercers control this flag through `Coercion`.
 
-For each field, Sire applies empty handling first, then `default()` or `optional()` if needed, then `prepare()`, nullability, coercion or nested validation, field rules, `finalize()`, and finally review callbacks.
+For each field, Sire applies raw empty handling first, then `default()` or `optional()` if needed, then `prepare()`, nullability, coercion or nested validation, field rules, `finalize()`, and finally review callbacks.
 
 ## Prepare input before validation
 
@@ -454,7 +454,7 @@ Configure a shape fluently when you need project-specific rules, coercion behavi
 - Use `messages()` to override many type, rule, or extra-field messages.
 - Use `ruleParser()` if you need a different DSL split strategy.
 
-Custom rules implement `Duon\Sire\Contract\Rule`, expose a default `message`, and return `Duon\Sire\Contract\Validation`; use `Duon\Sire\Validation` when the default immutable result object is enough. Rules skip empty values by default; implement `Duon\Sire\Contract\ValidatesEmpty` when a rule must run for empty values. Custom coercers implement `Duon\Sire\Contract\Coercer`, expose a default `message`, and return `Duon\Sire\Contract\Coercion`; use `Duon\Sire\Coercion` when the default immutable result object is enough. Return `Failure::invalid()` when a coercer or rule cannot produce a valid value. Use `Failure::key()` only when one coercer or rule has multiple distinct failure modes.
+Custom rules implement `Duon\Sire\Contract\Rule`, expose a default `message`, and return `Duon\Sire\Contract\Validation`; use `Duon\Sire\Validation` when the default immutable result object is enough. Rules skip values where `Contract\Value::$empty` is `true` by default; implement `Duon\Sire\Contract\ValidatesEmpty` when a rule must run for empty values. Custom coercers implement `Duon\Sire\Contract\Coercer`, expose a default `message`, and return `Duon\Sire\Contract\Coercion`; use `Duon\Sire\Coercion` when the default immutable result object is enough. Pass `empty: true` to `Coercion` when the coerced value has no meaningful content for its type. Return `Failure::invalid()` when a coercer or rule cannot produce a valid value. Use `Failure::key()` only when one coercer or rule has multiple distinct failure modes.
 
 ```php
 <?php
@@ -498,7 +498,7 @@ $shape
             {
                 $value = strtolower(trim((string) $pristine));
 
-                if ($value === '' || !preg_match('/^[a-z0-9-]+$/', $value)) {
+                if ($value !== '' && !preg_match('/^[a-z0-9-]+$/', $value)) {
                     return new Coercion(
                         $pristine,
                         $pristine,
@@ -506,7 +506,7 @@ $shape
                     );
                 }
 
-                return new Coercion($value, $pristine);
+                return new Coercion($value, $pristine, empty: $value === '');
             }
         },
     );
