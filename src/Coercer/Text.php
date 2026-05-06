@@ -6,7 +6,9 @@ namespace Duon\Sire\Coercer;
 
 use Duon\Sire\Coercion;
 use Duon\Sire\Contract;
+use Duon\Sire\Failure;
 use Override;
+use Stringable;
 
 /** @api */
 final class Text implements Contract\Coercer
@@ -18,23 +20,30 @@ final class Text implements Contract\Coercer
 	#[Override]
 	public function coerce(mixed $pristine): Contract\Coercion
 	{
-		if (self::isEmptyTextInput($pristine)) {
-			return new Coercion(null, $pristine);
+		if (!self::isCoercible($pristine)) {
+			return new Coercion(
+				$pristine,
+				$pristine,
+				Failure::invalid(),
+			);
 		}
 
-		return new Coercion((string) $pristine, $pristine);
+		return new Coercion(self::toText($pristine), $pristine);
 	}
 
-	private static function isEmptyTextInput(mixed $value): bool
+	private static function isCoercible(mixed $value): bool
 	{
 		return (
 			$value === null
-			|| $value === false
-			|| $value === 0
-			|| $value === 0.0
-			|| $value === ''
-			|| $value === '0'
-			|| $value === []
+			|| is_string($value)
+			|| is_int($value)
+			|| is_float($value)
+			|| $value instanceof Stringable
 		);
+	}
+
+	private static function toText(mixed $value): ?string
+	{
+		return $value === null ? null : (string) $value;
 	}
 }

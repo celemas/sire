@@ -84,6 +84,8 @@ Sire supports a small set of built-in types and rules out of the box, so you can
 - Built-in types: `text`, `int`, `float`, `number`, `bool`, `list`
 - Built-in rules: `required`, `email`, `minlen`, `maxlen`, `min`, `max`, `regex`, `in`
 
+`text` accepts strings, numbers, and stringable objects. It preserves text values, including `''` and `'0'`, and rejects booleans, arrays, and non-stringable objects.
+
 The rule DSL uses `:` to separate the rule name from arguments.
 
 - `required`
@@ -193,7 +195,7 @@ $shape->add('discount_code', 'text', 'maxlen:64')
     ->nullable();
 ```
 
-The `required` rule checks the final normalized value. Combine it with defaults or nullable fields when a field may be accepted structurally but must still contain a non-empty value after normalization.
+The `required` rule checks the final normalized value. It rejects `null`, `''`, and `[]`; it accepts `false`, `0`, `0.0`, and `'0'` as present values. Combine it with defaults or nullable fields when a field may be accepted structurally but must still contain a non-empty value after normalization.
 
 For each field, Sire applies empty handling first, then `default()` or `optional()` if needed, then `prepare()`, nullability, coercion or nested validation, field rules, `finalize()`, and finally review callbacks.
 

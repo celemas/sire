@@ -20,11 +20,11 @@ final class Required implements Contract\ValidatesEmpty
 	{
 		$val = $value->value;
 
-		if (is_null($val)) {
+		if ($val === null || $val === '') {
 			return Validation::invalid();
 		}
 
-		if (is_array($val) && count($val) === 0) {
+		if (is_array($val) && $val === []) {
 			return Validation::invalid();
 		}
 

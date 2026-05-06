@@ -193,12 +193,20 @@ class ShapeTest extends TestCase
 	{
 		$shape = new Shape();
 		$shape->add('title', 'text')->label('Title');
+		$shape->add('code', 'text', 'required');
+		$shape->add('invalid', 'text')->optional();
 		$shape->add('description', 'text')->optional();
 
-		$result = $shape->validate(['title' => true]);
+		$result = $shape->validate([
+			'title' => 13,
+			'code' => '0',
+			'invalid' => true,
+		]);
 
-		$this->assertTrue($result->valid());
-		$this->assertSame('1', $result->values()['title']);
+		$this->assertFalse($result->valid());
+		$this->assertSame('invalid must be text', $result->first('invalid'));
+		$this->assertSame('13', $result->values()['title']);
+		$this->assertSame('0', $result->values()['code']);
 		$this->assertArrayNotHasKey('description', $result->values());
 	}
 
@@ -579,13 +587,15 @@ class ShapeTest extends TestCase
 		$shape->add('invalid_1', 'text', 'required');
 		$shape->add('invalid_2', 'float', 'required')->label('Required 2');
 		$shape->add('invalid_3', 'list', 'required');
+		$shape->add('invalid_4', 'text', 'required');
 
 		$result = $shape->validate($testData);
 		$this->assertFalse($result->valid());
-		$this->assertCount(3, $result->issues());
+		$this->assertCount(4, $result->issues());
 		$this->assertSame('invalid_1 is required', $result->first('invalid_1'));
 		$this->assertSame('Required 2 is required', $result->first('invalid_2'));
 		$this->assertSame('invalid_3 is required', $result->first('invalid_3'));
+		$this->assertSame('invalid_4 is required', $result->first('invalid_4'));
 	}
 
 	public function testEmailRule(): void

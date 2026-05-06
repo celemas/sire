@@ -83,17 +83,28 @@ class CoercerTest extends TestCase
 	public function testTextCoercer(): void
 	{
 		$coercer = new Text();
+		$stringable = new class {
+			public function __toString(): string
+			{
+				return 'Stringable';
+			}
+		};
 
 		$this->assertCoerces($coercer, null, null);
-		$this->assertCoerces($coercer, null, false);
-		$this->assertCoerces($coercer, null, 0);
-		$this->assertCoerces($coercer, null, 0.0);
-		$this->assertCoerces($coercer, null, '');
-		$this->assertCoerces($coercer, null, '0');
-		$this->assertCoerces($coercer, null, []);
-		$this->assertCoerces($coercer, '1', true);
+		$this->assertCoerces($coercer, '', '');
+		$this->assertCoerces($coercer, '0', '0');
+		$this->assertCoerces($coercer, '0', 0);
+		$this->assertCoerces($coercer, '0', 0.0);
+		$this->assertCoerces($coercer, '13', 13);
+		$this->assertCoerces($coercer, '13.13', 13.13);
+		$this->assertCoerces($coercer, 'Stringable', $stringable);
 		$this->assertCoerces($coercer, 'Lorem ipsum', 'Lorem ipsum');
 		$this->assertCoerces($coercer, '<a href="/test">Test</a>', '<a href="/test">Test</a>');
+
+		$this->assertRejects($coercer, false);
+		$this->assertRejects($coercer, true);
+		$this->assertRejects($coercer, []);
+		$this->assertRejects($coercer, ['key' => 'data']);
 	}
 
 	public function testSequenceCoercer(): void

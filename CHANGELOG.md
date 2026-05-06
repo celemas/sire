@@ -31,6 +31,8 @@
 - Changed missing fields to fail validation by default; use `Field::optional()` to omit them or `Field::default()` to fill them.
 - Changed missing boolean fields to no longer default to `false`; use `Field::default(false)` for checkbox-style defaults.
 - Changed explicit `null` values to fail before coercion unless `Field::nullable()` is used or preparation returns a non-null value.
+- Changed the `text` type to preserve `''` and `'0'`, coerce only numbers and stringable objects, and reject booleans, arrays, and non-stringable objects.
+- Changed the `required` rule to reject empty strings while still accepting `false`, `0`, `0.0`, and `'0'` as present values.
 
 ### Added
 
