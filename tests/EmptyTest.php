@@ -241,6 +241,31 @@ class EmptyTest extends TestCase
 		$this->assertSame('Must be true', $result->first('enabled'));
 	}
 
+	public function testBooleanBlankStringFailsTypeValidation(): void
+	{
+		$shape = new Shape();
+		$shape->add('enabled', 'bool');
+
+		$result = $shape->validate(['enabled' => '']);
+
+		$this->assertFalse($result->valid());
+		$this->assertSame('enabled must be true or false', $result->first('enabled'));
+	}
+
+	public function testBooleanBlankStringCanUseRawEmptyDefault(): void
+	{
+		$shape = new Shape();
+		$shape
+			->add('enabled', 'bool')
+			->empty(Blank::String)
+			->default(false);
+
+		$result = $shape->validate(['enabled' => '']);
+
+		$this->assertTrue($result->valid());
+		$this->assertSame(false, $result->values()['enabled']);
+	}
+
 	private static function emptyMarkerCoercer(): Contract\Coercer
 	{
 		return new class implements Contract\Coercer {

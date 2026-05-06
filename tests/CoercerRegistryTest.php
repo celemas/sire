@@ -33,7 +33,7 @@ class CoercerRegistryTest extends TestCase
 		$registry = CoercerRegistry::withDefaults();
 
 		$this->assertSame('test', $registry->get('text')?->coerce('test')->value);
-		$this->assertSame(true, $registry->get('bool')?->coerce('yes')->value);
+		$this->assertSame(true, $registry->get('bool')?->coerce(true)->value);
 		$this->assertSame(13, $registry->get('int')?->coerce('13')->value);
 		$this->assertSame(13.0, $registry->get('float')?->coerce('13')->value);
 		$this->assertSame(13, $registry->get('number')?->coerce('13')->value);

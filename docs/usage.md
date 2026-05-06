@@ -86,6 +86,8 @@ Sire supports a small set of built-in types and rules out of the box, so you can
 
 `text` accepts strings, numbers, and stringable objects. It preserves text values, including `''` and `'0'`, and rejects booleans, arrays, and non-stringable objects.
 
+`bool` accepts only native booleans after field presence and null handling. `null` is controlled by `nullable()` and is the only empty bool value; missing fields are controlled by `default()` and `optional()`. Boolean-like strings and numbers such as `'true'`, `'false'`, `'1'`, `'0'`, `1`, and `0` fail type validation.
+
 The rule DSL uses `:` to separate the rule name from arguments.
 
 - `required`
@@ -195,7 +197,7 @@ $shape->add('discount_code', 'text', 'maxlen:64')
     ->nullable();
 ```
 
-The `required` rule checks the coerced value's `Value::$empty` flag. Built-in coercers mark `null`, `''`, and `[]` as empty where those values are meaningful for the type; they accept `false`, `0`, `0.0`, and `'0'` as present values. Custom coercers control this flag through `Coercion`.
+The `required` rule checks the coerced value's `Value::$empty` flag. Built-in coercers mark `null` as empty; `text` also marks `''` as empty, and `list` also marks `[]` as empty. They treat successful values such as `false`, `0`, `0.0`, and `'0'` as present. Blank strings are valid empty text values, but they are type errors for `bool`, `int`, `float`, `number`, and `list` unless field-level raw empty handling catches them first. Custom coercers control this flag through `Coercion`.
 
 For each field, Sire applies raw empty handling first, then `default()` or `optional()` if needed, then `prepare()`, nullability, coercion or nested validation, field rules, `finalize()`, and finally review callbacks.
 

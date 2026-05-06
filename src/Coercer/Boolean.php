@@ -19,26 +19,12 @@ final class Boolean implements Contract\Coercer
 	#[Override]
 	public function coerce(mixed $pristine): Contract\Coercion
 	{
+		if ($pristine === null) {
+			return new Coercion(null, null, empty: true);
+		}
+
 		if (is_bool($pristine)) {
 			return new Coercion($pristine, $pristine);
-		}
-
-		if (self::isEmpty($pristine)) {
-			return new Coercion(false, $pristine, empty: true);
-		}
-
-		if (!$pristine) {
-			return new Coercion(false, $pristine);
-		}
-
-		$tmp = strtolower((string) $pristine);
-
-		if (in_array($tmp, ['1', 'on', 'true', 'yes'], true)) {
-			return new Coercion(true, $pristine);
-		}
-
-		if (in_array($tmp, ['0', 'off', 'false', 'no', 'null'], true)) {
-			return new Coercion(false, $pristine);
 		}
 
 		return new Coercion(
@@ -46,10 +32,5 @@ final class Boolean implements Contract\Coercer
 			$pristine,
 			Failure::invalid(),
 		);
-	}
-
-	private static function isEmpty(mixed $value): bool
-	{
-		return $value === null || $value === '' || $value === [];
 	}
 }

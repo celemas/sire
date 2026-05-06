@@ -66,22 +66,26 @@ class CoercerTest extends TestCase
 		$coercer = new Boolean();
 
 		$this->assertCoerces($coercer, true, true);
-		$this->assertCoerces($coercer, true, '1');
-		$this->assertCoerces($coercer, true, 'on');
-		$this->assertCoerces($coercer, true, 'true');
-		$this->assertCoerces($coercer, true, 'yes');
 		$this->assertCoerces($coercer, false, false);
-		$this->assertCoerces($coercer, false, null, empty: true);
-		$this->assertCoerces($coercer, false, '', empty: true);
-		$this->assertCoerces($coercer, false, [], empty: true);
-		$this->assertCoerces($coercer, false, 0);
-		$this->assertCoerces($coercer, false, '0');
-		$this->assertCoerces($coercer, false, 'off');
-		$this->assertCoerces($coercer, false, 'false');
-		$this->assertCoerces($coercer, false, 'no');
-		$this->assertCoerces($coercer, false, 'null');
+		$this->assertCoerces($coercer, null, null, empty: true);
 
+		$this->assertRejects($coercer, 1);
+		$this->assertRejects($coercer, 0);
+		$this->assertRejects($coercer, '1');
+		$this->assertRejects($coercer, '0');
+		$this->assertRejects($coercer, 'on');
+		$this->assertRejects($coercer, 'off');
+		$this->assertRejects($coercer, 'true');
+		$this->assertRejects($coercer, 'false');
+		$this->assertRejects($coercer, 'yes');
+		$this->assertRejects($coercer, 'no');
+		$this->assertRejects($coercer, '');
+		$this->assertRejects($coercer, ' ');
+		$this->assertRejects($coercer, []);
+		$this->assertRejects($coercer, 'null');
 		$this->assertRejects($coercer, 'invalid');
+		$this->assertRejects($coercer, 0.0);
+		$this->assertRejects($coercer, 1.0);
 		$this->assertRejects($coercer, 13);
 	}
 

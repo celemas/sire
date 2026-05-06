@@ -180,7 +180,7 @@ class ShapeTest extends TestCase
 
 		$result = $shape->validate([
 			'enabled' => 'maybe',
-			'published' => 'yes',
+			'published' => true,
 		]);
 
 		$this->assertFalse($result->valid());
