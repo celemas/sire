@@ -24,11 +24,11 @@ final class Integer implements Contract\Coercer
 			return self::coerceStrict($pristine);
 		}
 
-		if (!self::isCoercible($pristine)) {
+		$value = self::toInteger($pristine);
+
+		if ($value === null && $pristine !== null) {
 			return self::invalid($pristine);
 		}
-
-		$value = self::toInteger($pristine);
 
 		return new Coercion($value, $pristine, empty: $value === null);
 	}
@@ -44,6 +44,15 @@ final class Integer implements Contract\Coercer
 			: self::invalid($pristine);
 	}
 
+	private static function toInteger(mixed $value): ?int
+	{
+		if ($value === null || is_int($value)) {
+			return $value;
+		}
+
+		return self::parseInteger($value);
+	}
+
 	private static function invalid(mixed $pristine): Coercion
 	{
 		return new Coercion(
@@ -54,23 +63,19 @@ final class Integer implements Contract\Coercer
 		);
 	}
 
-	private static function isCoercible(mixed $value): bool
+	private static function parseInteger(mixed $value): ?int
 	{
-		return $value === null || is_int($value) || self::isIntegerString($value);
-	}
+		if (!is_string($value)) {
+			return null;
+		}
 
-	private static function isIntegerString(mixed $value): bool
-	{
-		return preg_match('/^([0-9]|-[1-9]|-?[1-9][0-9]*)$/i', trim((string) $value)) === 1;
+		$parsed = filter_var(trim($value), FILTER_VALIDATE_INT);
+
+		return $parsed === false ? null : $parsed;
 	}
 
 	private static function isEmpty(mixed $value): bool
 	{
 		return $value === null || is_string($value) && trim($value) === '';
-	}
-
-	private static function toInteger(mixed $value): ?int
-	{
-		return $value === null ? null : (int) $value;
 	}
 }

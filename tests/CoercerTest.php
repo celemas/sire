@@ -22,12 +22,18 @@ class CoercerTest extends TestCase
 		$this->assertCoerces($coercer, null, null, empty: true);
 		$this->assertCoerces($coercer, 13, 13);
 		$this->assertCoerces($coercer, 13, '13');
+		$this->assertCoerces($coercer, 13, '+13');
 		$this->assertCoerces($coercer, 0, '0');
+		$this->assertCoerces($coercer, 0, '-0');
 		$this->assertCoerces($coercer, -13, '-13');
 
 		$this->assertRejects($coercer, '23invalid');
 		$this->assertRejects($coercer, '23.23');
+		$this->assertRejects($coercer, '1e3');
 		$this->assertRejects($coercer, '01');
+		$this->assertRejects($coercer, 13.0);
+		$this->assertRejects($coercer, true);
+		$this->assertRejects($coercer, []);
 		$this->assertRejects($coercer, '', empty: true);
 	}
 
