@@ -41,9 +41,12 @@ class CoercerTest extends TestCase
 		$this->assertCoerces($coercer, 13.0, '13');
 		$this->assertCoerces($coercer, 13.13, '13.13');
 		$this->assertCoerces($coercer, 1000.0, '1e3');
+		$this->assertCoerces($coercer, 1.0, '1.');
 
 		$this->assertRejects($coercer, '23.23invalid');
 		$this->assertRejects($coercer, '', empty: true);
+		$this->assertRejects($coercer, true);
+		$this->assertRejects($coercer, []);
 	}
 
 	public function testNumberCoercer(): void
@@ -57,9 +60,12 @@ class CoercerTest extends TestCase
 		$this->assertCoerces($coercer, 13.0, '13.0');
 		$this->assertCoerces($coercer, 13.13, '13.13');
 		$this->assertCoerces($coercer, 1000.0, '1e3');
+		$this->assertCoerces($coercer, 1.0, '1.');
 
 		$this->assertRejects($coercer, '23.23invalid');
 		$this->assertRejects($coercer, '', empty: true);
+		$this->assertRejects($coercer, true);
+		$this->assertRejects($coercer, []);
 	}
 
 	public function testBooleanCoercer(): void

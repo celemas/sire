@@ -56,17 +56,7 @@ final class Number implements Contract\Coercer
 
 	private static function isCoercible(mixed $value): bool
 	{
-		return (
-			is_null($value)
-			|| is_float($value)
-			|| is_int($value)
-			|| self::isNumericString(trim((string) $value))
-		);
-	}
-
-	private static function isNumericString(string $value): bool
-	{
-		return preg_match('/^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/', $value) === 1;
+		return $value === null || is_numeric($value);
 	}
 
 	private static function isEmpty(mixed $value): bool
