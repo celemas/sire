@@ -8,31 +8,21 @@ namespace Duon\Sire;
 final class Field
 {
 	private const int FLAG_HAS_DEFAULT = 1;
-
 	private const int FLAG_NULLABLE = 2;
-
 	private const int FLAG_OPTIONAL = 4;
 
 	private ?string $label = null;
-
 	/** @var list<callable> */
 	private array $preparers = [];
-
 	/** @var list<callable> */
 	private array $finalizers = [];
-
 	/** @var list<Blank> */
 	private array $empty = [Blank::Missing];
-
 	private int $flags = 0;
-
 	private mixed $default = null;
-
 	private ?CoercionMode $coercionMode = null;
-
 	/** @var array<string, string> */
 	private array $messages = [];
-
 	/** @var list<string> */
 	public private(set) array $rules = [];
 

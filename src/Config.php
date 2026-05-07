@@ -11,24 +11,16 @@ use ValueError;
 final class Config
 {
 	private bool $list = false;
-
 	private Extra $extra = Extra::Ignore;
-
 	private CoercionMode $coercionMode = CoercionMode::Coerce;
-
 	/** @var array<string, string> */
 	private array $messages = [];
-
 	private ?Contract\RuleRegistry $ruleRegistry = null;
-
 	/** @var array<string, Contract\Rule> */
 	private array $rules = [];
-
 	private ?Contract\CoercerRegistry $coercerRegistry = null;
-
 	/** @var array<string, Contract\Coercer> */
 	private array $coercers = [];
-
 	private ?Contract\RuleParser $ruleParser = null;
 
 	public function asList(bool $list = true): void

@@ -13,13 +13,10 @@ use ValueError;
 final class Shape implements Contract\Shape
 {
 	private Config $config;
-
 	/** @var array<string, Field> */
 	private array $fields = [];
-
 	/** @var list<Closure(array<array-key, mixed>): array<array-key, mixed>> */
 	private array $prepareCallbacks = [];
-
 	/** @var list<Closure(Review): void> */
 	private array $reviewCallbacks = [];
 

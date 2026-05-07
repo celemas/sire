@@ -11,7 +11,6 @@ use ValueError;
 final class ValidationRun
 {
 	private ErrorBag $errors;
-
 	/** @var array<string, true> */
 	private array $ruleBlockedPaths = [];
 
