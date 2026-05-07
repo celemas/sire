@@ -10,7 +10,7 @@ use Duon\Sire\Failure;
 use Override;
 
 /** @api */
-final class Sequence implements Contract\Coercer
+final class ListArray implements Contract\Coercer
 {
 	public string $message {
 		get => '{label} must be a list';

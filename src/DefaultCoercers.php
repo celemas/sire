@@ -21,7 +21,7 @@ final class DefaultCoercers implements Contract\CoercerRegistry
 		$coercer = match ($name) {
 			'string' => new Coercer\Str(),
 			'bool' => new Coercer\Boolean(),
-			'list' => new Coercer\Sequence(),
+			'list' => new Coercer\ListArray(),
 			'float' => new Coercer\FloatingPoint(),
 			'int' => new Coercer\Integer(),
 			'number' => new Coercer\Number(),

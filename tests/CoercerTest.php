@@ -7,8 +7,8 @@ namespace Duon\Sire\Tests;
 use Duon\Sire\Coercer\Boolean;
 use Duon\Sire\Coercer\FloatingPoint;
 use Duon\Sire\Coercer\Integer;
+use Duon\Sire\Coercer\ListArray;
 use Duon\Sire\Coercer\Number;
-use Duon\Sire\Coercer\Sequence;
 use Duon\Sire\Coercer\Str;
 use Duon\Sire\Contract\Coercer;
 
@@ -116,9 +116,9 @@ class CoercerTest extends TestCase
 		$this->assertRejects($coercer, ['key' => 'data']);
 	}
 
-	public function testSequenceCoercer(): void
+	public function testListArrayCoercer(): void
 	{
-		$coercer = new Sequence();
+		$coercer = new ListArray();
 
 		$this->assertCoerces($coercer, [], [], empty: true);
 		$this->assertCoerces($coercer, [1, 2], [1, 2]);
