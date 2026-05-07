@@ -9,7 +9,7 @@ use Duon\Sire\Coercer\FloatingPoint;
 use Duon\Sire\Coercer\Integer;
 use Duon\Sire\Coercer\Number;
 use Duon\Sire\Coercer\Sequence;
-use Duon\Sire\Coercer\Text;
+use Duon\Sire\Coercer\Str;
 use Duon\Sire\Contract\Coercer;
 
 class CoercerTest extends TestCase
@@ -89,9 +89,9 @@ class CoercerTest extends TestCase
 		$this->assertRejects($coercer, 13);
 	}
 
-	public function testTextCoercer(): void
+	public function testStringCoercer(): void
 	{
-		$coercer = new Text();
+		$coercer = new Str();
 		$stringable = new class {
 			public function __toString(): string
 			{

@@ -11,10 +11,10 @@ use Override;
 use Stringable;
 
 /** @api */
-final class Text implements Contract\Coercer
+final class Str implements Contract\Coercer
 {
 	public string $message {
-		get => '{label} must be text';
+		get => '{label} must be a string';
 	}
 
 	#[Override]
@@ -28,7 +28,7 @@ final class Text implements Contract\Coercer
 			);
 		}
 
-		$value = self::toText($pristine);
+		$value = self::toString($pristine);
 
 		return new Coercion($value, $pristine, empty: self::isEmpty($value));
 	}
@@ -44,7 +44,7 @@ final class Text implements Contract\Coercer
 		);
 	}
 
-	private static function toText(mixed $value): ?string
+	private static function toString(mixed $value): ?string
 	{
 		return $value === null ? null : (string) $value;
 	}

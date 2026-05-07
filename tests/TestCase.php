@@ -74,8 +74,8 @@ class TestCase extends BaseTestCase
 	{
 		$shape = Shape::list();
 		$shape->add('int', 'int', 'required');
-		$shape->add('text', 'text', 'required');
-		$shape->add('email', 'text', 'email', 'minlen:10')->optional();
+		$shape->add('text', 'string', 'required');
+		$shape->add('email', 'string', 'email', 'minlen:10')->optional();
 		$shape->add(
 			'single_shape',
 			new SubShape(),

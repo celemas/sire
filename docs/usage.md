@@ -16,7 +16,7 @@ Create a `Shape`, define fields with `add()`, and call `validate()` to get a `Re
 use Duon\Sire\Shape;
 
 $shape = new Shape();
-$shape->add('email', 'text', 'required', 'email')->label('Email address');
+$shape->add('email', 'string', 'required', 'email')->label('Email address');
 $shape->add('age', 'int', 'min:18');
 
 $result = $shape->validate([
@@ -42,7 +42,7 @@ use Duon\Sire\Exception\ValidationError;
 use Duon\Sire\Shape;
 
 $shape = new Shape();
-$shape->add('email', 'text', 'required', 'email');
+$shape->add('email', 'string', 'required', 'email');
 
 try {
     $values = $shape->parse(['email' => 'test@example.com']);
@@ -81,10 +81,10 @@ You can also pass the strings `ignore`, `allow`, and `forbid`. Configure the for
 
 Sire supports a small set of built-in types and rules out of the box, so you can start without additional configuration.
 
-- Built-in types: `text`, `int`, `float`, `number`, `bool`, `list`
+- Built-in types: `string`, `int`, `float`, `number`, `bool`, `list`
 - Built-in rules: `required`, `email`, `minlen`, `maxlen`, `min`, `max`, `regex`, `in`
 
-`text` accepts strings, numbers, and stringable objects. It preserves text values, including `''` and `'0'`, and rejects booleans, arrays, and non-stringable objects.
+`string` accepts strings, numbers, and stringable objects. It preserves string values, including `''` and `'0'`, and rejects booleans, arrays, and non-stringable objects.
 
 `bool` accepts only native booleans after field presence and null handling. `null` is controlled by `nullable()` and is the only empty bool value; missing fields are controlled by `default()` and `optional()`. Boolean-like strings and numbers such as `'true'`, `'false'`, `'1'`, `'0'`, `1`, and `0` fail type validation.
 
@@ -95,7 +95,7 @@ The rule DSL uses `:` to separate the rule name from arguments.
 - `email:checkdns`
 - `in:active,inactive`
 
-The `in` rule uses strict comparison against the cast value. Prepare or cast input to the expected type before using `in` for non-text values.
+The `in` rule uses strict comparison against the cast value. Prepare or cast input to the expected type before using `in` for non-string values.
 
 ## Use quoted and escaped DSL arguments
 
@@ -118,7 +118,7 @@ Fields are required by default. A missing field reports a validation error and i
 use Duon\Sire\Shape;
 
 $shape = new Shape();
-$shape->add('title', 'text')->label('Title');
+$shape->add('title', 'string')->label('Title');
 
 $result = $shape->validate([]);
 
@@ -133,7 +133,7 @@ Use `optional()` when a missing field should have no effect on validation output
 use Duon\Sire\Shape;
 
 $shape = new Shape();
-$shape->add('subtitle', 'text')->optional();
+$shape->add('subtitle', 'string')->optional();
 
 $result = $shape->validate([]);
 
@@ -148,7 +148,7 @@ Use `default()` when an empty field should be filled. By default, only missing i
 use Duon\Sire\Shape;
 
 $shape = new Shape();
-$shape->add('status', 'text')->default('draft');
+$shape->add('status', 'string')->default('draft');
 $shape->add('count', 'int')->default('0');
 
 $result = $shape->validate([]);
@@ -165,7 +165,7 @@ use Duon\Sire\Blank;
 use Duon\Sire\Shape;
 
 $shape = new Shape();
-$shape->add('status', 'text')
+$shape->add('status', 'string')
     ->empty(Blank::Missing, Blank::Null, Blank::Whitespace)
     ->default('draft');
 
@@ -192,12 +192,12 @@ Use `nullable()` when explicit `null` should be accepted instead of treated as e
 use Duon\Sire\Shape;
 
 $shape = new Shape();
-$shape->add('discount_code', 'text', 'maxlen:64')
+$shape->add('discount_code', 'string', 'maxlen:64')
     ->default('')
     ->nullable();
 ```
 
-The `required` rule checks the coerced value's `Value::$empty` flag. Built-in coercers mark `null` as empty; `text` also marks `''` as empty, and `list` also marks `[]` as empty. They treat successful values such as `false`, `0`, `0.0`, and `'0'` as present. Blank strings are valid empty text values, but they are type errors for `bool`, `int`, `float`, `number`, and `list` unless field-level empty handling catches them first. Field rules, including `required`, do not run after failed coercion or failed nested validation. Custom coercers control this flag through `Coercion`.
+The `required` rule checks the coerced value's `Value::$empty` flag. Built-in coercers mark `null` as empty; `string` also marks `''` as empty, and `list` also marks `[]` as empty. They treat successful values such as `false`, `0`, `0.0`, and `'0'` as present. Blank strings are valid empty string values, but they are type errors for `bool`, `int`, `float`, `number`, and `list` unless field-level empty handling catches them first. Field rules, including `required`, do not run after failed coercion or failed nested validation. Custom coercers control this flag through `Coercion`.
 
 For a validation run, Sire applies shape preparation first. For present fields, Sire then applies field preparation, field-level empty handling, `default()` or `optional()` if needed, nullability, coercion or nested validation, field rules, `finalize()`, and finally review callbacks. Missing fields do not run field preparation unless a default is used. Defaults run through field preparation, nullability, coercion or nested validation, rules, and finalizers.
 
@@ -222,7 +222,7 @@ $shape = (new Shape())
         return $data;
     });
 
-$shape->add('first_name', 'text');
+$shape->add('first_name', 'string');
 ```
 
 For `Shape::list()`, the callback receives the whole list, not each item. Map the list inside the callback when you need per-item migration.
@@ -237,7 +237,7 @@ $users = Shape::list()->prepare(static fn(array $items): array => array_map(
     $items,
 ));
 
-$users->add('email', 'text', 'email');
+$users->add('email', 'string', 'email');
 ```
 
 If a shape prepare callback throws, the exception is not caught by Sire.
@@ -269,8 +269,8 @@ Field prepare callbacks receive the current field value and the current shape it
 use Duon\Sire\Shape;
 
 $shape = new Shape();
-$shape->add('title', 'text');
-$shape->add('slug', 'text', 'required')
+$shape->add('title', 'string');
+$shape->add('slug', 'string', 'required')
     ->default('')
     ->prepare(static function (mixed $value, array $data): string {
         if ($value !== '') {
@@ -293,7 +293,7 @@ Prepare callbacks also run before nested shape validation. This is useful when e
 use Duon\Sire\Shape;
 
 $profile = new Shape();
-$profile->add('bio', 'text')->optional();
+$profile->add('bio', 'string')->optional();
 
 $user = new Shape();
 $user
@@ -313,8 +313,8 @@ Use `Field::finalize()` when a field needs a final output transform after succes
 use Duon\Sire\Shape;
 
 $shape = new Shape();
-$shape->add('title', 'text');
-$shape->add('slug', 'text')
+$shape->add('title', 'string');
+$shape->add('slug', 'string')
     ->default('')
     ->finalize(static function (mixed $value, array $values): string {
         if ($value !== '') {
@@ -350,7 +350,7 @@ Paths can be dot strings such as `address.zip` or arrays such as `[0, 'email']` 
 
 ## Customize messages
 
-Use `message()` or `messages()` to override coercion and rule errors for a shape. Built-in type keys are `type.int`, `type.float`, `type.number`, `type.bool`, and `type.list`. Field presence keys are `missing` and `null`. Built-in rule keys use the rule name, for example `rule.required`, `rule.email`, `rule.min`, and `rule.max`. Custom coercers and rules use their registered names, for example `type.slug` and `rule.starts_with`.
+Use `message()` or `messages()` to override coercion and rule errors for a shape. Built-in type keys are `type.string`, `type.int`, `type.float`, `type.number`, `type.bool`, and `type.list`. Field presence keys are `missing` and `null`. Built-in rule keys use the rule name, for example `rule.required`, `rule.email`, `rule.min`, and `rule.max`. Custom coercers and rules use their registered names, for example `type.slug` and `rule.starts_with`.
 
 ```php
 <?php
@@ -410,8 +410,8 @@ use Duon\Sire\Review;
 use Duon\Sire\Shape;
 
 $shape = new Shape();
-$shape->add('password', 'text', 'required');
-$shape->add('confirm', 'text', 'required')->label('Password confirmation');
+$shape->add('password', 'string', 'required');
+$shape->add('confirm', 'string', 'required')->label('Password confirmation');
 
 $shape->review(static function (Review $review): void {
     $values = $review->values();
@@ -440,15 +440,15 @@ You can use another shape as a field type to validate nested structures. Create 
 use Duon\Sire\Shape;
 
 $address = new Shape();
-$address->add('street', 'text', 'required');
-$address->add('zip', 'text', 'required', 'minlen:5');
+$address->add('street', 'string', 'required');
+$address->add('zip', 'string', 'required', 'minlen:5');
 
 $user = new Shape();
-$user->add('name', 'text', 'required');
+$user->add('name', 'string', 'required');
 $user->add('address', $address);
 
 $users = Shape::list();
-$users->add('name', 'text', 'required');
+$users->add('name', 'string', 'required');
 $users->add('address', $address);
 ```
 
@@ -471,8 +471,8 @@ final class LoginShape implements Contract\Validator
     public function __construct()
     {
         $this->shape = new Shape();
-        $this->shape->add('email', 'text', 'required', 'email');
-        $this->shape->add('password', 'text', 'required');
+        $this->shape->add('email', 'string', 'required', 'email');
+        $this->shape->add('password', 'string', 'required');
     }
 
     #[Override]

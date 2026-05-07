@@ -17,7 +17,7 @@ final class SubShape implements Contract\Validator
 	{
 		$this->shape = $list ? Shape::list() : new Shape();
 		$this->shape->add('inner_int', 'int', 'required')->label('Int');
-		$this->shape->add('inner_email', 'text', 'required', 'email')->label('Email');
+		$this->shape->add('inner_email', 'string', 'required', 'email')->label('Email');
 	}
 
 	#[Override]

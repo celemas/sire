@@ -32,7 +32,7 @@ class CoercerRegistryTest extends TestCase
 	{
 		$registry = CoercerRegistry::withDefaults();
 
-		$this->assertSame('test', $registry->get('text')?->coerce('test')->value);
+		$this->assertSame('test', $registry->get('string')?->coerce('test')->value);
 		$this->assertSame(true, $registry->get('bool')?->coerce(true)->value);
 		$this->assertSame(13, $registry->get('int')?->coerce('13')->value);
 		$this->assertSame(13.0, $registry->get('float')?->coerce('13')->value);
@@ -44,7 +44,7 @@ class CoercerRegistryTest extends TestCase
 	{
 		$registry = CoercerRegistry::withDefaults();
 
-		$this->assertSame($registry->get('text'), $registry->get('text'));
+		$this->assertSame($registry->get('string'), $registry->get('string'));
 	}
 
 	public function testWithDefaultsReturnsNullForUnknownCoercers(): void
@@ -57,9 +57,9 @@ class CoercerRegistryTest extends TestCase
 	public function testCustomCoercerShadowsDefaults(): void
 	{
 		$coercer = self::coercer(static fn(mixed $pristine): string => (string) $pristine);
-		$registry = CoercerRegistry::withDefaults()->with('text', $coercer);
+		$registry = CoercerRegistry::withDefaults()->with('string', $coercer);
 
-		$this->assertSame($coercer, $registry->get('text'));
+		$this->assertSame($coercer, $registry->get('string'));
 	}
 
 	public function testLocalCoercerShadowsFallback(): void
@@ -73,9 +73,9 @@ class CoercerRegistryTest extends TestCase
 		};
 
 		$coercer = self::coercer(static fn(mixed $pristine): string => (string) $pristine);
-		$registry = new CoercerRegistry(['text' => $coercer], $fallback);
+		$registry = new CoercerRegistry(['string' => $coercer], $fallback);
 
-		$this->assertSame($coercer, $registry->get('text'));
+		$this->assertSame($coercer, $registry->get('string'));
 	}
 
 	/** @param Closure(mixed): mixed $callback */

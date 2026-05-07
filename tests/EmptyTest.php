@@ -18,13 +18,13 @@ class EmptyTest extends TestCase
 	{
 		$this->expectException(ValueError::class);
 
-		new Shape()->add('name', 'text')->empty('blank');
+		new Shape()->add('name', 'string')->empty('blank');
 	}
 
 	public function testAcceptsStringBlank(): void
 	{
 		$shape = new Shape();
-		$shape->add('name', 'text')->empty('missing', Blank::Null);
+		$shape->add('name', 'string')->empty('missing', Blank::Null);
 
 		$result = $shape->validate(['name' => 'Ada']);
 
@@ -35,7 +35,7 @@ class EmptyTest extends TestCase
 	public function testFieldDefaultValueDoesNotFillNullByDefault(): void
 	{
 		$shape = new Shape();
-		$shape->add('status', 'text')->label('Status')->default('draft');
+		$shape->add('status', 'string')->label('Status')->default('draft');
 
 		$result = $shape->validate(['status' => null]);
 
@@ -48,7 +48,7 @@ class EmptyTest extends TestCase
 	{
 		$shape = new Shape();
 		$shape
-			->add('status', 'text')
+			->add('status', 'string')
 			->empty(Blank::Missing, Blank::Null)
 			->default('draft');
 
@@ -64,7 +64,7 @@ class EmptyTest extends TestCase
 	public function testFieldEmptyNullDefaultDoesNotFillMissingWithoutMissingEmpty(): void
 	{
 		$shape = new Shape();
-		$shape->add('status', 'text')->empty(Blank::Null)->default('draft');
+		$shape->add('status', 'string')->empty(Blank::Null)->default('draft');
 
 		$result = $shape->validate([]);
 
@@ -76,7 +76,7 @@ class EmptyTest extends TestCase
 	public function testFieldEmptyStringDefaultMatchesExactString(): void
 	{
 		$shape = new Shape();
-		$shape->add('status', 'text')->empty(Blank::String)->default('draft');
+		$shape->add('status', 'string')->empty(Blank::String)->default('draft');
 
 		$emptyResult = $shape->validate(['status' => '']);
 		$spaceResult = $shape->validate(['status' => ' ']);
@@ -90,7 +90,7 @@ class EmptyTest extends TestCase
 	public function testFieldEmptyWhitespaceDefaultFillsBlankStrings(): void
 	{
 		$shape = new Shape();
-		$shape->add('status', 'text')->empty(Blank::Whitespace)->default('draft');
+		$shape->add('status', 'string')->empty(Blank::Whitespace)->default('draft');
 
 		$emptyResult = $shape->validate(['status' => '']);
 		$blankResult = $shape->validate(['status' => " \n\t"]);
@@ -116,7 +116,7 @@ class EmptyTest extends TestCase
 	{
 		$shape = new Shape();
 		$shape
-			->add('status', 'text')
+			->add('status', 'string')
 			->empty(Blank::String)
 			->default('draft')
 			->prepare(static fn(mixed $value): string => trim((string) $value));
@@ -132,7 +132,7 @@ class EmptyTest extends TestCase
 		$called = false;
 		$shape = new Shape();
 		$shape
-			->add('name', 'text')
+			->add('name', 'string')
 			->empty(Blank::Null)
 			->optional()
 			->prepare(static function (mixed $value) use (&$called): mixed {
@@ -151,7 +151,7 @@ class EmptyTest extends TestCase
 	public function testOptionalFieldOmitsMissingWhenMissingIsNotEmpty(): void
 	{
 		$shape = new Shape();
-		$shape->add('status', 'text')->empty(Blank::Null)->optional();
+		$shape->add('status', 'string')->empty(Blank::Null)->optional();
 
 		$result = $shape->validate([]);
 
@@ -162,7 +162,7 @@ class EmptyTest extends TestCase
 	public function testFieldBlankWithoutDefaultAddsMissingError(): void
 	{
 		$shape = new Shape();
-		$shape->add('title', 'text')->label('Title')->empty(Blank::String);
+		$shape->add('title', 'string')->label('Title')->empty(Blank::String);
 
 		$result = $shape->validate(['title' => '']);
 
@@ -175,7 +175,7 @@ class EmptyTest extends TestCase
 	{
 		$shape = new Shape();
 		$shape
-			->add('status', 'text')
+			->add('status', 'string')
 			->empty(Blank::Missing, Blank::Null)
 			->default('draft');
 
