@@ -70,20 +70,13 @@ final class Number implements Contract\Coercer
 			return $value;
 		}
 
-		return self::toNumericString(trim((string) $value));
+		return self::fromNumericString(trim((string) $value));
 	}
 
-	private static function toNumericString(string $value): int|float
+	private static function fromNumericString(string $value): int|float
 	{
-		if (self::isIntegerString($value)) {
-			return (int) $value;
-		}
+		$integer = filter_var($value, FILTER_VALIDATE_INT);
 
-		return (float) $value;
-	}
-
-	private static function isIntegerString(string $value): bool
-	{
-		return preg_match('/^[-+]?[0-9]+$/', $value) === 1;
+		return $integer === false ? (float) $value : $integer;
 	}
 }

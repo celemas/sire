@@ -34,6 +34,7 @@
 - Changed the `bool` type to coerce common PHP and HTML form values in default coercing mode.
 - Changed `float` and `number` coercion to use PHP numeric values instead of string-casting arbitrary input.
 - Changed `int` coercion to use PHP integer-string validation instead of string-casting arbitrary input.
+- Changed `number` coercion to return strings as integers only when PHP validates them as native integers.
 - Changed explicit `null` values to fail before coercion unless `Field::nullable()` is used or preparation returns a non-null value.
 - Renamed the `text` type to `string` and `Coercer\Text` to `Coercer\Str`.
 - Renamed `Coercer\Sequence` to `Coercer\ListArray`.

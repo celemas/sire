@@ -67,6 +67,8 @@ class CoercerTest extends TestCase
 		$this->assertCoerces($coercer, 13.13, '13.13');
 		$this->assertCoerces($coercer, 1000.0, '1e3');
 		$this->assertCoerces($coercer, 1.0, '1.');
+		$this->assertCoerces($coercer, 1.0, '01');
+		$this->assertCoerces($coercer, 1.0E+30, '1000000000000000000000000000000');
 
 		$this->assertRejects($coercer, '23.23invalid');
 		$this->assertRejects($coercer, '', empty: true);
