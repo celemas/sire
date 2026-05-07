@@ -21,7 +21,7 @@ Start with the section that matches your current task. Each section focuses on o
 Sire uses a shape object that defines fields, field types, and rules. A validation run returns a `Result` object with path-aware issues and coerced values.
 
 - Define fields with `Shape::add()`.
-- Describe constraints with the string DSL, for example `required` or `min:10`.
+- Attach constraints with `Field::rules()` and the string DSL, for example `required` or `min:10`.
 - Normalize whole input payloads with `Shape::prepare()` before fields are read.
 - Normalize present field input with `Field::prepare()` before empty handling, coercion, and validation when needed.
 - Add cross-field or post-validation checks with `Shape::review()` callbacks.

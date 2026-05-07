@@ -8,7 +8,7 @@ This guide covers the day-to-day Sire API, including shape creation, validation 
 
 ## Validate data with a shape
 
-Create a `Shape`, define fields with `add()`, and call `validate()` to get a `Result` object.
+Create a `Shape`, define fields with `add()`, attach field constraints with `rules()`, and call `validate()` to get a `Result` object.
 
 ```php
 <?php
@@ -16,8 +16,8 @@ Create a `Shape`, define fields with `add()`, and call `validate()` to get a `Re
 use Duon\Sire\Shape;
 
 $shape = new Shape();
-$shape->add('email', 'string', 'required', 'email')->label('Email address');
-$shape->add('age', 'int', 'min:18');
+$shape->add('email', 'string')->rules('required', 'email')->label('Email address');
+$shape->add('age', 'int')->rules('min:18');
 
 $result = $shape->validate([
     'email' => 'test@example.com',
@@ -42,7 +42,7 @@ use Duon\Sire\Exception\ValidationError;
 use Duon\Sire\Shape;
 
 $shape = new Shape();
-$shape->add('email', 'string', 'required', 'email');
+$shape->add('email', 'string')->rules('required', 'email');
 
 try {
     $values = $shape->parse(['email' => 'test@example.com']);
@@ -88,7 +88,7 @@ Sire supports a small set of built-in types and rules out of the box, so you can
 
 `bool` accepts only native booleans after field presence and null handling. `null` is controlled by `nullable()` and is the only empty bool value; missing fields are controlled by `default()` and `optional()`. Boolean-like strings and numbers such as `'true'`, `'false'`, `'1'`, `'0'`, `1`, and `0` fail type validation.
 
-The rule DSL uses `:` to separate the rule name from arguments.
+Add rules to a field with `Field::rules()`. The rule DSL uses `:` to separate the rule name from arguments.
 
 - `required`
 - `min:10`
@@ -192,9 +192,7 @@ Use `nullable()` when explicit `null` should be accepted instead of treated as e
 use Duon\Sire\Shape;
 
 $shape = new Shape();
-$shape->add('discount_code', 'string', 'maxlen:64')
-    ->default('')
-    ->nullable();
+$shape->add('discount_code', 'string')->rules('maxlen:64') ->default('') ->nullable();
 ```
 
 The `required` rule checks the coerced value's `Value::$empty` flag. Built-in coercers mark `null` as empty; `string` also marks `''` as empty, and `list` also marks `[]` as empty. They treat successful values such as `false`, `0`, `0.0`, and `'0'` as present. Blank strings are valid empty string values, but they are type errors for `bool`, `int`, `float`, `number`, and `list` unless field-level empty handling catches them first. Field rules, including `required`, do not run after failed coercion or failed nested validation. Custom coercers control this flag through `Coercion`.
@@ -237,7 +235,7 @@ $users = Shape::list()->prepare(static fn(array $items): array => array_map(
     $items,
 ));
 
-$users->add('email', 'string', 'email');
+$users->add('email', 'string')->rules('email');
 ```
 
 If a shape prepare callback throws, the exception is not caught by Sire.
@@ -253,7 +251,7 @@ use Duon\Sire\Shape;
 
 $shape = new Shape();
 $shape
-    ->add('age', 'int', 'min:18')
+    ->add('age', 'int')->rules('min:18')
     ->prepare(static fn(mixed $value): mixed => trim((string) $value));
 
 $result = $shape->validate(['age' => ' 21 ']);
@@ -270,7 +268,7 @@ use Duon\Sire\Shape;
 
 $shape = new Shape();
 $shape->add('title', 'string');
-$shape->add('slug', 'string', 'required')
+$shape->add('slug', 'string')->rules('required')
     ->default('')
     ->prepare(static function (mixed $value, array $data): string {
         if ($value !== '') {
@@ -365,7 +363,7 @@ $shape = (new Shape())
         'rule.required' => '{label} is required',
     ]);
 
-$shape->add('age', 'int', 'required')->label('Age');
+$shape->add('age', 'int')->rules('required')->label('Age');
 $shape->add('enabled', 'bool')->label('Enabled');
 ```
 
@@ -378,7 +376,7 @@ use Duon\Sire\Shape;
 
 $shape = new Shape();
 $shape
-    ->add('age', 'int', 'max:120')
+    ->add('age', 'int')->rules('max:120')
     ->label('Age')
     ->messages([
         'type' => '{label} must be a whole number',
@@ -410,8 +408,8 @@ use Duon\Sire\Review;
 use Duon\Sire\Shape;
 
 $shape = new Shape();
-$shape->add('password', 'string', 'required');
-$shape->add('confirm', 'string', 'required')->label('Password confirmation');
+$shape->add('password', 'string')->rules('required');
+$shape->add('confirm', 'string')->rules('required')->label('Password confirmation');
 
 $shape->review(static function (Review $review): void {
     $values = $review->values();
@@ -440,15 +438,15 @@ You can use another shape as a field type to validate nested structures. Create 
 use Duon\Sire\Shape;
 
 $address = new Shape();
-$address->add('street', 'string', 'required');
-$address->add('zip', 'string', 'required', 'minlen:5');
+$address->add('street', 'string')->rules('required');
+$address->add('zip', 'string')->rules('required', 'minlen:5');
 
 $user = new Shape();
-$user->add('name', 'string', 'required');
+$user->add('name', 'string')->rules('required');
 $user->add('address', $address);
 
 $users = Shape::list();
-$users->add('name', 'string', 'required');
+$users->add('name', 'string')->rules('required');
 $users->add('address', $address);
 ```
 
@@ -471,8 +469,8 @@ final class LoginShape implements Contract\Validator
     public function __construct()
     {
         $this->shape = new Shape();
-        $this->shape->add('email', 'string', 'required', 'email');
-        $this->shape->add('password', 'string', 'required');
+        $this->shape->add('email', 'string')->rules('required', 'email');
+        $this->shape->add('password', 'string')->rules('required');
     }
 
     #[Override]
@@ -490,7 +488,7 @@ Delegating shapes can be used anywhere a nested shape is accepted because Sire f
 Configure a shape fluently when you need project-specific rules, coercion behavior, or DSL parsing.
 
 - Use `rule()` to add or replace one rule.
-- Use `rules()` to replace the rule registry.
+- Use `Shape::rules()` to replace the rule registry.
 - Use `type()` to add or replace one base type with its coercer.
 - Use `types()` to replace the coercer registry.
 - Use `message()` to override one type, rule, or extra-field message.

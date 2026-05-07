@@ -108,7 +108,6 @@ final class Shape implements Contract\Shape
 	public function add(
 		string $field,
 		string|Contract\Validator $type,
-		string ...$rules,
 	): Field {
 		if (!$field) {
 			throw new ValueError(
@@ -116,10 +115,7 @@ final class Shape implements Contract\Shape
 			);
 		}
 
-		/** @var list<string> $ruleList */
-		$ruleList = $rules;
-		$definition = new Field($field, $type, $ruleList);
-
+		$definition = new Field($field, $type);
 		$this->fields[$field] = $definition;
 
 		return $definition;

@@ -69,7 +69,7 @@ class ShapeTest extends TestCase
 	public function testCustomRuleMessage(): void
 	{
 		$shape = new Shape()->message('rule.required', '{label} is mandatory');
-		$shape->add('name', 'string', 'required')->label('Name');
+		$shape->add('name', 'string')->rules('required')->label('Name');
 
 		$result = $shape->validate(['name' => '']);
 
@@ -80,12 +80,23 @@ class ShapeTest extends TestCase
 	public function testCustomRuleMessageWithArgs(): void
 	{
 		$shape = new Shape()->message('rule.min', '{label} must be at least {arg1}, got {value}');
-		$shape->add('age', 'int', 'min:18')->label('Age');
+		$shape->add('age', 'int')->rules('min:18')->label('Age');
 
 		$result = $shape->validate(['age' => '12']);
 
 		$this->assertFalse($result->valid());
 		$this->assertSame('Age must be at least 18, got 12', $result->first('age'));
+	}
+
+	public function testFieldRulesAppend(): void
+	{
+		$shape = new Shape();
+		$shape->add('age', 'int')->rules('min:18')->rules('max:65');
+
+		$result = $shape->validate(['age' => '70']);
+
+		$this->assertFalse($result->valid());
+		$this->assertSame('age must be at most 65', $result->first('age'));
 	}
 
 	public function testFieldTypeMessageOverridesShapeMessage(): void
@@ -107,8 +118,11 @@ class ShapeTest extends TestCase
 	public function testFieldRuleMessageOverridesShapeMessage(): void
 	{
 		$shape = new Shape()->message('rule.max', 'Global max {arg1}');
-		$shape->add('age', 'int', 'max:120')->message('max', 'Age must be at most {arg1}, got {value}');
-		$shape->add('score', 'int', 'max:10');
+		$shape->add('age', 'int')->rules('max:120')->message(
+			'max',
+			'Age must be at most {arg1}, got {value}',
+		);
+		$shape->add('score', 'int')->rules('max:10');
 
 		$result = $shape->validate([
 			'age' => '130',
@@ -123,10 +137,13 @@ class ShapeTest extends TestCase
 	public function testFieldMessagesSupportExplicitKeys(): void
 	{
 		$shape = new Shape();
-		$shape->add('age', 'int', 'max:120')->messages([
-			'type.int' => 'Age must be numeric',
-			'rule.max' => 'Age must be at most {arg1}',
-		]);
+		$shape
+			->add('age', 'int')
+			->rules('max:120')
+			->messages([
+				'type.int' => 'Age must be numeric',
+				'rule.max' => 'Age must be at most {arg1}',
+			]);
 
 		$result = $shape->validate(['age' => 'old']);
 
@@ -193,7 +210,7 @@ class ShapeTest extends TestCase
 	{
 		$shape = new Shape();
 		$shape->add('title', 'string')->label('Title');
-		$shape->add('code', 'string', 'required');
+		$shape->add('code', 'string')->rules('required');
 		$shape->add('invalid', 'string')->optional();
 		$shape->add('description', 'string')->optional();
 
@@ -217,7 +234,7 @@ class ShapeTest extends TestCase
 		];
 
 		$shape = new Shape();
-		$shape->add('valid_text', 'string', 'maxlen');
+		$shape->add('valid_text', 'string')->rules('maxlen');
 
 		$result = $shape->validate($testData);
 		$this->assertTrue($result->valid());
@@ -226,8 +243,8 @@ class ShapeTest extends TestCase
 	public function testInvalidTypeSkipsFieldRules(): void
 	{
 		$shape = new Shape();
-		$shape->add('blank_age', 'int', 'required');
-		$shape->add('old_age', 'int', 'min:18');
+		$shape->add('blank_age', 'int')->rules('required');
+		$shape->add('old_age', 'int')->rules('min:18');
 
 		$result = $shape->validate([
 			'blank_age' => '',
@@ -264,7 +281,7 @@ class ShapeTest extends TestCase
 
 		$shape = new Shape();
 		$shape->rule('tracked', $rule);
-		$shape->add('age', 'int', 'tracked');
+		$shape->add('age', 'int')->rules('tracked');
 
 		$result = $shape->validate(['age' => 'old']);
 
@@ -293,11 +310,11 @@ class ShapeTest extends TestCase
 		};
 
 		$nested = new Shape();
-		$nested->add('email', 'string', 'email');
+		$nested->add('email', 'string')->rules('email');
 
 		$shape = new Shape();
 		$shape->rule('tracked', $rule);
-		$shape->add('child', $nested, 'tracked');
+		$shape->add('child', $nested)->rules('tracked');
 
 		$result = $shape->validate(['child' => ['email' => 'invalid']]);
 
@@ -329,7 +346,7 @@ class ShapeTest extends TestCase
 		$this->expectExceptionMessage('Wrong shape type');
 
 		$shape = new Shape();
-		$shape->add('invalid_field', 'Invalid', 'invalid');
+		$shape->add('invalid_field', 'Invalid')->rules('invalid');
 		$shape->validate(['invalid_field' => false]);
 	}
 
@@ -339,7 +356,7 @@ class ShapeTest extends TestCase
 		$this->expectExceptionMessage('Unknown rule');
 
 		$shape = new Shape();
-		$shape->add('field', 'string', 'unknown');
+		$shape->add('field', 'string')->rules('unknown');
 		$shape->validate(['field' => 'value']);
 	}
 
@@ -351,7 +368,7 @@ class ShapeTest extends TestCase
 		);
 
 		$shape = new Shape()->rules($registry);
-		$shape->add('field', 'string', 'required', 'starts_with:foo');
+		$shape->add('field', 'string')->rules('required', 'starts_with:foo');
 
 		$result = $shape->validate(['field' => 'foobar']);
 		$this->assertTrue($result->valid());
@@ -386,7 +403,7 @@ class ShapeTest extends TestCase
 		$shape = new Shape()
 			->rules($registry)
 			->ruleParser($parser);
-		$shape->add('field', 'string', 'starts_with|foo');
+		$shape->add('field', 'string')->rules('starts_with|foo');
 
 		$result = $shape->validate(['field' => 'foobar']);
 		$this->assertTrue($result->valid());
@@ -419,7 +436,7 @@ class ShapeTest extends TestCase
 				}
 			},
 		);
-		$shape->add('slug', 'slug', 'required');
+		$shape->add('slug', 'slug')->rules('required');
 
 		$result = $shape->validate(['slug' => 'test-slug']);
 		$this->assertTrue($result->valid());
@@ -487,7 +504,7 @@ class ShapeTest extends TestCase
 	public function testResult(): void
 	{
 		$shape = new Shape();
-		$shape->add('email', 'string', 'required', 'email');
+		$shape->add('email', 'string')->rules('required', 'email');
 
 		$result = $shape->validate(['email' => 'invalid']);
 		$this->assertFalse($result->valid());
@@ -524,7 +541,7 @@ class ShapeTest extends TestCase
 	public function testParseThrowsValidationErrorForInvalidData(): void
 	{
 		$shape = new Shape();
-		$shape->add('email', 'string', 'required', 'email');
+		$shape->add('email', 'string')->rules('required', 'email');
 
 		try {
 			$shape->parse(['email' => 'invalid']);
@@ -542,7 +559,7 @@ class ShapeTest extends TestCase
 	public function testParseThrowsValidationErrorForReviewErrors(): void
 	{
 		$shape = new Shape();
-		$shape->add('email', 'string', 'required', 'email');
+		$shape->add('email', 'string')->rules('required', 'email');
 		$shape->review(static function (Review $review): void {
 			$review->addError('email', 'Already used', 'email.taken');
 		});
@@ -708,15 +725,15 @@ class ShapeTest extends TestCase
 		];
 
 		$shape = new Shape();
-		$shape->add('valid_1', 'string', 'required');
-		$shape->add('valid_2', 'bool', 'required');
-		$shape->add('valid_3', 'int', 'required');
-		$shape->add('valid_4', 'float', 'required');
-		$shape->add('valid_5', 'list', 'required');
-		$shape->add('invalid_1', 'string', 'required');
-		$shape->add('invalid_2', 'float', 'required')->label('Required 2');
-		$shape->add('invalid_3', 'list', 'required');
-		$shape->add('invalid_4', 'string', 'required');
+		$shape->add('valid_1', 'string')->rules('required');
+		$shape->add('valid_2', 'bool')->rules('required');
+		$shape->add('valid_3', 'int')->rules('required');
+		$shape->add('valid_4', 'float')->rules('required');
+		$shape->add('valid_5', 'list')->rules('required');
+		$shape->add('invalid_1', 'string')->rules('required');
+		$shape->add('invalid_2', 'float')->rules('required')->label('Required 2');
+		$shape->add('invalid_3', 'list')->rules('required');
+		$shape->add('invalid_4', 'string')->rules('required');
 
 		$result = $shape->validate($testData);
 		$this->assertFalse($result->valid());
@@ -735,8 +752,8 @@ class ShapeTest extends TestCase
 		];
 
 		$shape = new Shape();
-		$shape->add('invalid_email', 'string', 'email')->label('Email');
-		$shape->add('valid_email', 'string', 'email');
+		$shape->add('invalid_email', 'string')->rules('email')->label('Email');
+		$shape->add('valid_email', 'string')->rules('email');
 
 		$result = $shape->validate($testData);
 		$this->assertFalse($result->valid());
@@ -752,8 +769,8 @@ class ShapeTest extends TestCase
 		];
 
 		$shape = new Shape();
-		$shape->add('invalid_email', 'string', 'email:checkdns');
-		$shape->add('valid_email', 'string', 'email:checkdns');
+		$shape->add('invalid_email', 'string')->rules('email:checkdns');
+		$shape->add('valid_email', 'string')->rules('email:checkdns');
 
 		$result = $shape->validate($testData);
 		$this->assertFalse($result->valid());
@@ -776,12 +793,12 @@ class ShapeTest extends TestCase
 		];
 
 		$shape = new Shape();
-		$shape->add('valid_1', 'int', 'min:10');
-		$shape->add('valid_2', 'float', 'min:10');
-		$shape->add('valid_3', 'int', 'min:10');
-		$shape->add('valid_4', 'float', 'min:10');
-		$shape->add('invalid_1', 'int', 'min:10')->label('Min');
-		$shape->add('invalid_2', 'float', 'min:10');
+		$shape->add('valid_1', 'int')->rules('min:10');
+		$shape->add('valid_2', 'float')->rules('min:10');
+		$shape->add('valid_3', 'int')->rules('min:10');
+		$shape->add('valid_4', 'float')->rules('min:10');
+		$shape->add('invalid_1', 'int')->rules('min:10')->label('Min');
+		$shape->add('invalid_2', 'float')->rules('min:10');
 
 		$result = $shape->validate($testData);
 		$this->assertFalse($result->valid());
@@ -802,12 +819,12 @@ class ShapeTest extends TestCase
 		];
 
 		$shape = new Shape();
-		$shape->add('valid_1', 'int', 'max:13');
-		$shape->add('valid_2', 'float', 'max:13');
-		$shape->add('valid_3', 'int', 'max:13');
-		$shape->add('valid_4', 'float', 'max:13');
-		$shape->add('invalid_1', 'int', 'max:13');
-		$shape->add('invalid_2', 'float', 'max:13')->label('Max');
+		$shape->add('valid_1', 'int')->rules('max:13');
+		$shape->add('valid_2', 'float')->rules('max:13');
+		$shape->add('valid_3', 'int')->rules('max:13');
+		$shape->add('valid_4', 'float')->rules('max:13');
+		$shape->add('invalid_1', 'int')->rules('max:13');
+		$shape->add('invalid_2', 'float')->rules('max:13')->label('Max');
 
 		$result = $shape->validate($testData);
 		$this->assertFalse($result->valid());
@@ -825,9 +842,9 @@ class ShapeTest extends TestCase
 		];
 
 		$shape = new Shape();
-		$shape->add('valid_1', 'string', 'minlen:10');
-		$shape->add('valid_2', 'string', 'minlen:10');
-		$shape->add('invalid', 'string', 'minlen:10');
+		$shape->add('valid_1', 'string')->rules('minlen:10');
+		$shape->add('valid_2', 'string')->rules('minlen:10');
+		$shape->add('invalid', 'string')->rules('minlen:10');
 
 		$result = $shape->validate($testData);
 		$this->assertFalse($result->valid());
@@ -847,9 +864,9 @@ class ShapeTest extends TestCase
 		];
 
 		$shape = new Shape();
-		$shape->add('valid_1', 'string', 'maxlen:10');
-		$shape->add('valid_2', 'string', 'maxlen:10');
-		$shape->add('invalid', 'string', 'maxlen:10');
+		$shape->add('valid_1', 'string')->rules('maxlen:10');
+		$shape->add('valid_2', 'string')->rules('maxlen:10');
+		$shape->add('invalid', 'string')->rules('maxlen:10');
 
 		$result = $shape->validate($testData);
 		$this->assertFalse($result->valid());
@@ -870,10 +887,10 @@ class ShapeTest extends TestCase
 		];
 
 		$shape = new Shape();
-		$shape->add('valid', 'string', 'regex:/^abcdefghi$/');
-		$shape->add('invalid', 'string', 'regex:/^abcdefghi$/');
-		$shape->add('valid_colon', 'string', 'regex:/^[a-z:]+:$/');
-		$shape->add('invalid_colon', 'string', 'regex:/^[a-z:]+:$/');
+		$shape->add('valid', 'string')->rules('regex:/^abcdefghi$/');
+		$shape->add('invalid', 'string')->rules('regex:/^abcdefghi$/');
+		$shape->add('valid_colon', 'string')->rules('regex:/^[a-z:]+:$/');
+		$shape->add('invalid_colon', 'string')->rules('regex:/^[a-z:]+:$/');
 
 		$result = $shape->validate($testData);
 		$this->assertFalse($result->valid());
@@ -890,9 +907,9 @@ class ShapeTest extends TestCase
 		];
 
 		$shape = new Shape();
-		$shape->add('valid1', 'string', 'in:valid,alsovalid');
-		$shape->add('valid2', 'string', 'in:valid,alsovalid');
-		$shape->add('invalid', 'string', 'in:valid,alsovalid');
+		$shape->add('valid1', 'string')->rules('in:valid,alsovalid');
+		$shape->add('valid2', 'string')->rules('in:valid,alsovalid');
+		$shape->add('invalid', 'string')->rules('in:valid,alsovalid');
 
 		$result = $shape->validate($testData);
 		$this->assertFalse($result->valid());
@@ -910,10 +927,10 @@ class ShapeTest extends TestCase
 		];
 
 		$shape = new Shape();
-		$shape->add('quoted_comma', 'string', 'in:"ACME, Inc",Globex');
-		$shape->add('escaped_comma', 'string', 'in:ACME\\, Inc,Globex');
-		$shape->add('quoted_colon', 'string', 'in:"http://","https://"');
-		$shape->add('invalid', 'string', 'in:"ACME, Inc",Globex');
+		$shape->add('quoted_comma', 'string')->rules('in:"ACME, Inc",Globex');
+		$shape->add('escaped_comma', 'string')->rules('in:ACME\\, Inc,Globex');
+		$shape->add('quoted_colon', 'string')->rules('in:"http://","https://"');
+		$shape->add('invalid', 'string')->rules('in:"ACME, Inc",Globex');
 
 		$result = $shape->validate($testData);
 		$this->assertFalse($result->valid());
@@ -930,9 +947,9 @@ class ShapeTest extends TestCase
 			'starts_with',
 			self::startsWithRule(),
 		);
-		$shape->add('escaped', 'string', 'starts_with:http\\://');
-		$shape->add('quoted', 'string', 'starts_with:"http://"');
-		$shape->add('invalid', 'string', 'starts_with:http\\://');
+		$shape->add('escaped', 'string')->rules('starts_with:http\\://');
+		$shape->add('quoted', 'string')->rules('starts_with:"http://"');
+		$shape->add('invalid', 'string')->rules('starts_with:http\\://');
 
 		$result = $shape->validate([
 			'escaped' => 'http://duon.de',
@@ -948,7 +965,7 @@ class ShapeTest extends TestCase
 	public function testReviewCallbackAddsErrors(): void
 	{
 		$shape = new Shape();
-		$shape->add('email', 'string', 'required')->label('Email');
+		$shape->add('email', 'string')->rules('required')->label('Email');
 		$shape->review(static function (Review $context): void {
 			self::assertSame(['email' => 'taken@example.com'], $context->values());
 			self::assertFalse($context->isList());
@@ -1003,7 +1020,7 @@ class ShapeTest extends TestCase
 	{
 		$called = false;
 		$shape = new Shape();
-		$shape->add('email', 'string', 'required');
+		$shape->add('email', 'string')->rules('required');
 		$shape->review(static function (Review $_context) use (&$called): void {
 			$called = true;
 		});
@@ -1084,7 +1101,7 @@ class ShapeTest extends TestCase
 	public function testInvalidNestedFieldDefaultAddsValidationError(): void
 	{
 		$nested = new Shape();
-		$nested->add('email', 'string', 'email')->label('Email');
+		$nested->add('email', 'string')->rules('email')->label('Email');
 
 		$shape = new Shape();
 		$shape->add('child', $nested)->default(['email' => 'invalid']);
@@ -1144,7 +1161,7 @@ class ShapeTest extends TestCase
 	public function testRequiredNarrowsNullFieldDefault(): void
 	{
 		$shape = new Shape();
-		$shape->add('note', 'string', 'required')->default(null);
+		$shape->add('note', 'string')->rules('required')->default(null);
 
 		$result = $shape->validate([]);
 
@@ -1173,7 +1190,7 @@ class ShapeTest extends TestCase
 	public function testFieldPreparationRunsBeforeNestedShapeValidation(): void
 	{
 		$nested = new Shape();
-		$nested->add('name', 'string', 'required');
+		$nested->add('name', 'string')->rules('required');
 
 		$shape = new Shape();
 		$shape
@@ -1191,7 +1208,8 @@ class ShapeTest extends TestCase
 		$called = false;
 		$shape = new Shape();
 		$shape
-			->add('count', 'int', 'min:2')
+			->add('count', 'int')
+			->rules('min:2')
 			->finalize(static function (mixed $value, array $values) use (&$called): int {
 				$called = true;
 				self::assertSame(2, $value);
@@ -1389,8 +1407,8 @@ class ShapeTest extends TestCase
 		];
 
 		$shape = new Shape();
-		$shape->add('int', 'int', 'required');
-		$shape->add('text', 'string', 'required');
+		$shape->add('int', 'int')->rules('required');
+		$shape->add('text', 'string')->rules('required');
 		$shape->add('shape', new SubShape())->label('Shape');
 
 		$result = $shape->validate($testData);
@@ -1408,8 +1426,8 @@ class ShapeTest extends TestCase
 		];
 
 		$shape = new Shape();
-		$shape->add('int', 'int', 'required');
-		$shape->add('text', 'string', 'required');
+		$shape->add('int', 'int')->rules('required');
+		$shape->add('text', 'string')->rules('required');
 		$shape->add('shape', new SubShape());
 
 		$result = $shape->validate($testData);
@@ -1468,8 +1486,8 @@ class ShapeTest extends TestCase
 		];
 
 		$shape = Shape::list();
-		$shape->add('int', 'int', 'required');
-		$shape->add('text', 'string', 'required');
+		$shape->add('int', 'int')->rules('required');
+		$shape->add('text', 'string')->rules('required');
 		$shape->add('single_shape', new SubShape());
 		$shape->add('list_shape', new SubShape(true))->optional();
 
@@ -1551,7 +1569,7 @@ class ShapeTest extends TestCase
 		$this->expectExceptionMessage('must not be empty');
 
 		$shape = new Shape();
-		$shape->add('', 'Int', 'int');
+		$shape->add('', 'Int')->rules('int');
 	}
 
 	public function testEmptyArraySkipsRegularRule(): void
@@ -1561,7 +1579,7 @@ class ShapeTest extends TestCase
 		];
 
 		$shape = new Shape();
-		$shape->add('items', 'list', 'in:a,b,c');
+		$shape->add('items', 'list')->rules('in:a,b,c');
 
 		$result = $shape->validate($testData);
 		$this->assertTrue($result->valid());
@@ -1592,7 +1610,7 @@ class ShapeTest extends TestCase
 
 		$shape = new Shape();
 		// Regex rule without a pattern (just 'regex' with no argument)
-		$shape->add('text', 'string', 'regex');
+		$shape->add('text', 'string')->rules('regex');
 
 		$result = $shape->validate($testData);
 		$this->assertFalse($result->valid());

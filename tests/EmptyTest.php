@@ -206,7 +206,7 @@ class EmptyTest extends TestCase
 		$shape = new Shape();
 		$shape->type('marker', self::emptyMarkerCoercer());
 		$shape->rule('tracked', $rule);
-		$shape->add('marker', 'marker', 'tracked');
+		$shape->add('marker', 'marker')->rules('tracked');
 
 		$result = $shape->validate(['marker' => 'empty']);
 
@@ -219,7 +219,7 @@ class EmptyTest extends TestCase
 	{
 		$shape = new Shape();
 		$shape->type('marker', self::emptyMarkerCoercer());
-		$shape->add('marker', 'marker', 'required');
+		$shape->add('marker', 'marker')->rules('required');
 
 		$result = $shape->validate(['marker' => 'empty']);
 
@@ -247,7 +247,7 @@ class EmptyTest extends TestCase
 
 		$shape = new Shape();
 		$shape->rule('must_be_true', $rule);
-		$shape->add('enabled', 'bool', 'must_be_true');
+		$shape->add('enabled', 'bool')->rules('must_be_true');
 
 		$result = $shape->validate(['enabled' => false]);
 

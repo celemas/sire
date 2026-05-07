@@ -6,6 +6,7 @@
 
 - Renamed `Result::isValid()` to `Result::valid()`.
 - Renamed field definitions from `Rule` to `Field`.
+- Moved field rule definitions from variadic `Shape::add()` arguments to fluent `Field::rules()` calls.
 - Renamed field checks from validators to rules, including `Contract\Validator` to `Contract\Rule`, `ValidatorRegistry` to `RuleRegistry`, `ValidatorParser` to `RuleParser`, and the fluent `Shape::validator*()` methods to `Shape::rule*()` methods.
 - Renamed `Contract\Shape` to `Contract\Validator` for reusable shape validators.
 - Changed field rule issue and message keys from `validator.*` to `rule.*`.
@@ -42,6 +43,7 @@
 - Added the `Extra` enum to control extra input fields with `ignore`, `allow`, and `forbid` modes.
 - Added the `number` type for values that may be integers or floats.
 - Added `Shape::review()` callbacks with `Review` for post-validation checks after successful normal validation.
+- Added `Field::rules()` to attach field rule definitions after `Shape::add()`.
 - Added `Field::prepare()` to normalize present or defaulted field values before type casting and nested shape validation.
 - Added `Field::finalize()` to transform valid output values after field validation and before review callbacks.
 - Added `Field::optional()`, `Field::default()`, `Field::empty()`, and `Field::nullable()` for field presence control.

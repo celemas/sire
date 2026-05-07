@@ -73,14 +73,18 @@ class TestCase extends BaseTestCase
 	public function getListShape(): Shape
 	{
 		$shape = Shape::list();
-		$shape->add('int', 'int', 'required');
-		$shape->add('text', 'string', 'required');
-		$shape->add('email', 'string', 'email', 'minlen:10')->optional();
-		$shape->add(
-			'single_shape',
-			new SubShape(),
-			'required',
-		)->label('Single Shape');
+		$shape->add('int', 'int')->rules('required');
+		$shape->add('text', 'string')->rules('required');
+		$shape->add('email', 'string')->rules('email', 'minlen:10')->optional();
+		$shape
+			->add(
+				'single_shape',
+				new SubShape(),
+			)
+			->rules(
+				'required',
+			)
+			->label('Single Shape');
 		$shape->add(
 			'list_shape',
 			new SubShape(list: true),

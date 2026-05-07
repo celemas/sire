@@ -29,12 +29,22 @@ final class Field
 	/** @var array<string, string> */
 	private array $messages = [];
 
-	/** @param list<string> $rules */
+	/** @var list<string> */
+	public private(set) array $rules = [];
+
 	public function __construct(
 		public readonly string $field,
 		public readonly string|Contract\Validator $type,
-		public readonly array $rules,
 	) {}
+
+	public function rules(string ...$rules): static
+	{
+		foreach ($rules as $rule) {
+			$this->rules[] = $rule;
+		}
+
+		return $this;
+	}
 
 	public function label(string $label): static
 	{
