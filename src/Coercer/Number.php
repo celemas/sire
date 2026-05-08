@@ -24,11 +24,11 @@ final class Number implements Contract\Coercer
 			return self::coerceStrict($pristine);
 		}
 
-		if (!self::isCoercible($pristine)) {
+		$value = self::toNumber($pristine);
+
+		if ($value === null && $pristine !== null) {
 			return self::invalid($pristine);
 		}
-
-		$value = self::toNumber($pristine);
 
 		return new Coercion($value, $pristine, empty: $value === null);
 	}
@@ -39,7 +39,7 @@ final class Number implements Contract\Coercer
 			return new Coercion(null, null, empty: true);
 		}
 
-		return is_int($pristine) || is_float($pristine)
+		return is_int($pristine) || is_float($pristine) && is_finite($pristine)
 			? new Coercion($pristine, $pristine)
 			: self::invalid($pristine);
 	}
@@ -54,11 +54,6 @@ final class Number implements Contract\Coercer
 		);
 	}
 
-	private static function isCoercible(mixed $value): bool
-	{
-		return $value === null || is_numeric($value);
-	}
-
 	private static function isEmpty(mixed $value): bool
 	{
 		return $value === null || is_string($value) && trim($value) === '';
@@ -66,17 +61,37 @@ final class Number implements Contract\Coercer
 
 	private static function toNumber(mixed $value): int|float|null
 	{
-		if (is_null($value) || is_int($value) || is_float($value)) {
+		if ($value === null || is_int($value)) {
 			return $value;
 		}
 
-		return self::fromNumericString(trim((string) $value));
+		if (is_float($value)) {
+			return self::finiteFloat($value);
+		}
+
+		return self::isNumericString($value)
+			? self::fromNumericString(trim($value))
+			: null;
 	}
 
-	private static function fromNumericString(string $value): int|float
+	private static function isNumericString(mixed $value): bool
+	{
+		return is_string($value) && is_numeric($value);
+	}
+
+	private static function fromNumericString(string $value): int|float|null
 	{
 		$integer = filter_var($value, FILTER_VALIDATE_INT);
 
-		return $integer === false ? (float) $value : $integer;
+		if ($integer !== false) {
+			return $integer;
+		}
+
+		return self::finiteFloat((float) $value);
+	}
+
+	private static function finiteFloat(float $value): ?float
+	{
+		return is_finite($value) ? $value : null;
 	}
 }

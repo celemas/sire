@@ -595,6 +595,45 @@ class ShapeTest extends TestCase
 		$this->assertSame('VALUE', $result->values()['field']);
 	}
 
+	public function testCustomCoercerReceivesResolvedCoercionMode(): void
+	{
+		$coercer = new class implements Coercer {
+			/** @var list<CoercionMode> */
+			public array $modes = [];
+
+			public string $message {
+				get => 'Invalid value';
+			}
+
+			#[Override]
+			public function coerce(
+				mixed $pristine,
+				CoercionMode $mode,
+			): \Duon\Sire\Contract\Coercion {
+				$this->modes[] = $mode;
+
+				return new Coercion($pristine, $pristine);
+			}
+		};
+
+		$shape = new Shape()
+			->strict()
+			->type('tracked', $coercer);
+		$shape->add('strict', 'tracked');
+		$shape->add('coerced', 'tracked')->coerce();
+
+		$result = $shape->validate([
+			'strict' => 'value',
+			'coerced' => 'value',
+		]);
+
+		$this->assertTrue($result->valid());
+		$this->assertSame(
+			[CoercionMode::Strict, CoercionMode::Coerce],
+			$coercer->modes,
+		);
+	}
+
 	public function testResult(): void
 	{
 		$shape = new Shape();

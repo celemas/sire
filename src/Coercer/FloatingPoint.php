@@ -24,11 +24,11 @@ final class FloatingPoint implements Contract\Coercer
 			return self::coerceStrict($pristine);
 		}
 
-		if (!self::isCoercible($pristine)) {
+		$value = self::toFloat($pristine);
+
+		if ($value === null && $pristine !== null) {
 			return self::invalid($pristine);
 		}
-
-		$value = self::toFloat($pristine);
 
 		return new Coercion($value, $pristine, empty: $value === null);
 	}
@@ -39,7 +39,7 @@ final class FloatingPoint implements Contract\Coercer
 			return new Coercion(null, null, empty: true);
 		}
 
-		return is_float($pristine)
+		return is_float($pristine) && is_finite($pristine)
 			? new Coercion($pristine, $pristine)
 			: self::invalid($pristine);
 	}
@@ -54,11 +54,6 @@ final class FloatingPoint implements Contract\Coercer
 		);
 	}
 
-	private static function isCoercible(mixed $value): bool
-	{
-		return $value === null || is_numeric($value);
-	}
-
 	private static function isEmpty(mixed $value): bool
 	{
 		return $value === null || is_string($value) && trim($value) === '';
@@ -66,6 +61,22 @@ final class FloatingPoint implements Contract\Coercer
 
 	private static function toFloat(mixed $value): ?float
 	{
-		return is_null($value) ? null : (float) $value;
+		if ($value === null) {
+			return null;
+		}
+
+		return self::isFloatCastable($value)
+			? self::finiteFloat((float) $value)
+			: null;
+	}
+
+	private static function isFloatCastable(mixed $value): bool
+	{
+		return is_int($value) || is_float($value) || is_string($value) && is_numeric($value);
+	}
+
+	private static function finiteFloat(float $value): ?float
+	{
+		return is_finite($value) ? $value : null;
 	}
 }

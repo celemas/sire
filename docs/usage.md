@@ -81,7 +81,7 @@ $shape->add('age', 'int'); // accepts only native ints
 $shape->add('count', 'int')->coerce(); // accepts numeric strings too
 ```
 
-Strict mode checks the prepared or defaulted value after field-level empty handling. For `float`, strict mode accepts only native floats. Use `number` when native integers and floats should both be valid. Nested shapes use their own coercion mode configuration.
+Strict mode checks the prepared or defaulted value after field-level empty handling. For `float`, strict mode accepts only finite native floats. Use `number` when finite native integers and floats should both be valid. Nested shapes use their own coercion mode configuration.
 
 `extra()` controls input fields that do not have a field:
 
@@ -101,6 +101,8 @@ Sire supports a small set of built-in types and rules out of the box, so you can
 `string` accepts strings, numbers, and stringable objects in coercing mode. It preserves string values, including `''` and `'0'`, and rejects booleans, arrays, and non-stringable objects. In strict mode, it accepts only native strings.
 
 `bool` accepts common PHP and HTML form boolean values in coercing mode: `true`, `false`, `1`, `0`, `'1'`, `'0'`, `'true'`, `'false'`, `'on'`, `'off'`, `'yes'`, and `'no'`. String values are trimmed and matched case-insensitively. In strict mode, it accepts only native booleans. `null` is controlled by `nullable()`; missing fields are controlled by `default()` and `optional()`. Empty strings still fail type validation unless field-level `empty()` handling catches them first.
+
+`float` and `number` accept only finite numeric values. They reject non-finite values such as `INF`, `-INF`, `NAN`, and numeric strings that overflow to infinity.
 
 Add rules to a field with `Field::rules()`. The rule DSL uses `:` to separate the rule name from arguments.
 
@@ -510,7 +512,7 @@ Configure a shape fluently when you need project-specific rules, coercion behavi
 - Use `messages()` to override many type, rule, or extra-field messages.
 - Use `ruleParser()` if you need a different DSL split strategy.
 
-Custom rules implement `Duon\Sire\Contract\Rule`, expose a default `message`, and return `Duon\Sire\Contract\Validation`; use `Duon\Sire\Validation` when the default immutable result object is enough. Rules do not run after failed type handling or failed nested validation. Rules also skip values where `Contract\Value::$empty` is `true` by default; implement `Duon\Sire\Contract\ValidatesEmpty` when a rule must run for successfully typed empty values. Custom coercers implement `Duon\Sire\Contract\Coercer`, expose a default `message`, and return `Duon\Sire\Contract\Coercion`; use `Duon\Sire\Coercion` when the default immutable result object is enough. Sire passes the resolved `Duon\Sire\CoercionMode` to `coerce()`, so custom coercers can reject non-native values in strict mode. Pass `empty: true` to `Coercion` when the coerced value has no meaningful content for its type. Return `Failure::invalid()` when a coercer or rule cannot produce a valid value. Use `Failure::key()` only when one coercer or rule has multiple distinct failure modes.
+Custom rules implement `Duon\Sire\Contract\Rule`, expose a default `message`, and return `Duon\Sire\Contract\Validation`; use `Duon\Sire\Validation` when the default immutable result object is enough. Rules do not run after failed type handling or failed nested validation. Rules also skip values where `Contract\Value::$empty` is `true` by default; implement `Duon\Sire\Contract\ValidatesEmpty` when a rule must run for successfully typed empty values. Custom coercers implement `Duon\Sire\Contract\Coercer`, expose a default `message`, and return `Duon\Sire\Contract\Coercion`; use `Duon\Sire\Coercion` when the default immutable result object is enough. Sire passes the resolved `Duon\Sire\CoercionMode` to `coerce()`, but custom coercers must honor it themselves; shape strict mode cannot make a custom coercer strict if it ignores the mode. Pass `empty: true` to `Coercion` when the coerced value has no meaningful content for its type. Return `Failure::invalid()` when a coercer or rule cannot produce a valid value. Use `Failure::key()` only when one coercer or rule has multiple distinct failure modes.
 
 ```php
 <?php

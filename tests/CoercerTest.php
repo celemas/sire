@@ -50,6 +50,10 @@ class CoercerTest extends TestCase
 		$this->assertCoerces($coercer, 1.0, '1.');
 
 		$this->assertRejects($coercer, '23.23invalid');
+		$this->assertRejects($coercer, '1e309');
+		$this->assertRejects($coercer, INF);
+		$this->assertRejects($coercer, -INF);
+		$this->assertRejects($coercer, NAN);
 		$this->assertRejects($coercer, '', empty: true);
 		$this->assertRejects($coercer, true);
 		$this->assertRejects($coercer, []);
@@ -71,6 +75,10 @@ class CoercerTest extends TestCase
 		$this->assertCoerces($coercer, 1.0E+30, '1000000000000000000000000000000');
 
 		$this->assertRejects($coercer, '23.23invalid');
+		$this->assertRejects($coercer, '1e309');
+		$this->assertRejects($coercer, INF);
+		$this->assertRejects($coercer, -INF);
+		$this->assertRejects($coercer, NAN);
 		$this->assertRejects($coercer, '', empty: true);
 		$this->assertRejects($coercer, true);
 		$this->assertRejects($coercer, []);
@@ -119,11 +127,15 @@ class CoercerTest extends TestCase
 		$this->assertCoerces(new FloatingPoint(), null, null, empty: true, mode: CoercionMode::Strict);
 		$this->assertCoerces(new FloatingPoint(), 13.13, 13.13, mode: CoercionMode::Strict);
 		$this->assertRejects(new FloatingPoint(), 13, mode: CoercionMode::Strict);
+		$this->assertRejects(new FloatingPoint(), INF, mode: CoercionMode::Strict);
+		$this->assertRejects(new FloatingPoint(), NAN, mode: CoercionMode::Strict);
 		$this->assertRejects(new FloatingPoint(), '13.13', mode: CoercionMode::Strict);
 
 		$this->assertCoerces(new Number(), null, null, empty: true, mode: CoercionMode::Strict);
 		$this->assertCoerces(new Number(), 13, 13, mode: CoercionMode::Strict);
 		$this->assertCoerces(new Number(), 13.13, 13.13, mode: CoercionMode::Strict);
+		$this->assertRejects(new Number(), INF, mode: CoercionMode::Strict);
+		$this->assertRejects(new Number(), NAN, mode: CoercionMode::Strict);
 		$this->assertRejects(new Number(), '13', mode: CoercionMode::Strict);
 
 		$this->assertCoerces(new Str(), null, null, empty: true, mode: CoercionMode::Strict);
@@ -199,8 +211,14 @@ class CoercerTest extends TestCase
 	): void {
 		$coercion = $coercer->coerce($pristine, $mode);
 
-		$this->assertSame($pristine, $coercion->value);
-		$this->assertSame($pristine, $coercion->pristine);
+		if (is_float($pristine) && is_nan($pristine)) {
+			$this->assertNan($coercion->value);
+			$this->assertNan($coercion->pristine);
+		} else {
+			$this->assertSame($pristine, $coercion->value);
+			$this->assertSame($pristine, $coercion->pristine);
+		}
+
 		$this->assertNotNull($coercion->failure);
 		$this->assertSame($empty, $coercion->empty);
 	}
