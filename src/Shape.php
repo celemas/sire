@@ -13,13 +13,10 @@ use ValueError;
 final class Shape implements Contract\Shape
 {
 	private Config $config;
-
 	/** @var array<string, Field> */
 	private array $fields = [];
-
 	/** @var list<Closure(array<array-key, mixed>): array<array-key, mixed>> */
 	private array $prepareCallbacks = [];
-
 	/** @var list<Closure(Review): void> */
 	private array $reviewCallbacks = [];
 
@@ -43,6 +40,20 @@ final class Shape implements Contract\Shape
 	public function extra(Extra|string $extra): self
 	{
 		$this->config->extra($extra);
+
+		return $this;
+	}
+
+	public function strict(): self
+	{
+		$this->config->coercionMode(CoercionMode::Strict);
+
+		return $this;
+	}
+
+	public function coerce(): self
+	{
+		$this->config->coercionMode(CoercionMode::Coerce);
 
 		return $this;
 	}

@@ -11,7 +11,6 @@ use ValueError;
 final class ValidationRun
 {
 	private ErrorBag $errors;
-
 	/** @var array<string, true> */
 	private array $ruleBlockedPaths = [];
 
@@ -296,7 +295,10 @@ final class ValidationRun
 			throw new ValueError('Wrong shape type');
 		}
 
-		$coercion = $coercer->coerce($value);
+		$coercion = $coercer->coerce(
+			$value,
+			$definition->coercionMode($this->shape->coercionMode),
+		);
 
 		return new ReadValue(
 			new \Duon\Sire\Value($coercion->value, $coercion->pristine, $coercion->empty),

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Duon\Sire\Coercer;
 
 use Duon\Sire\Coercion;
+use Duon\Sire\CoercionMode;
 use Duon\Sire\Contract;
 use Duon\Sire\Failure;
 use Override;
@@ -17,15 +18,39 @@ final class Integer implements Contract\Coercer
 	}
 
 	#[Override]
-	public function coerce(mixed $pristine): Contract\Coercion
+	public function coerce(mixed $pristine, CoercionMode $mode): Contract\Coercion
 	{
-		if (!self::isCoercible($pristine)) {
-			return self::invalid($pristine);
+		if ($mode === CoercionMode::Strict) {
+			return self::coerceStrict($pristine);
 		}
 
 		$value = self::toInteger($pristine);
 
+		if ($value === null && $pristine !== null) {
+			return self::invalid($pristine);
+		}
+
 		return new Coercion($value, $pristine, empty: $value === null);
+	}
+
+	private static function coerceStrict(mixed $pristine): Coercion
+	{
+		if ($pristine === null) {
+			return new Coercion(null, null, empty: true);
+		}
+
+		return is_int($pristine)
+			? new Coercion($pristine, $pristine)
+			: self::invalid($pristine);
+	}
+
+	private static function toInteger(mixed $value): ?int
+	{
+		if ($value === null || is_int($value)) {
+			return $value;
+		}
+
+		return self::parseInteger($value);
 	}
 
 	private static function invalid(mixed $pristine): Coercion
@@ -38,23 +63,19 @@ final class Integer implements Contract\Coercer
 		);
 	}
 
-	private static function isCoercible(mixed $value): bool
+	private static function parseInteger(mixed $value): ?int
 	{
-		return $value === null || is_int($value) || self::isIntegerString($value);
-	}
+		if (!is_string($value)) {
+			return null;
+		}
 
-	private static function isIntegerString(mixed $value): bool
-	{
-		return preg_match('/^([0-9]|-[1-9]|-?[1-9][0-9]*)$/i', trim((string) $value)) === 1;
+		$parsed = filter_var(trim($value), FILTER_VALIDATE_INT);
+
+		return $parsed === false ? null : $parsed;
 	}
 
 	private static function isEmpty(mixed $value): bool
 	{
 		return $value === null || is_string($value) && trim($value) === '';
-	}
-
-	private static function toInteger(mixed $value): ?int
-	{
-		return $value === null ? null : (int) $value;
 	}
 }

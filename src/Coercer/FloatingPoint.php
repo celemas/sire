@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Duon\Sire\Coercer;
 
 use Duon\Sire\Coercion;
+use Duon\Sire\CoercionMode;
 use Duon\Sire\Contract;
 use Duon\Sire\Failure;
 use Override;
@@ -17,15 +18,30 @@ final class FloatingPoint implements Contract\Coercer
 	}
 
 	#[Override]
-	public function coerce(mixed $pristine): Contract\Coercion
+	public function coerce(mixed $pristine, CoercionMode $mode): Contract\Coercion
 	{
-		if (!self::isCoercible($pristine)) {
-			return self::invalid($pristine);
+		if ($mode === CoercionMode::Strict) {
+			return self::coerceStrict($pristine);
 		}
 
 		$value = self::toFloat($pristine);
 
+		if ($value === null && $pristine !== null) {
+			return self::invalid($pristine);
+		}
+
 		return new Coercion($value, $pristine, empty: $value === null);
+	}
+
+	private static function coerceStrict(mixed $pristine): Coercion
+	{
+		if ($pristine === null) {
+			return new Coercion(null, null, empty: true);
+		}
+
+		return is_float($pristine) && is_finite($pristine)
+			? new Coercion($pristine, $pristine)
+			: self::invalid($pristine);
 	}
 
 	private static function invalid(mixed $pristine): Coercion
@@ -38,21 +54,6 @@ final class FloatingPoint implements Contract\Coercer
 		);
 	}
 
-	private static function isCoercible(mixed $value): bool
-	{
-		return (
-			is_null($value)
-			|| is_float($value)
-			|| is_int($value)
-			|| self::isNumericString(trim((string) $value))
-		);
-	}
-
-	private static function isNumericString(string $value): bool
-	{
-		return preg_match('/^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/', $value) === 1;
-	}
-
 	private static function isEmpty(mixed $value): bool
 	{
 		return $value === null || is_string($value) && trim($value) === '';
@@ -60,6 +61,22 @@ final class FloatingPoint implements Contract\Coercer
 
 	private static function toFloat(mixed $value): ?float
 	{
-		return is_null($value) ? null : (float) $value;
+		if ($value === null) {
+			return null;
+		}
+
+		return self::isFloatCastable($value)
+			? self::finiteFloat((float) $value)
+			: null;
+	}
+
+	private static function isFloatCastable(mixed $value): bool
+	{
+		return is_int($value) || is_float($value) || is_string($value) && is_numeric($value);
+	}
+
+	private static function finiteFloat(float $value): ?float
+	{
+		return is_finite($value) ? $value : null;
 	}
 }

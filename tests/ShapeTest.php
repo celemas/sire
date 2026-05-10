@@ -6,6 +6,7 @@ namespace Duon\Sire\Tests;
 
 use Duon\Sire\CoercerRegistry;
 use Duon\Sire\Coercion;
+use Duon\Sire\CoercionMode;
 use Duon\Sire\Contract\Coercer;
 use Duon\Sire\Contract\Parser;
 use Duon\Sire\Contract\Rule;
@@ -204,6 +205,93 @@ class ShapeTest extends TestCase
 		$this->assertSame('Enabled must be true or false', $result->first('enabled'));
 		$this->assertSame(true, $result->values()['published']);
 		$this->assertSame(false, $result->values()['archived']);
+	}
+
+	public function testBooleanCoercesFormValues(): void
+	{
+		$shape = new Shape();
+		$shape->add('enabled', 'bool');
+		$shape->add('published', 'bool')->default(false);
+		$shape->add('visible', 'bool');
+
+		$result = $shape->validate([
+			'enabled' => 'on',
+			'visible' => ' FALSE ',
+		]);
+
+		$this->assertTrue($result->valid());
+		$this->assertSame(true, $result->values()['enabled']);
+		$this->assertSame(false, $result->values()['published']);
+		$this->assertSame(false, $result->values()['visible']);
+	}
+
+	public function testFieldStrictModeRejectsCoercibleValues(): void
+	{
+		$shape = new Shape();
+		$shape->add('age', 'int')->strict()->label('Age');
+		$shape->add('count', 'int');
+
+		$result = $shape->validate([
+			'age' => '13',
+			'count' => '13',
+		]);
+
+		$this->assertFalse($result->valid());
+		$this->assertSame('Age must be a whole number', $result->first('age'));
+		$this->assertSame('13', $result->values()['age']);
+		$this->assertSame(13, $result->values()['count']);
+	}
+
+	public function testShapeStrictModeCanBeOverriddenByFieldCoerce(): void
+	{
+		$shape = new Shape()->strict();
+		$shape->add('age', 'int');
+		$shape->add('count', 'int')->coerce();
+		$shape->add('price', 'float');
+		$shape->add('amount', 'number');
+		$shape->add('enabled', 'bool')->coerce();
+
+		$result = $shape->validate([
+			'age' => '13',
+			'count' => '13',
+			'price' => 13,
+			'amount' => 13,
+			'enabled' => 'on',
+		]);
+
+		$this->assertFalse($result->valid());
+		$this->assertSame('age must be a whole number', $result->first('age'));
+		$this->assertSame('price must be a number', $result->first('price'));
+		$this->assertSame('13', $result->values()['age']);
+		$this->assertSame(13, $result->values()['count']);
+		$this->assertSame(13, $result->values()['price']);
+		$this->assertSame(13, $result->values()['amount']);
+		$this->assertSame(true, $result->values()['enabled']);
+	}
+
+	public function testShapeCoerceResetsShapeStrictMode(): void
+	{
+		$shape = new Shape()->strict()->coerce();
+		$shape->add('age', 'int');
+
+		$result = $shape->validate(['age' => '13']);
+
+		$this->assertTrue($result->valid());
+		$this->assertSame(13, $result->values()['age']);
+	}
+
+	public function testStrictFieldUsesPreparedValue(): void
+	{
+		$shape = new Shape();
+		$shape
+			->add('age', 'int')
+			->strict()
+			->prepare(static fn(mixed $value): int => (int) $value);
+
+		$result = $shape->validate(['age' => '13']);
+
+		$this->assertTrue($result->valid());
+		$this->assertSame(13, $result->values()['age']);
 	}
 
 	public function testTypeString(): void
@@ -422,8 +510,10 @@ class ShapeTest extends TestCase
 				}
 
 				#[Override]
-				public function coerce(mixed $pristine): \Duon\Sire\Contract\Coercion
-				{
+				public function coerce(
+					mixed $pristine,
+					CoercionMode $mode,
+				): \Duon\Sire\Contract\Coercion {
 					if (!is_string($pristine) || !preg_match('/^[a-z0-9-]+$/', $pristine)) {
 						return new Coercion(
 							$pristine,
@@ -457,8 +547,10 @@ class ShapeTest extends TestCase
 					}
 
 					#[Override]
-					public function coerce(mixed $pristine): \Duon\Sire\Contract\Coercion
-					{
+					public function coerce(
+						mixed $pristine,
+						CoercionMode $mode,
+					): \Duon\Sire\Contract\Coercion {
 						return new Coercion(
 							$pristine,
 							$pristine,
@@ -484,8 +576,10 @@ class ShapeTest extends TestCase
 				}
 
 				#[Override]
-				public function coerce(mixed $pristine): \Duon\Sire\Contract\Coercion
-				{
+				public function coerce(
+					mixed $pristine,
+					CoercionMode $mode,
+				): \Duon\Sire\Contract\Coercion {
 					$value = is_string($pristine) ? strtoupper($pristine) : $pristine;
 
 					return new Coercion($value, $pristine);
@@ -499,6 +593,45 @@ class ShapeTest extends TestCase
 		$result = $shape->validate(['field' => 'value']);
 		$this->assertTrue($result->valid());
 		$this->assertSame('VALUE', $result->values()['field']);
+	}
+
+	public function testCustomCoercerReceivesResolvedCoercionMode(): void
+	{
+		$coercer = new class implements Coercer {
+			/** @var list<CoercionMode> */
+			public array $modes = [];
+
+			public string $message {
+				get => 'Invalid value';
+			}
+
+			#[Override]
+			public function coerce(
+				mixed $pristine,
+				CoercionMode $mode,
+			): \Duon\Sire\Contract\Coercion {
+				$this->modes[] = $mode;
+
+				return new Coercion($pristine, $pristine);
+			}
+		};
+
+		$shape = new Shape()
+			->strict()
+			->type('tracked', $coercer);
+		$shape->add('strict', 'tracked');
+		$shape->add('coerced', 'tracked')->coerce();
+
+		$result = $shape->validate([
+			'strict' => 'value',
+			'coerced' => 'value',
+		]);
+
+		$this->assertTrue($result->valid());
+		$this->assertSame(
+			[CoercionMode::Strict, CoercionMode::Coerce],
+			$coercer->modes,
+		);
 	}
 
 	public function testResult(): void

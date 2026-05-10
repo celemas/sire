@@ -11,22 +11,16 @@ use ValueError;
 final class Config
 {
 	private bool $list = false;
-
 	private Extra $extra = Extra::Ignore;
-
+	private CoercionMode $coercionMode = CoercionMode::Coerce;
 	/** @var array<string, string> */
 	private array $messages = [];
-
 	private ?Contract\RuleRegistry $ruleRegistry = null;
-
 	/** @var array<string, Contract\Rule> */
 	private array $rules = [];
-
 	private ?Contract\CoercerRegistry $coercerRegistry = null;
-
 	/** @var array<string, Contract\Coercer> */
 	private array $coercers = [];
-
 	private ?Contract\RuleParser $ruleParser = null;
 
 	public function asList(bool $list = true): void
@@ -46,6 +40,11 @@ final class Config
 			'Invalid extra mode "%s"',
 			$extra,
 		));
+	}
+
+	public function coercionMode(CoercionMode $mode): void
+	{
+		$this->coercionMode = $mode;
 	}
 
 	public function rule(string $name, Contract\Rule $rule): void
@@ -99,6 +98,7 @@ final class Config
 		return new ShapeDefinition(
 			$this->list,
 			$this->extra,
+			$this->coercionMode,
 			$fields,
 			$this->resolvedRuleRegistry(),
 			$this->resolvedCoercerRegistry(),

@@ -10,6 +10,7 @@ use Duon\Sire\Coercer\Integer;
 use Duon\Sire\Coercer\ListArray;
 use Duon\Sire\Coercer\Number;
 use Duon\Sire\Coercer\Str;
+use Duon\Sire\CoercionMode;
 use Duon\Sire\Contract\Coercer;
 
 class CoercerTest extends TestCase
@@ -21,12 +22,18 @@ class CoercerTest extends TestCase
 		$this->assertCoerces($coercer, null, null, empty: true);
 		$this->assertCoerces($coercer, 13, 13);
 		$this->assertCoerces($coercer, 13, '13');
+		$this->assertCoerces($coercer, 13, '+13');
 		$this->assertCoerces($coercer, 0, '0');
+		$this->assertCoerces($coercer, 0, '-0');
 		$this->assertCoerces($coercer, -13, '-13');
 
 		$this->assertRejects($coercer, '23invalid');
 		$this->assertRejects($coercer, '23.23');
+		$this->assertRejects($coercer, '1e3');
 		$this->assertRejects($coercer, '01');
+		$this->assertRejects($coercer, 13.0);
+		$this->assertRejects($coercer, true);
+		$this->assertRejects($coercer, []);
 		$this->assertRejects($coercer, '', empty: true);
 	}
 
@@ -40,9 +47,16 @@ class CoercerTest extends TestCase
 		$this->assertCoerces($coercer, 13.0, '13');
 		$this->assertCoerces($coercer, 13.13, '13.13');
 		$this->assertCoerces($coercer, 1000.0, '1e3');
+		$this->assertCoerces($coercer, 1.0, '1.');
 
 		$this->assertRejects($coercer, '23.23invalid');
+		$this->assertRejects($coercer, '1e309');
+		$this->assertRejects($coercer, INF);
+		$this->assertRejects($coercer, -INF);
+		$this->assertRejects($coercer, NAN);
 		$this->assertRejects($coercer, '', empty: true);
+		$this->assertRejects($coercer, true);
+		$this->assertRejects($coercer, []);
 	}
 
 	public function testNumberCoercer(): void
@@ -56,9 +70,18 @@ class CoercerTest extends TestCase
 		$this->assertCoerces($coercer, 13.0, '13.0');
 		$this->assertCoerces($coercer, 13.13, '13.13');
 		$this->assertCoerces($coercer, 1000.0, '1e3');
+		$this->assertCoerces($coercer, 1.0, '1.');
+		$this->assertCoerces($coercer, 1.0, '01');
+		$this->assertCoerces($coercer, 1.0E+30, '1000000000000000000000000000000');
 
 		$this->assertRejects($coercer, '23.23invalid');
+		$this->assertRejects($coercer, '1e309');
+		$this->assertRejects($coercer, INF);
+		$this->assertRejects($coercer, -INF);
+		$this->assertRejects($coercer, NAN);
 		$this->assertRejects($coercer, '', empty: true);
+		$this->assertRejects($coercer, true);
+		$this->assertRejects($coercer, []);
 	}
 
 	public function testBooleanCoercer(): void
@@ -68,17 +91,19 @@ class CoercerTest extends TestCase
 		$this->assertCoerces($coercer, true, true);
 		$this->assertCoerces($coercer, false, false);
 		$this->assertCoerces($coercer, null, null, empty: true);
+		$this->assertCoerces($coercer, true, 1);
+		$this->assertCoerces($coercer, false, 0);
+		$this->assertCoerces($coercer, true, '1');
+		$this->assertCoerces($coercer, false, '0');
+		$this->assertCoerces($coercer, true, 'on');
+		$this->assertCoerces($coercer, false, 'off');
+		$this->assertCoerces($coercer, true, 'true');
+		$this->assertCoerces($coercer, false, 'false');
+		$this->assertCoerces($coercer, true, 'yes');
+		$this->assertCoerces($coercer, false, 'no');
+		$this->assertCoerces($coercer, true, ' ON ');
+		$this->assertCoerces($coercer, false, 'False');
 
-		$this->assertRejects($coercer, 1);
-		$this->assertRejects($coercer, 0);
-		$this->assertRejects($coercer, '1');
-		$this->assertRejects($coercer, '0');
-		$this->assertRejects($coercer, 'on');
-		$this->assertRejects($coercer, 'off');
-		$this->assertRejects($coercer, 'true');
-		$this->assertRejects($coercer, 'false');
-		$this->assertRejects($coercer, 'yes');
-		$this->assertRejects($coercer, 'no');
 		$this->assertRejects($coercer, '');
 		$this->assertRejects($coercer, ' ');
 		$this->assertRejects($coercer, []);
@@ -87,6 +112,39 @@ class CoercerTest extends TestCase
 		$this->assertRejects($coercer, 0.0);
 		$this->assertRejects($coercer, 1.0);
 		$this->assertRejects($coercer, 13);
+	}
+
+	public function testStrictCoercers(): void
+	{
+		$this->assertCoerces(new Boolean(), true, true, mode: CoercionMode::Strict);
+		$this->assertRejects(new Boolean(), 1, mode: CoercionMode::Strict);
+		$this->assertRejects(new Boolean(), 'on', mode: CoercionMode::Strict);
+
+		$this->assertCoerces(new Integer(), null, null, empty: true, mode: CoercionMode::Strict);
+		$this->assertCoerces(new Integer(), 13, 13, mode: CoercionMode::Strict);
+		$this->assertRejects(new Integer(), '13', mode: CoercionMode::Strict);
+
+		$this->assertCoerces(new FloatingPoint(), null, null, empty: true, mode: CoercionMode::Strict);
+		$this->assertCoerces(new FloatingPoint(), 13.13, 13.13, mode: CoercionMode::Strict);
+		$this->assertRejects(new FloatingPoint(), 13, mode: CoercionMode::Strict);
+		$this->assertRejects(new FloatingPoint(), INF, mode: CoercionMode::Strict);
+		$this->assertRejects(new FloatingPoint(), NAN, mode: CoercionMode::Strict);
+		$this->assertRejects(new FloatingPoint(), '13.13', mode: CoercionMode::Strict);
+
+		$this->assertCoerces(new Number(), null, null, empty: true, mode: CoercionMode::Strict);
+		$this->assertCoerces(new Number(), 13, 13, mode: CoercionMode::Strict);
+		$this->assertCoerces(new Number(), 13.13, 13.13, mode: CoercionMode::Strict);
+		$this->assertRejects(new Number(), INF, mode: CoercionMode::Strict);
+		$this->assertRejects(new Number(), NAN, mode: CoercionMode::Strict);
+		$this->assertRejects(new Number(), '13', mode: CoercionMode::Strict);
+
+		$this->assertCoerces(new Str(), null, null, empty: true, mode: CoercionMode::Strict);
+		$this->assertCoerces(new Str(), '', '', empty: true, mode: CoercionMode::Strict);
+		$this->assertCoerces(new Str(), 'text', 'text', mode: CoercionMode::Strict);
+		$this->assertRejects(new Str(), 13, mode: CoercionMode::Strict);
+
+		$this->assertCoerces(new ListArray(), [1, 2], [1, 2], mode: CoercionMode::Strict);
+		$this->assertRejects(new ListArray(), ['key' => 'data'], mode: CoercionMode::Strict);
 	}
 
 	public function testStringCoercer(): void
@@ -135,8 +193,9 @@ class CoercerTest extends TestCase
 		mixed $expected,
 		mixed $pristine,
 		bool $empty = false,
+		CoercionMode $mode = CoercionMode::Coerce,
 	): void {
-		$coercion = $coercer->coerce($pristine);
+		$coercion = $coercer->coerce($pristine, $mode);
 
 		$this->assertSame($expected, $coercion->value);
 		$this->assertSame($pristine, $coercion->pristine);
@@ -144,12 +203,22 @@ class CoercerTest extends TestCase
 		$this->assertSame($empty, $coercion->empty);
 	}
 
-	private function assertRejects(Coercer $coercer, mixed $pristine, bool $empty = false): void
-	{
-		$coercion = $coercer->coerce($pristine);
+	private function assertRejects(
+		Coercer $coercer,
+		mixed $pristine,
+		bool $empty = false,
+		CoercionMode $mode = CoercionMode::Coerce,
+	): void {
+		$coercion = $coercer->coerce($pristine, $mode);
 
-		$this->assertSame($pristine, $coercion->value);
-		$this->assertSame($pristine, $coercion->pristine);
+		if (is_float($pristine) && is_nan($pristine)) {
+			$this->assertNan($coercion->value);
+			$this->assertNan($coercion->pristine);
+		} else {
+			$this->assertSame($pristine, $coercion->value);
+			$this->assertSame($pristine, $coercion->pristine);
+		}
+
 		$this->assertNotNull($coercion->failure);
 		$this->assertSame($empty, $coercion->empty);
 	}
