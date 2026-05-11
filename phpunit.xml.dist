@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xsi:noNamespaceSchemaLocation="./vendor/phpunit/phpunit/phpunit.xsd"
-		 colors="true">
+<phpunit
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/13.0/phpunit.xsd"
+	bootstrap="vendor/autoload.php"
+	colors="true"
+	cacheDirectory=".phpunit.cache">
 	<testsuites>
-		<testsuite name="Duon\Sire Test Suite">
+		<testsuite name="Celemas Sire Test Suite">
 			<directory suffix="Test.php">tests</directory>
 		</testsuite>
 	</testsuites>
@@ -12,9 +15,11 @@
 			<directory>src</directory>
 		</include>
 	</source>
-	<coverage includeUncoveredFiles="true">
+	<coverage includeUncoveredFiles="true" pathCoverage="true">
 		<report>
-			<html outputDirectory=".coverage" lowUpperBound="20" highLowerBound="50"/>
+			<html outputDirectory=".coverage/html"/>
+			<text outputFile="php://stdout"/>
+			<php outputFile=".coverage/cover.php"/>
 		</report>
 	</coverage>
 </phpunit>
