@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Duon\Sire\Tests;
+namespace Celemas\Sire\Tests;
 
-use Duon\Sire\Coercer\Boolean;
-use Duon\Sire\Coercer\FloatingPoint;
-use Duon\Sire\Coercer\Integer;
-use Duon\Sire\Coercer\ListArray;
-use Duon\Sire\Coercer\Number;
-use Duon\Sire\Coercer\Str;
-use Duon\Sire\CoercionMode;
-use Duon\Sire\Contract\Coercer;
+use Celemas\Sire\Coercer\Boolean;
+use Celemas\Sire\Coercer\FloatingPoint;
+use Celemas\Sire\Coercer\Integer;
+use Celemas\Sire\Coercer\ListArray;
+use Celemas\Sire\Coercer\Number;
+use Celemas\Sire\Coercer\Str;
+use Celemas\Sire\CoercionMode;
+use Celemas\Sire\Contract\Coercer;
 
 class CoercerTest extends TestCase
 {

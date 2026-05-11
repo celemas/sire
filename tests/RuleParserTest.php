@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Sire\Tests;
+namespace Celemas\Sire\Tests;
 
-use Duon\Sire\RuleParser;
+use Celemas\Sire\RuleParser;
 use ValueError;
 
 class RuleParserTest extends TestCase

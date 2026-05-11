@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Duon\Sire\Tests;
+namespace Celemas\Sire\Tests;
 
-use Duon\Sire\Contract;
-use Duon\Sire\Result;
-use Duon\Sire\Shape;
+use Celemas\Sire\Contract;
+use Celemas\Sire\Result;
+use Celemas\Sire\Shape;
 use Override;
 
 final class SubShape implements Contract\Validator

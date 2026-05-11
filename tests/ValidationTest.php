@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Duon\Sire\Tests;
+namespace Celemas\Sire\Tests;
 
-use Duon\Sire\Failure;
-use Duon\Sire\Validation;
+use Celemas\Sire\Failure;
+use Celemas\Sire\Validation;
 
 class ValidationTest extends TestCase
 {

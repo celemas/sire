@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Duon\Sire\Tests;
+namespace Celemas\Sire\Tests;
 
+use Celemas\Sire\CoercerRegistry;
+use Celemas\Sire\Coercion;
+use Celemas\Sire\CoercionMode;
+use Celemas\Sire\Contract;
+use Celemas\Sire\Contract\Coercer;
 use Closure;
-use Duon\Sire\CoercerRegistry;
-use Duon\Sire\Coercion;
-use Duon\Sire\CoercionMode;
-use Duon\Sire\Contract;
-use Duon\Sire\Contract\Coercer;
 use Override;
 use RuntimeException;
 

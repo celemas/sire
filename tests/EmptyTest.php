@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Duon\Sire\Tests;
+namespace Celemas\Sire\Tests;
 
-use Duon\Sire\Blank;
-use Duon\Sire\Coercion;
-use Duon\Sire\CoercionMode;
-use Duon\Sire\Contract;
-use Duon\Sire\Shape;
-use Duon\Sire\Validation;
+use Celemas\Sire\Blank;
+use Celemas\Sire\Coercion;
+use Celemas\Sire\CoercionMode;
+use Celemas\Sire\Contract;
+use Celemas\Sire\Shape;
+use Celemas\Sire\Validation;
 use Override;
 use ValueError;
 

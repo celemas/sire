@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Duon\Sire\Contract;
+namespace Celemas\Sire\Contract;
 
 /** @api */
 interface Parser
 {
 	/**
 	 * @return array<array-key, mixed>
-	 * @throws \Duon\Sire\Exception\ValidationError
+	 * @throws \Celemas\Sire\Exception\ValidationError
 	 */
 	public function parse(array $data): array;
 }

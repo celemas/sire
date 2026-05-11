@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Duon\Sire\Tests;
+namespace Celemas\Sire\Tests;
 
-use Duon\Sire\Coercion;
-use Duon\Sire\Failure;
+use Celemas\Sire\Coercion;
+use Celemas\Sire\Failure;
 
 class CoercionTest extends TestCase
 {

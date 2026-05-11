@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Duon\Sire\Rule;
+namespace Celemas\Sire\Rule;
 
-use Duon\Sire\Contract;
-use Duon\Sire\Validation;
+use Celemas\Sire\Contract;
+use Celemas\Sire\Validation;
 use Override;
 
 /** @api */

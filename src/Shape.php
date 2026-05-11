@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Duon\Sire;
+namespace Celemas\Sire;
 
+use Celemas\Sire\Exception\ValidationError;
 use Closure;
-use Duon\Sire\Exception\ValidationError;
 use Override;
 use ValueError;
 

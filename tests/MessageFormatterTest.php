@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Duon\Sire\Tests;
+namespace Celemas\Sire\Tests;
 
-use Duon\Sire\Failure;
-use Duon\Sire\MessageFormatter;
+use Celemas\Sire\Failure;
+use Celemas\Sire\MessageFormatter;
 
 class MessageFormatterTest extends TestCase
 {

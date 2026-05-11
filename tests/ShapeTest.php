@@ -2,23 +2,23 @@
 
 declare(strict_types=1);
 
-namespace Duon\Sire\Tests;
+namespace Celemas\Sire\Tests;
 
-use Duon\Sire\CoercerRegistry;
-use Duon\Sire\Coercion;
-use Duon\Sire\CoercionMode;
-use Duon\Sire\Contract\Coercer;
-use Duon\Sire\Contract\Parser;
-use Duon\Sire\Contract\Rule;
-use Duon\Sire\Contract\RuleParser;
-use Duon\Sire\Contract\Value;
-use Duon\Sire\Exception\ValidationError;
-use Duon\Sire\Extra;
-use Duon\Sire\Failure;
-use Duon\Sire\Review;
-use Duon\Sire\RuleRegistry;
-use Duon\Sire\Shape;
-use Duon\Sire\Validation;
+use Celemas\Sire\CoercerRegistry;
+use Celemas\Sire\Coercion;
+use Celemas\Sire\CoercionMode;
+use Celemas\Sire\Contract\Coercer;
+use Celemas\Sire\Contract\Parser;
+use Celemas\Sire\Contract\Rule;
+use Celemas\Sire\Contract\RuleParser;
+use Celemas\Sire\Contract\Value;
+use Celemas\Sire\Exception\ValidationError;
+use Celemas\Sire\Extra;
+use Celemas\Sire\Failure;
+use Celemas\Sire\Review;
+use Celemas\Sire\RuleRegistry;
+use Celemas\Sire\Shape;
+use Celemas\Sire\Validation;
 use Override;
 use ValueError;
 
@@ -359,7 +359,7 @@ class ShapeTest extends TestCase
 			}
 
 			#[Override]
-			public function validate(Value $value, string ...$args): \Duon\Sire\Contract\Validation
+			public function validate(Value $value, string ...$args): \Celemas\Sire\Contract\Validation
 			{
 				$this->called = true;
 
@@ -389,7 +389,7 @@ class ShapeTest extends TestCase
 			}
 
 			#[Override]
-			public function validate(Value $value, string ...$args): \Duon\Sire\Contract\Validation
+			public function validate(Value $value, string ...$args): \Celemas\Sire\Contract\Validation
 			{
 				$this->called = true;
 
@@ -513,7 +513,7 @@ class ShapeTest extends TestCase
 				public function coerce(
 					mixed $pristine,
 					CoercionMode $mode,
-				): \Duon\Sire\Contract\Coercion {
+				): \Celemas\Sire\Contract\Coercion {
 					if (!is_string($pristine) || !preg_match('/^[a-z0-9-]+$/', $pristine)) {
 						return new Coercion(
 							$pristine,
@@ -550,7 +550,7 @@ class ShapeTest extends TestCase
 					public function coerce(
 						mixed $pristine,
 						CoercionMode $mode,
-					): \Duon\Sire\Contract\Coercion {
+					): \Celemas\Sire\Contract\Coercion {
 						return new Coercion(
 							$pristine,
 							$pristine,
@@ -579,7 +579,7 @@ class ShapeTest extends TestCase
 				public function coerce(
 					mixed $pristine,
 					CoercionMode $mode,
-				): \Duon\Sire\Contract\Coercion {
+				): \Celemas\Sire\Contract\Coercion {
 					$value = is_string($pristine) ? strtoupper($pristine) : $pristine;
 
 					return new Coercion($value, $pristine);
@@ -609,7 +609,7 @@ class ShapeTest extends TestCase
 			public function coerce(
 				mixed $pristine,
 				CoercionMode $mode,
-			): \Duon\Sire\Contract\Coercion {
+			): \Celemas\Sire\Contract\Coercion {
 				$this->modes[] = $mode;
 
 				return new Coercion($pristine, $pristine);
@@ -664,7 +664,7 @@ class ShapeTest extends TestCase
 			);
 
 		$this->assertInstanceOf(Parser::class, $shape);
-		$this->assertInstanceOf(\Duon\Sire\Contract\Validator::class, $shape);
+		$this->assertInstanceOf(\Celemas\Sire\Contract\Validator::class, $shape);
 		$this->assertSame(
 			['age' => 21, 'status' => 'DRAFT'],
 			$shape->parse(['age' => '21']),
@@ -1085,9 +1085,9 @@ class ShapeTest extends TestCase
 		$shape->add('invalid', 'string')->rules('starts_with:http\\://');
 
 		$result = $shape->validate([
-			'escaped' => 'http://duon.de',
-			'quoted' => 'http://duon.org',
-			'invalid' => 'https://duon.de',
+			'escaped' => 'http://celemas.de',
+			'quoted' => 'http://celemas.org',
+			'invalid' => 'https://celemas.de',
 		]);
 
 		$this->assertFalse($result->valid());
@@ -1726,7 +1726,7 @@ class ShapeTest extends TestCase
 			}
 
 			#[Override]
-			public function validate(Value $value, string ...$args): \Duon\Sire\Contract\Validation
+			public function validate(Value $value, string ...$args): \Celemas\Sire\Contract\Validation
 			{
 				$prefix = $args[0] ?? '';
 

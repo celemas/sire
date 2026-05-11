@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Duon\Sire\Contract;
+namespace Celemas\Sire\Contract;
 
 /** @api */
 interface CoercerRegistry

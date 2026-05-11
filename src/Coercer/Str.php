@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Duon\Sire\Coercer;
+namespace Celemas\Sire\Coercer;
 
-use Duon\Sire\Coercion;
-use Duon\Sire\CoercionMode;
-use Duon\Sire\Contract;
-use Duon\Sire\Failure;
+use Celemas\Sire\Coercion;
+use Celemas\Sire\CoercionMode;
+use Celemas\Sire\Contract;
+use Celemas\Sire\Failure;
 use Override;
 use Stringable;
 

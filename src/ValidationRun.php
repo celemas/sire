@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Sire;
+namespace Celemas\Sire;
 
-use Duon\Sire\Contract\Value;
+use Celemas\Sire\Contract\Value;
 use ValueError;
 
 /** @internal */
@@ -141,7 +141,7 @@ final class ValidationRun
 
 			$value = $values[$field];
 			$finalValue = $definition->applyFinalization($value->value, $itemValues);
-			$values[$field] = new \Duon\Sire\Value($finalValue, $value->pristine, $value->empty);
+			$values[$field] = new \Celemas\Sire\Value($finalValue, $value->pristine, $value->empty);
 		}
 
 		return $values;
@@ -258,7 +258,7 @@ final class ValidationRun
 	private function readExtraValue(string $field, mixed $value, string|int|null $listIndex): ?Value
 	{
 		if ($this->shape->extra === Extra::Allow) {
-			return new \Duon\Sire\Value($value, $value, self::isRawEmptyValue($value));
+			return new \Celemas\Sire\Value($value, $value, self::isRawEmptyValue($value));
 		}
 
 		if ($this->shape->extra === Extra::Forbid) {
@@ -275,7 +275,7 @@ final class ValidationRun
 	{
 		if ($value === null) {
 			return new ReadValue(
-				new \Duon\Sire\Value(null, null, true),
+				new \Celemas\Sire\Value(null, null, true),
 				$definition->isNullable() ? null : $this->formatNullFailure($definition),
 			);
 		}
@@ -301,7 +301,7 @@ final class ValidationRun
 		);
 
 		return new ReadValue(
-			new \Duon\Sire\Value($coercion->value, $coercion->pristine, $coercion->empty),
+			new \Celemas\Sire\Value($coercion->value, $coercion->pristine, $coercion->empty),
 			$this->formatCoercionFailure($coercion, $definition, $coercer),
 		);
 	}
@@ -417,7 +417,7 @@ final class ValidationRun
 	): ReadValue {
 		if (!is_array($pristine)) {
 			return new ReadValue(
-				new \Duon\Sire\Value($pristine, $pristine, self::isRawEmptyValue($pristine)),
+				new \Celemas\Sire\Value($pristine, $pristine, self::isRawEmptyValue($pristine)),
 				$this->formatShapeFailure($definition, $pristine),
 			);
 		}
@@ -427,11 +427,11 @@ final class ValidationRun
 		if ($result->valid()) {
 			$values = $result->values();
 
-			return new ReadValue(new \Duon\Sire\Value($values, $pristine, $values === []));
+			return new ReadValue(new \Celemas\Sire\Value($values, $pristine, $values === []));
 		}
 
 		return new ReadValue(
-			new \Duon\Sire\Value($pristine, $pristine, self::isRawEmptyValue($pristine)),
+			new \Celemas\Sire\Value($pristine, $pristine, self::isRawEmptyValue($pristine)),
 			nestedResult: $result,
 		);
 	}

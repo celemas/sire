@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Duon\Sire\Tests;
+namespace Celemas\Sire\Tests;
 
-use Duon\Sire\Contract;
-use Duon\Sire\RuleRegistry;
-use Duon\Sire\Validation;
-use Duon\Sire\Value;
+use Celemas\Sire\Contract;
+use Celemas\Sire\RuleRegistry;
+use Celemas\Sire\Validation;
+use Celemas\Sire\Value;
 use Override;
 use RuntimeException;
 

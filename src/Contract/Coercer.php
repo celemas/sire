@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Sire\Contract;
+namespace Celemas\Sire\Contract;
 
-use Duon\Sire\CoercionMode;
+use Celemas\Sire\CoercionMode;
 
 /** @api */
 interface Coercer

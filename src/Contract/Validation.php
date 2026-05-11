@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Sire\Contract;
+namespace Celemas\Sire\Contract;
 
-use Duon\Sire\Failure;
+use Celemas\Sire\Failure;
 
 /** @api */
 interface Validation

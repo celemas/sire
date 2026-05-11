@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Sire\Exception;
+namespace Celemas\Sire\Exception;
 
-use Duon\Sire\Result;
+use Celemas\Sire\Result;
 use RuntimeException;
 use Throwable;
 

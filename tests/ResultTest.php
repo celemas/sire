@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Duon\Sire\Tests;
+namespace Celemas\Sire\Tests;
 
-use Duon\Sire\Issue;
-use Duon\Sire\Result;
+use Celemas\Sire\Issue;
+use Celemas\Sire\Result;
 
 class ResultTest extends TestCase
 {
