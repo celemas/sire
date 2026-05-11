@@ -20,7 +20,7 @@ Use Composer to add Sire as a project dependency.
 1. Run the dependency install command.
 
     ```bash
-    composer require duon/sire
+    composer require celemas/sire
     ```
 
 2. Ensure your Composer autoloader is loaded in your application bootstrap.

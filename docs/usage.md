@@ -13,7 +13,7 @@ Create a `Shape`, define fields with `add()`, attach field constraints with `rul
 ```php
 <?php
 
-use Duon\Sire\Shape;
+use Celemas\Sire\Shape;
 
 $shape = new Shape();
 $shape->add('email', 'string')->rules('required', 'email')->label('Email address');
@@ -33,13 +33,13 @@ var_dump($result->values());
 
 ## Parse valid values or throw
 
-Use `parse()` when invalid input should stop the current flow. It returns the same coerced and finalized values as `Result::values()` after validation and review both succeed. It throws `Duon\Sire\Exception\ValidationError` when the data is invalid.
+Use `parse()` when invalid input should stop the current flow. It returns the same coerced and finalized values as `Result::values()` after validation and review both succeed. It throws `Celemas\Sire\Exception\ValidationError` when the data is invalid.
 
 ```php
 <?php
 
-use Duon\Sire\Exception\ValidationError;
-use Duon\Sire\Shape;
+use Celemas\Sire\Exception\ValidationError;
+use Celemas\Sire\Shape;
 
 $shape = new Shape();
 $shape->add('email', 'string')->rules('required', 'email');
@@ -60,8 +60,8 @@ Use `validate()` when you need to branch on validation state without exceptions.
 ```php
 <?php
 
-use Duon\Sire\Extra;
-use Duon\Sire\Shape;
+use Celemas\Sire\Extra;
+use Celemas\Sire\Shape;
 
 $shape = Shape::list()
     ->extra(Extra::Allow);
@@ -74,7 +74,7 @@ Sire coerces field values by default. Use `strict()` when fields should reject v
 ```php
 <?php
 
-use Duon\Sire\Shape;
+use Celemas\Sire\Shape;
 
 $shape = new Shape()->strict();
 $shape->add('age', 'int'); // accepts only native ints
@@ -131,7 +131,7 @@ Fields are required by default. A missing field reports a validation error and i
 ```php
 <?php
 
-use Duon\Sire\Shape;
+use Celemas\Sire\Shape;
 
 $shape = new Shape();
 $shape->add('title', 'string')->label('Title');
@@ -146,7 +146,7 @@ Use `optional()` when a missing field should have no effect on validation output
 ```php
 <?php
 
-use Duon\Sire\Shape;
+use Celemas\Sire\Shape;
 
 $shape = new Shape();
 $shape->add('subtitle', 'string')->optional();
@@ -161,7 +161,7 @@ Use `default()` when an empty field should be filled. By default, only missing i
 ```php
 <?php
 
-use Duon\Sire\Shape;
+use Celemas\Sire\Shape;
 
 $shape = new Shape();
 $shape->add('status', 'string')->default('draft');
@@ -177,8 +177,8 @@ Use `empty()` to configure which field value states count as empty for a field. 
 ```php
 <?php
 
-use Duon\Sire\Blank;
-use Duon\Sire\Shape;
+use Celemas\Sire\Blank;
+use Celemas\Sire\Shape;
 
 $shape = new Shape();
 $shape->add('status', 'string')
@@ -205,7 +205,7 @@ Use `nullable()` when explicit `null` should be accepted instead of treated as e
 ```php
 <?php
 
-use Duon\Sire\Shape;
+use Celemas\Sire\Shape;
 
 $shape = new Shape();
 $shape->add('discount_code', 'string')->rules('maxlen:64') ->default('') ->nullable();
@@ -222,8 +222,8 @@ Use `Shape::prepare()` when the whole input payload needs migration or normaliza
 ```php
 <?php
 
-use Duon\Sire\Extra;
-use Duon\Sire\Shape;
+use Celemas\Sire\Extra;
+use Celemas\Sire\Shape;
 
 $shape = new Shape()
     ->extra(Extra::Forbid)
@@ -244,7 +244,7 @@ For `Shape::list()`, the callback receives the whole list, not each item. Map th
 ```php
 <?php
 
-use Duon\Sire\Shape;
+use Celemas\Sire\Shape;
 
 $users = Shape::list()->prepare(static fn(array $items): array => array_map(
     static fn(mixed $item): array => is_string($item) ? ['email' => $item] : $item,
@@ -263,7 +263,7 @@ Use `Field::prepare()` when a field value needs normalization before Sire checks
 ```php
 <?php
 
-use Duon\Sire\Shape;
+use Celemas\Sire\Shape;
 
 $shape = new Shape();
 $shape
@@ -280,7 +280,7 @@ Field prepare callbacks receive the current field value and the current shape it
 ```php
 <?php
 
-use Duon\Sire\Shape;
+use Celemas\Sire\Shape;
 
 $shape = new Shape();
 $shape->add('title', 'string');
@@ -304,7 +304,7 @@ Prepare callbacks also run before nested shape validation. This is useful when e
 ```php
 <?php
 
-use Duon\Sire\Shape;
+use Celemas\Sire\Shape;
 
 $profile = new Shape();
 $profile->add('bio', 'string')->optional();
@@ -324,7 +324,7 @@ Use `Field::finalize()` when a field needs a final output transform after succes
 ```php
 <?php
 
-use Duon\Sire\Shape;
+use Celemas\Sire\Shape;
 
 $shape = new Shape();
 $shape->add('title', 'string');
@@ -369,7 +369,7 @@ Use `message()` or `messages()` to override coercion and rule errors for a shape
 ```php
 <?php
 
-use Duon\Sire\Shape;
+use Celemas\Sire\Shape;
 
 $shape = new Shape()
     ->message('type.int', '{label} must be a whole number')
@@ -388,7 +388,7 @@ Use `Field::message()` or `Field::messages()` for field-specific messages. Field
 ```php
 <?php
 
-use Duon\Sire\Shape;
+use Celemas\Sire\Shape;
 
 $shape = new Shape();
 $shape
@@ -420,8 +420,8 @@ Use `Shape::review()` for cross-field checks or other post-validation checks. Re
 ```php
 <?php
 
-use Duon\Sire\Review;
-use Duon\Sire\Shape;
+use Celemas\Sire\Review;
+use Celemas\Sire\Shape;
 
 $shape = new Shape();
 $shape->add('password', 'string')->rules('required');
@@ -451,7 +451,7 @@ You can use another shape as a field type to validate nested structures. Create 
 ```php
 <?php
 
-use Duon\Sire\Shape;
+use Celemas\Sire\Shape;
 
 $address = new Shape();
 $address->add('street', 'string')->rules('required');
@@ -473,9 +473,9 @@ $users->add('address', $address);
 ```php
 <?php
 
-use Duon\Sire\Contract;
-use Duon\Sire\Shape;
-use Duon\Sire\Result;
+use Celemas\Sire\Contract;
+use Celemas\Sire\Shape;
+use Celemas\Sire\Result;
 use Override;
 
 final class LoginShape implements Contract\Validator
@@ -512,17 +512,17 @@ Configure a shape fluently when you need project-specific rules, coercion behavi
 - Use `messages()` to override many type, rule, or extra-field messages.
 - Use `ruleParser()` if you need a different DSL split strategy.
 
-Custom rules implement `Duon\Sire\Contract\Rule`, expose a default `message`, and return `Duon\Sire\Contract\Validation`; use `Duon\Sire\Validation` when the default immutable result object is enough. Rules do not run after failed type handling or failed nested validation. Rules also skip values where `Contract\Value::$empty` is `true` by default; implement `Duon\Sire\Contract\ValidatesEmpty` when a rule must run for successfully typed empty values. Custom coercers implement `Duon\Sire\Contract\Coercer`, expose a default `message`, and return `Duon\Sire\Contract\Coercion`; use `Duon\Sire\Coercion` when the default immutable result object is enough. Sire passes the resolved `Duon\Sire\CoercionMode` to `coerce()`, but custom coercers must honor it themselves; shape strict mode cannot make a custom coercer strict if it ignores the mode. Pass `empty: true` to `Coercion` when the coerced value has no meaningful content for its type. Return `Failure::invalid()` when a coercer or rule cannot produce a valid value. Use `Failure::key()` only when one coercer or rule has multiple distinct failure modes.
+Custom rules implement `Celemas\Sire\Contract\Rule`, expose a default `message`, and return `Celemas\Sire\Contract\Validation`; use `Celemas\Sire\Validation` when the default immutable result object is enough. Rules do not run after failed type handling or failed nested validation. Rules also skip values where `Contract\Value::$empty` is `true` by default; implement `Celemas\Sire\Contract\ValidatesEmpty` when a rule must run for successfully typed empty values. Custom coercers implement `Celemas\Sire\Contract\Coercer`, expose a default `message`, and return `Celemas\Sire\Contract\Coercion`; use `Celemas\Sire\Coercion` when the default immutable result object is enough. Sire passes the resolved `Celemas\Sire\CoercionMode` to `coerce()`, but custom coercers must honor it themselves; shape strict mode cannot make a custom coercer strict if it ignores the mode. Pass `empty: true` to `Coercion` when the coerced value has no meaningful content for its type. Return `Failure::invalid()` when a coercer or rule cannot produce a valid value. Use `Failure::key()` only when one coercer or rule has multiple distinct failure modes.
 
 ```php
 <?php
 
-use Duon\Sire\Coercion;
-use Duon\Sire\CoercionMode;
-use Duon\Sire\Contract;
-use Duon\Sire\Failure;
-use Duon\Sire\Shape;
-use Duon\Sire\Validation;
+use Celemas\Sire\Coercion;
+use Celemas\Sire\CoercionMode;
+use Celemas\Sire\Contract;
+use Celemas\Sire\Failure;
+use Celemas\Sire\Shape;
+use Celemas\Sire\Validation;
 use Override;
 
 $shape = new Shape();
