@@ -13,15 +13,15 @@ Start by cloning the repository and installing dependencies.
 1. Clone the repository.
 2. Install dependencies.
 
-    ```bash
-    composer install
-    ```
+   ```bash
+   composer install
+   ```
 
 3. Run the test suite once to verify your environment.
 
-    ```bash
-    composer test
-    ```
+   ```bash
+   composer test
+   ```
 
 ## Run quality checks
 
@@ -42,9 +42,9 @@ When you update `README.md` or files in `docs/`, run markdown linting to keep fo
 1. Edit the relevant markdown files.
 2. Run markdown checks.
 
-    ```bash
-    composer docs:lint
-    ```
+   ```bash
+   composer docs:lint
+   ```
 
 3. Fix reported issues before committing.
 

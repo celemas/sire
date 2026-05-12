@@ -19,9 +19,9 @@ Use Composer to add Sire as a project dependency.
 
 1. Run the dependency install command.
 
-    ```bash
-    composer require celemas/sire
-    ```
+   ```bash
+   composer require celemas/sire
+   ```
 
 2. Ensure your Composer autoloader is loaded in your application bootstrap.
 
@@ -34,16 +34,16 @@ If you want to contribute to Sire itself, install the repository dependencies in
 1. Clone the repository.
 2. Install dependencies.
 
-    ```bash
-    composer install
-    ```
+   ```bash
+   composer install
+   ```
 
 3. Run the baseline quality checks.
 
-    ```bash
-    composer test
-    composer types
-    ```
+   ```bash
+   composer test
+   composer types
+   ```
 
 ## Next steps
 
