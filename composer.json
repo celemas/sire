@@ -29,7 +29,7 @@
 		"symfony/html-sanitizer": "^8.0"
 	},
 	"require-dev": {
-		"celemas/dev": "^4.1"
+		"celemas/dev": "^4.2"
 	},
 	"scripts": {
 		"test": "./vendor/bin/phpunit --testdox --no-coverage --colors=always",
