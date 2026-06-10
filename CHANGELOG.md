@@ -2,6 +2,10 @@
 
 ## [Unreleased](https://codeberg.org/celemas/sire/compare/0.3.0...HEAD)
 
+No notable changes since the last release.
+
+## [0.4.0](https://codeberg.org/celemas/sire/src/tag/0.4.0) (2026-06-10)
+
 ### Breaking Changes
 
 - Rename package metadata, root namespace, repository URLs, homepage, and contact email to Celemas.
