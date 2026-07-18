@@ -1,10 +1,16 @@
 # Changelog
 
-## [Unreleased](https://codeberg.org/celemas/sire/compare/0.3.0...HEAD)
+## [Unreleased](https://codeberg.org/celema/sire/compare/0.4.0...HEAD)
 
-No notable changes since the last release.
+### Changed
 
-## [0.4.0](https://codeberg.org/celemas/sire/src/tag/0.4.0) (2026-06-10)
+- Renamed the Composer package to `celema/sire` and moved PHP classes from `Celemas\Sire` to `Celema\Sire`.
+
+### Removed
+
+- Removed the previous Composer package name and PHP namespace; consumers must update their dependency and imports.
+
+## [0.4.0](https://codeberg.org/celema/sire/src/tag/0.4.0) (2026-06-10)
 
 ### Breaking Changes
 
@@ -67,7 +73,7 @@ No notable changes since the last release.
 - Added named placeholders such as `{label}`, `{field}`, `{value}`, and `{arg1}` for coercion and rule message templates.
 - Added `Shape::parse()` and `Contract\Parser` to return valid values directly or throw `Exception\ValidationError`.
 
-## [0.3.0](https://codeberg.org/celemas/sire/src/tag/0.3.0) (2026-02-21)
+## [0.3.0](https://codeberg.org/celema/sire/src/tag/0.3.0) (2026-02-21)
 
 Codename: Jonas
 
@@ -77,13 +83,13 @@ Codename: Jonas
 - Breaking: `Rule::type()` now returns `'shape'` instead of `'schema'` for sub-shape fields.
 - Breaking: Exception messages updated to reference "shape" instead of "schema" (`"Shape definition error: field must not be empty"`, `"Wrong shape type"`).
 
-## [0.2.0](https://codeberg.org/celemas/sire/src/tag/0.2.0) (2026-02-01)
+## [0.2.0](https://codeberg.org/celema/sire/src/tag/0.2.0) (2026-02-01)
 
 ### Changed
 
 - Breaking: Updated `symfony/html-sanitizer` requirement to `^8.0` (Symfony 7 is no longer supported).
 
-## [0.1.0](https://codeberg.org/celemas/sire/src/tag/0.1.0) (2026-01-31)
+## [0.1.0](https://codeberg.org/celema/sire/src/tag/0.1.0) (2026-01-31)
 
 Initial release.
 
