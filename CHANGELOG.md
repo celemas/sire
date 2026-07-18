@@ -1,6 +1,10 @@
 # Changelog
 
-## [Unreleased](https://codeberg.org/celema/sire/compare/0.4.0...HEAD)
+## [Unreleased](https://codeberg.org/celema/sire/compare/0.5.0...HEAD)
+
+No notable changes since the last release.
+
+## [0.5.0](https://codeberg.org/celema/sire/src/tag/0.5.0) (2026-07-18)
 
 ### Changed
 
