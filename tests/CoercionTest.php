@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Celemas\Sire\Tests;
+namespace Celema\Sire\Tests;
 
-use Celemas\Sire\Coercion;
-use Celemas\Sire\Failure;
+use Celema\Sire\Coercion;
+use Celema\Sire\Failure;
 
 class CoercionTest extends TestCase
 {

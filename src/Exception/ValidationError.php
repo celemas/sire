@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Celemas\Sire\Exception;
+namespace Celema\Sire\Exception;
 
-use Celemas\Sire\Result;
+use Celema\Sire\Result;
 use RuntimeException;
 use Throwable;
 

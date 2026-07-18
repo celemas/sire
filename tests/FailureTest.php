@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Celemas\Sire\Tests;
+namespace Celema\Sire\Tests;
 
-use Celemas\Sire\Failure;
+use Celema\Sire\Failure;
 
 class FailureTest extends TestCase
 {

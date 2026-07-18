@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Celemas\Sire\Tests;
+namespace Celema\Sire\Tests;
 
-use Celemas\Sire\Failure;
-use Celemas\Sire\MessageFormatter;
+use Celema\Sire\Failure;
+use Celema\Sire\MessageFormatter;
 
 class MessageFormatterTest extends TestCase
 {

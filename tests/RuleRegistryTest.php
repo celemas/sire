@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Celemas\Sire\Tests;
+namespace Celema\Sire\Tests;
 
-use Celemas\Sire\Contract;
-use Celemas\Sire\RuleRegistry;
-use Celemas\Sire\Validation;
-use Celemas\Sire\Value;
+use Celema\Sire\Contract;
+use Celema\Sire\RuleRegistry;
+use Celema\Sire\Validation;
+use Celema\Sire\Value;
 use Override;
 use RuntimeException;
 

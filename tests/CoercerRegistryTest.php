@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Celemas\Sire\Tests;
+namespace Celema\Sire\Tests;
 
-use Celemas\Sire\CoercerRegistry;
-use Celemas\Sire\Coercion;
-use Celemas\Sire\CoercionMode;
-use Celemas\Sire\Contract;
-use Celemas\Sire\Contract\Coercer;
+use Celema\Sire\CoercerRegistry;
+use Celema\Sire\Coercion;
+use Celema\Sire\CoercionMode;
+use Celema\Sire\Contract;
+use Celema\Sire\Contract\Coercer;
 use Closure;
 use Override;
 use RuntimeException;

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Celemas\Sire\Contract;
+namespace Celema\Sire\Contract;
 
-use Celemas\Sire\Result;
+use Celema\Sire\Result;
 
 /** @api */
 interface Validator

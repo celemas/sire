@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Celemas\Sire;
+namespace Celema\Sire;
 
-use Celemas\Sire\Exception\ValidationError;
+use Celema\Sire\Exception\ValidationError;
 use Closure;
 use Override;
 use ValueError;

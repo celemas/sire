@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Celemas\Sire\Tests;
+namespace Celema\Sire\Tests;
 
-use Celemas\Sire\Blank;
-use Celemas\Sire\Coercion;
-use Celemas\Sire\CoercionMode;
-use Celemas\Sire\Contract;
-use Celemas\Sire\Shape;
-use Celemas\Sire\Validation;
+use Celema\Sire\Blank;
+use Celema\Sire\Coercion;
+use Celema\Sire\CoercionMode;
+use Celema\Sire\Contract;
+use Celema\Sire\Shape;
+use Celema\Sire\Validation;
 use Override;
 use ValueError;
 

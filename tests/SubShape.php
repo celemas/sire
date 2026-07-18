@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Celemas\Sire\Tests;
+namespace Celema\Sire\Tests;
 
-use Celemas\Sire\Contract;
-use Celemas\Sire\Result;
-use Celemas\Sire\Shape;
+use Celema\Sire\Contract;
+use Celema\Sire\Result;
+use Celema\Sire\Shape;
 use Override;
 
 final class SubShape implements Contract\Validator

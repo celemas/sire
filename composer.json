@@ -1,27 +1,27 @@
 {
-	"name": "celemas/sire",
+	"name": "celema/sire",
 	"description": "A PHP validation library",
 	"type": "library",
 	"license": "MIT",
 	"authors": [
 		{
 			"name": "Ernst",
-			"email": "ernst@celemas.dev"
+			"email": "ernst@celema.dev"
 		}
 	],
-	"homepage": "https://celemas.dev/sire",
+	"homepage": "https://celema.dev/sire",
 	"keywords": [
-		"celemas",
+		"celema",
 		"validation"
 	],
 	"autoload": {
 		"psr-4": {
-			"Celemas\\Sire\\": "src/"
+			"Celema\\Sire\\": "src/"
 		}
 	},
 	"autoload-dev": {
 		"psr-4": {
-			"Celemas\\Sire\\Tests\\": "tests"
+			"Celema\\Sire\\Tests\\": "tests"
 		}
 	},
 	"require": {
@@ -29,7 +29,7 @@
 		"symfony/html-sanitizer": "^8.0"
 	},
 	"require-dev": {
-		"celemas/dev": "^4.2"
+		"celema/dev": "^5.0"
 	},
 	"scripts": {
 		"test": "@php vendor/bin/phpunit --testdox --no-coverage --colors=always",
@@ -39,7 +39,7 @@
 			"@php vendor/bin/mago lint"
 		],
 		"docs:format": "npx prettier@3.6.2 --write --config docs/.prettierrc README.md CHANGELOG.md LICENSE.md docs/",
-		"docs:lint": "npx markdownlint-cli2@0.22.1 --config vendor/celemas/dev/config/markdownlint.jsonc README.md CHANGELOG.md LICENSE.md docs/",
+		"docs:lint": "npx markdownlint-cli2@0.22.1 --config vendor/celema/dev/config/markdownlint.jsonc README.md CHANGELOG.md LICENSE.md docs/",
 		"coverage:test": "@php -d xdebug.mode=coverage vendor/bin/phpunit --testdox --path-coverage --colors=always",
 		"coverage:analyze": "@php vendor/bin/coverlyzer .coverage/coverage.php",
 		"coverage": [

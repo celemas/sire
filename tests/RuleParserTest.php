@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Celemas\Sire\Tests;
+namespace Celema\Sire\Tests;
 
-use Celemas\Sire\RuleParser;
+use Celema\Sire\RuleParser;
 use ValueError;
 
 class RuleParserTest extends TestCase

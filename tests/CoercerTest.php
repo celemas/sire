@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Celemas\Sire\Tests;
+namespace Celema\Sire\Tests;
 
-use Celemas\Sire\Coercer\Boolean;
-use Celemas\Sire\Coercer\FloatingPoint;
-use Celemas\Sire\Coercer\Integer;
-use Celemas\Sire\Coercer\ListArray;
-use Celemas\Sire\Coercer\Number;
-use Celemas\Sire\Coercer\Str;
-use Celemas\Sire\CoercionMode;
-use Celemas\Sire\Contract\Coercer;
+use Celema\Sire\Coercer\Boolean;
+use Celema\Sire\Coercer\FloatingPoint;
+use Celema\Sire\Coercer\Integer;
+use Celema\Sire\Coercer\ListArray;
+use Celema\Sire\Coercer\Number;
+use Celema\Sire\Coercer\Str;
+use Celema\Sire\CoercionMode;
+use Celema\Sire\Contract\Coercer;
 
 class CoercerTest extends TestCase
 {

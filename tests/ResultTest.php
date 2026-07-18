@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Celemas\Sire\Tests;
+namespace Celema\Sire\Tests;
 
-use Celemas\Sire\Issue;
-use Celemas\Sire\Result;
+use Celema\Sire\Issue;
+use Celema\Sire\Result;
 
 class ResultTest extends TestCase
 {

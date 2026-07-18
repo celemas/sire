@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Celemas\Sire\Tests;
+namespace Celema\Sire\Tests;
 
-use Celemas\Sire\Failure;
-use Celemas\Sire\Validation;
+use Celema\Sire\Failure;
+use Celema\Sire\Validation;
 
 class ValidationTest extends TestCase
 {

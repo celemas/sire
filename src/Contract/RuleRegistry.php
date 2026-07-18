@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Celemas\Sire\Contract;
+namespace Celema\Sire\Contract;
 
 /** @api */
 interface RuleRegistry

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Celemas\Sire\Rule;
+namespace Celema\Sire\Rule;
 
-use Celemas\Sire\Contract;
-use Celemas\Sire\Validation;
+use Celema\Sire\Contract;
+use Celema\Sire\Validation;
 use Override;
 
 /** @api */

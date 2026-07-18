@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Celemas\Sire\Coercer;
+namespace Celema\Sire\Coercer;
 
-use Celemas\Sire\Coercion;
-use Celemas\Sire\CoercionMode;
-use Celemas\Sire\Contract;
-use Celemas\Sire\Failure;
+use Celema\Sire\Coercion;
+use Celema\Sire\CoercionMode;
+use Celema\Sire\Contract;
+use Celema\Sire\Failure;
 use Override;
 
 /** @api */

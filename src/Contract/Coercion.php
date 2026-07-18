@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Celemas\Sire\Contract;
+namespace Celema\Sire\Contract;
 
-use Celemas\Sire\Failure;
+use Celema\Sire\Failure;
 
 /** @api */
 interface Coercion

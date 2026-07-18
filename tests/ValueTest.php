@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Celemas\Sire\Tests;
+namespace Celema\Sire\Tests;
 
-use Celemas\Sire\Value;
+use Celema\Sire\Value;
 
 class ValueTest extends TestCase
 {
