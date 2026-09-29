@@ -46,8 +46,8 @@ final class RuleParser implements Contract\RuleParser
 				$firstChar === '"'
 				|| $firstChar === "'"
 			)
-				&& $firstChar === $lastChar
-				&& substr_count($arg, $firstChar) === 2
+			&& $firstChar === $lastChar
+			&& substr_count($arg, $firstChar) === 2
 		) {
 			return substr($arg, 1, -1);
 		}
