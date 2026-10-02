@@ -30,3 +30,4 @@ no-else-clause = { enabled = false }
 no-boolean-flag-parameter = { enabled = false }
 too-many-methods = { enabled = false }
 excessive-parameter-list = { enabled = false }
+prefer-early-continue = { enabled = false }
