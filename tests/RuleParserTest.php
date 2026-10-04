@@ -73,5 +73,29 @@ class RuleParserTest extends TestCase
 			['name' => 'regex', 'args' => ['']],
 			$parser->parse('regex:'),
 		);
+		$this->assertSame(
+			['name' => 'regex', 'args' => ['']],
+			$parser->parse("regex:''"),
+		);
+	}
+
+	public function testKeepsTrailingBackslash(): void
+	{
+		$parser = new RuleParser();
+
+		$this->assertSame(
+			['name' => 'ends_with', 'args' => ['a\\']],
+			$parser->parse('ends_with:a\\'),
+		);
+	}
+
+	public function testUnescapesDelimiterAtTheEnd(): void
+	{
+		$parser = new RuleParser();
+
+		$this->assertSame(
+			['name' => 'ends_with', 'args' => ['a:']],
+			$parser->parse('ends_with:a\\:'),
+		);
 	}
 }

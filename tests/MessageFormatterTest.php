@@ -98,6 +98,23 @@ class MessageFormatterTest extends TestCase
 		$this->assertSame('Use {field} for age and {arg1} for extra', $message);
 	}
 
+	public function testEscapesSingleSidedNamedBraces(): void
+	{
+		$formatter = new MessageFormatter([
+			'type.int' => 'Opening {{ only',
+			'type.float' => 'Closing }} only',
+		]);
+
+		$this->assertSame(
+			'Opening { only',
+			$formatter->format(Failure::key('type.int'), 'Age', 'age', 'raw'),
+		);
+		$this->assertSame(
+			'Closing } only',
+			$formatter->format(Failure::key('type.float'), 'Age', 'age', 'raw'),
+		);
+	}
+
 	public function testLeavesUnknownNamedPlaceholders(): void
 	{
 		$formatter = new MessageFormatter([

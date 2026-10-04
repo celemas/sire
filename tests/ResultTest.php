@@ -36,13 +36,14 @@ class ResultTest extends TestCase
 			[
 				new Issue(['email'], 'rule.email', 'Invalid value'),
 				new Issue(['profile', 'name'], 'missing', 'Name is required'),
+				new Issue(['email'], 'rule.max', 'Too long'),
 			],
 			['email' => 'x'],
 		);
 
 		$this->assertFalse($result->valid());
-		$this->assertCount(2, $result->issues());
-		$this->assertSame(['Invalid value'], $result->messages('email'));
+		$this->assertCount(3, $result->issues());
+		$this->assertSame(['Invalid value', 'Too long'], $result->messages('email'));
 		$this->assertSame('Invalid value', $result->first('email'));
 		$this->assertTrue($result->has('profile.name'));
 		$this->assertFalse($result->has('missing'));

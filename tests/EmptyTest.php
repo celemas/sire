@@ -95,11 +95,13 @@ class EmptyTest extends TestCase
 
 		$emptyResult = $shape->validate(['status' => '']);
 		$blankResult = $shape->validate(['status' => " \n\t"]);
+		$presentResult = $shape->validate(['status' => ' live ']);
 
 		$this->assertTrue($emptyResult->valid());
 		$this->assertSame('draft', $emptyResult->values()['status']);
 		$this->assertTrue($blankResult->valid());
 		$this->assertSame('draft', $blankResult->values()['status']);
+		$this->assertSame(' live ', $presentResult->values()['status']);
 	}
 
 	public function testFieldEmptyListDefaultFillsEmptyList(): void

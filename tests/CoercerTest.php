@@ -26,6 +26,7 @@ class CoercerTest extends TestCase
 		$this->assertCoerces($coercer, 0, '0');
 		$this->assertCoerces($coercer, 0, '-0');
 		$this->assertCoerces($coercer, -13, '-13');
+		$this->assertCoerces($coercer, 13, " 13\n");
 
 		$this->assertRejects($coercer, '23invalid');
 		$this->assertRejects($coercer, '23.23');
@@ -35,6 +36,7 @@ class CoercerTest extends TestCase
 		$this->assertRejects($coercer, true);
 		$this->assertRejects($coercer, []);
 		$this->assertRejects($coercer, '', empty: true);
+		$this->assertRejects($coercer, " \t", empty: true);
 	}
 
 	public function testFloatingPointCoercer(): void
@@ -55,6 +57,7 @@ class CoercerTest extends TestCase
 		$this->assertRejects($coercer, -INF);
 		$this->assertRejects($coercer, NAN);
 		$this->assertRejects($coercer, '', empty: true);
+		$this->assertRejects($coercer, " \t", empty: true);
 		$this->assertRejects($coercer, true);
 		$this->assertRejects($coercer, []);
 	}
@@ -73,6 +76,8 @@ class CoercerTest extends TestCase
 		$this->assertCoerces($coercer, 1.0, '1.');
 		$this->assertCoerces($coercer, 1.0, '01');
 		$this->assertCoerces($coercer, 1.0E+30, '1000000000000000000000000000000');
+		$this->assertCoerces($coercer, 13, " 13\n");
+		$this->assertCoerces($coercer, 13.13, ' 13.13 ');
 
 		$this->assertRejects($coercer, '23.23invalid');
 		$this->assertRejects($coercer, '1e309');
@@ -80,6 +85,7 @@ class CoercerTest extends TestCase
 		$this->assertRejects($coercer, -INF);
 		$this->assertRejects($coercer, NAN);
 		$this->assertRejects($coercer, '', empty: true);
+		$this->assertRejects($coercer, " \t", empty: true);
 		$this->assertRejects($coercer, true);
 		$this->assertRejects($coercer, []);
 	}

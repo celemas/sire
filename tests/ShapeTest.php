@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Celema\Sire\Tests;
 
+use Celema\Sire\Blank;
 use Celema\Sire\CoercerRegistry;
 use Celema\Sire\Coercion;
 use Celema\Sire\CoercionMode;
@@ -65,6 +66,20 @@ class ShapeTest extends TestCase
 
 		$this->assertFalse($result->valid());
 		$this->assertSame('Enabled must be yes or no', $result->first('enabled'));
+	}
+
+	public function testMessagesMergeWithEarlierMessages(): void
+	{
+		$shape = new Shape()
+			->message('type.int', '{label} needs digits')
+			->messages(['type.bool' => '{label} needs yes or no']);
+		$shape->add('age', 'int')->label('Age');
+		$shape->add('active', 'bool')->label('Active');
+
+		$result = $shape->validate(['age' => 'old', 'active' => 'maybe']);
+
+		$this->assertSame('Age needs digits', $result->first('age'));
+		$this->assertSame('Active needs yes or no', $result->first('active'));
 	}
 
 	public function testCustomRuleMessage(): void
@@ -802,6 +817,27 @@ class ShapeTest extends TestCase
 		$this->assertSame('23', $values['unknown_4']);
 	}
 
+	public function testAcceptsIntegerKeysInData(): void
+	{
+		$shape = new Shape()->extra(Extra::Allow);
+		$shape->add('name', 'string');
+
+		$result = $shape->validate(['name' => 'boiler', 0 => 'extra']);
+
+		$this->assertTrue($result->valid());
+		$this->assertSame(['name' => 'boiler', 0 => 'extra'], $result->values());
+	}
+
+	public function testAsListValidatesEachItem(): void
+	{
+		$shape = new Shape()->asList();
+		$shape->add('name', 'string');
+
+		$result = $shape->validate([['name' => 'a'], ['name' => 'b']]);
+
+		$this->assertSame([['name' => 'a'], ['name' => 'b']], $result->values());
+	}
+
 	public function testForbidsExtraData(): void
 	{
 		$shape = new Shape()->extra(Extra::Forbid);
@@ -877,6 +913,16 @@ class ShapeTest extends TestCase
 		$this->assertSame('invalid_4 is required', $result->first('invalid_4'));
 	}
 
+	public function testRuleFailureExposesAllArguments(): void
+	{
+		$shape = new Shape();
+		$shape->add('age', 'int')->rules('min:18:years');
+
+		$result = $shape->validate(['age' => '12']);
+
+		$this->assertSame(['arg1' => '18', 'arg2' => 'years'], $result->issues()[0]->params);
+	}
+
 	public function testEmailRule(): void
 	{
 		$testData = [
@@ -892,6 +938,24 @@ class ShapeTest extends TestCase
 		$this->assertFalse($result->valid());
 		$this->assertCount(1, $result->issues());
 		$this->assertSame('Email must be a valid email address', $result->first('invalid_email'));
+	}
+
+	public function testEmailRuleAcceptsSurroundingWhitespace(): void
+	{
+		$shape = new Shape();
+		$shape->add('email', 'string')->rules('email');
+
+		$this->assertTrue($shape->validate(['email' => " valid@email.com\n"])->valid());
+	}
+
+	public function testEmailRuleWithDnsCheckRejectsInvalidAddress(): void
+	{
+		$shape = new Shape();
+		$shape->add('email', 'string')->rules('email:checkdns');
+
+		$result = $shape->validate(['email' => 'invalid']);
+
+		$this->assertSame('email must be a valid email address', $result->first('email'));
 	}
 
 	public function testEmailRuleWithDnsCheck(): void
@@ -1112,6 +1176,18 @@ class ShapeTest extends TestCase
 		$this->assertSame('Already used', $result->first('email'));
 		$this->assertSame('taken@example.com', $result->values()['email']);
 		$this->assertSame('email.taken', $result->issues()[0]->code);
+	}
+
+	public function testReviewCallbackNormalizesNumericSegmentsInDottedPaths(): void
+	{
+		$shape = new Shape();
+		$shape->review(static function (Review $context): void {
+			$context->addError('items.0.name', 'Name error');
+		});
+
+		$result = $shape->validate([]);
+
+		$this->assertSame(['items', 0, 'name'], $result->issues()[0]->path);
 	}
 
 	public function testReviewCallbackAddsErrorsForRootIntegerAndArrayPaths(): void
@@ -1469,6 +1545,50 @@ class ShapeTest extends TestCase
 
 		$this->assertTrue($result->valid());
 		$this->assertSame([], $result->values());
+	}
+
+	public function testOptionalMissingFieldDoesNotHideLaterMissingFields(): void
+	{
+		$shape = new Shape();
+		$shape->add('subtitle', 'string')->empty(Blank::Null)->optional();
+		$shape->add('title', 'string')->label('Title');
+
+		$result = $shape->validate([]);
+
+		$this->assertSame('Title is required', $result->first('title'));
+	}
+
+	public function testOmittedOptionalFieldDoesNotSkipLaterFinalizers(): void
+	{
+		$shape = new Shape();
+		$shape->add('subtitle', 'string')->optional();
+		$shape->add('title', 'string')->finalize(static fn(mixed $value): string => strtoupper((string) $value));
+
+		$result = $shape->validate(['title' => 'boiler']);
+
+		$this->assertSame(['title' => 'BOILER'], $result->values());
+	}
+
+	public function testBlankRequiredFieldReportsMissingOnce(): void
+	{
+		$shape = new Shape();
+		$shape->add('title', 'string')->empty(Blank::String)->label('Title');
+
+		$result = $shape->validate(['title' => '']);
+
+		$this->assertSame(['Title is required'], $result->messages('title'));
+	}
+
+	public function testNullableFlagSurvivesDefaultAndOptional(): void
+	{
+		$shape = new Shape();
+		$shape->add('withDefault', 'string')->nullable()->default('draft');
+		$shape->add('optional', 'string')->nullable()->optional();
+
+		$result = $shape->validate(['withDefault' => null, 'optional' => null]);
+
+		$this->assertTrue($result->valid());
+		$this->assertSame(['withDefault' => null, 'optional' => null], $result->values());
 	}
 
 	public function testOptionalFieldValidatesPresentValue(): void
