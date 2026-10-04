@@ -69,7 +69,7 @@ final class Integer implements Contract\Coercer
 			return null;
 		}
 
-		$parsed = filter_var(trim($value), FILTER_VALIDATE_INT);
+		$parsed = filter_var($value, FILTER_VALIDATE_INT);
 
 		return $parsed === false ? null : $parsed;
 	}

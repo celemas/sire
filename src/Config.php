@@ -23,7 +23,7 @@ final class Config
 	private array $coercers = [];
 	private ?Contract\RuleParser $ruleParser = null;
 
-	public function asList(bool $list = true): void
+	public function asList(bool $list): void
 	{
 		$this->list = $list;
 	}

@@ -70,7 +70,7 @@ final class Number implements Contract\Coercer
 		}
 
 		return self::isNumericString($value)
-			? self::fromNumericString(trim($value))
+			? self::fromNumericString($value)
 			: null;
 	}
 

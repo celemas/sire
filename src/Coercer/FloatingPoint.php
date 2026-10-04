@@ -61,10 +61,6 @@ final class FloatingPoint implements Contract\Coercer
 
 	private static function toFloat(mixed $value): ?float
 	{
-		if ($value === null) {
-			return null;
-		}
-
 		return self::isFloatCastable($value)
 			? self::finiteFloat((float) $value)
 			: null;
