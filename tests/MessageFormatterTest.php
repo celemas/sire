@@ -82,6 +82,17 @@ class MessageFormatterTest extends TestCase
 		);
 	}
 
+	public function testFormatsNonStringNamedArguments(): void
+	{
+		$formatter = new MessageFormatter([
+			'type.int' => '{arg1} and {arg2}',
+		]);
+
+		$message = $formatter->format(Failure::key('type.int', 5, 1.5), 'Age', 'age', 'raw');
+
+		$this->assertSame('5 and 1.5', $message);
+	}
+
 	public function testEscapesNamedBraces(): void
 	{
 		$formatter = new MessageFormatter([

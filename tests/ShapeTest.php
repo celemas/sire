@@ -1497,6 +1497,17 @@ class ShapeTest extends TestCase
 		$this->assertSame('hello', $result->values()['slug']);
 	}
 
+	public function testChainedFieldFinalizersReceiveThePreviousResult(): void
+	{
+		$shape = new Shape();
+		$shape
+			->add('name', 'string')
+			->finalize(static fn(mixed $value): string => strtoupper((string) $value))
+			->finalize(static fn(mixed $_value, array $values): string => (string) $values['name'] . '!');
+
+		$this->assertSame('ADA!', $shape->validate(['name' => 'ada'])->values()['name']);
+	}
+
 	public function testReviewCallbacksReceiveFinalizedValues(): void
 	{
 		$called = false;
