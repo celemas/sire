@@ -7,6 +7,7 @@ namespace Celema\Sire;
 /** @api */
 final readonly class Review
 {
+	/** @param array<array-key, mixed> $values */
 	public function __construct(
 		private ErrorBag $errors,
 		private array $values,

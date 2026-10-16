@@ -14,6 +14,7 @@ final class ValidationRun
 	/** @var array<string, true> */
 	private array $ruleBlockedPaths = [];
 
+	/** @param array<array-key, mixed> $data */
 	public function __construct(
 		private readonly ShapeDefinition $shape,
 		private readonly array $data,
@@ -53,7 +54,10 @@ final class ValidationRun
 		);
 	}
 
-	/** @return array<array-key, mixed> */
+	/**
+	 * @param array<array-key, mixed> $data
+	 * @return array<array-key, mixed>
+	 */
 	private function prepareData(array $data): array
 	{
 		foreach ($this->shape->prepareCallbacks as $prepare) {
@@ -108,7 +112,10 @@ final class ValidationRun
 		}
 	}
 
-	/** @param array<string, Value>|list<array<string, Value>> $validatedValues */
+	/**
+	 * @param array<string, Value>|list<array<string, Value>> $validatedValues
+	 * @return array<string, Value>|list<array<string, Value>>
+	 */
 	private function finalizeValues(array $validatedValues): array
 	{
 		if ($this->shape->list) {
@@ -147,7 +154,10 @@ final class ValidationRun
 		return $values;
 	}
 
-	/** @param array<string, Value>|list<array<string, Value>> $validatedValues */
+	/**
+	 * @param array<string, Value>|list<array<string, Value>> $validatedValues
+	 * @return array<string, mixed>|list<array<string, mixed>>
+	 */
 	private function extractValues(array $validatedValues): array
 	{
 		if ($this->shape->list) {
@@ -165,7 +175,10 @@ final class ValidationRun
 		return $this->getValues($validatedValues);
 	}
 
-	/** @return array<string, Value> */
+	/**
+	 * @param array<array-key, mixed> $data
+	 * @return array<string, Value>
+	 */
 	private function readFromData(array $data, string|int|null $listIndex = null): array
 	{
 		$values = [];
@@ -488,7 +501,10 @@ final class ValidationRun
 		return $values;
 	}
 
-	/** @return array<string, Value>|list<array<string, Value>> */
+	/**
+	 * @param array<array-key, mixed> $data
+	 * @return array<string, Value>|list<array<string, Value>>
+	 */
 	private function readValues(array $data): array
 	{
 		if ($this->shape->list) {

@@ -8,6 +8,7 @@ namespace Celema\Sire\Contract;
 interface Parser
 {
 	/**
+	 * @param array<array-key, mixed> $data
 	 * @return array<array-key, mixed>
 	 * @throws \Celema\Sire\Exception\ValidationError
 	 */

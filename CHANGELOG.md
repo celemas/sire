@@ -2,7 +2,9 @@
 
 ## [Unreleased](https://codefloe.com/celema/sire/compare/0.5.0...HEAD)
 
-No notable changes since the last release.
+### Changed
+
+- Declared `array<array-key, mixed>` as the input type of `Contract\Validator::validate()` and `Contract\Parser::parse()`, so static analysis no longer reports missing array value types in implementations.
 
 ## [0.5.0](https://codefloe.com/celema/sire/src/tag/0.5.0) (2026-07-18)
 
