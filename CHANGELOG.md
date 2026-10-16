@@ -5,6 +5,7 @@
 ### Changed
 
 - Declared `array<array-key, mixed>` as the input type of `Contract\Validator::validate()` and `Contract\Parser::parse()`, so static analysis no longer reports missing array value types in implementations.
+- Changed the `minlen` and `maxlen` rules to count characters instead of bytes, matching their messages. Multibyte text now passes `maxlen` and fails `minlen` sooner than before, and Sire now requires `ext-mbstring`.
 
 ### Fixed
 

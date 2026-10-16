@@ -18,6 +18,6 @@ final class MaxLength implements Contract\Rule
 	#[Override]
 	public function validate(Contract\Value $value, string ...$args): Contract\Validation
 	{
-		return Validation::from(is_string($value->value) && strlen($value->value) <= (int) ($args[0] ?? null));
+		return Validation::from(is_string($value->value) && mb_strlen($value->value) <= (int) ($args[0] ?? null));
 	}
 }

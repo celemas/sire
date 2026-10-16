@@ -26,6 +26,7 @@
 	},
 	"require": {
 		"php": "^8.5",
+		"ext-mbstring": "*",
 		"symfony/html-sanitizer": "^8.0"
 	},
 	"require-dev": {

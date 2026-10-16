@@ -1084,6 +1084,20 @@ class ShapeTest extends TestCase
 		);
 	}
 
+	public function testLengthRulesCountCharacters(): void
+	{
+		$shape = new Shape();
+		$shape->add('short', 'string')->rules('maxlen:3');
+		$shape->add('long', 'string')->rules('minlen:4');
+
+		$result = $shape->validate(['short' => 'äöü', 'long' => 'äöü']);
+
+		$this->assertSame(
+			[['long']],
+			array_map(static fn($issue): array => $issue->path, $result->issues()),
+		);
+	}
+
 	public function testRegexRule(): void
 	{
 		$testData = [
