@@ -198,7 +198,7 @@ final class ValidationRun
 		return $values;
 	}
 
-	/** @param array<string, mixed> $data */
+	/** @param array<array-key, mixed> $data */
 	private function readFieldValue(
 		string $field,
 		Field $definition,
@@ -218,7 +218,7 @@ final class ValidationRun
 		return $read->value;
 	}
 
-	/** @param array<string, mixed> $data */
+	/** @param array<array-key, mixed> $data */
 	private function readEmptyValue(
 		string $field,
 		Field $definition,
@@ -241,7 +241,7 @@ final class ValidationRun
 		return null;
 	}
 
-	/** @param array<string, mixed> $data */
+	/** @param array<array-key, mixed> $data */
 	private function readDefaultValue(
 		string $field,
 		Field $definition,
@@ -460,7 +460,7 @@ final class ValidationRun
 
 	/**
 	 * @param array<string, Value> $values
-	 * @param array<string, mixed> $data
+	 * @param array<array-key, mixed> $data
 	 * @return array<string, Value>
 	 */
 	private function fillMissingFromFields(
@@ -516,7 +516,6 @@ final class ValidationRun
 					continue;
 				}
 
-				/** @var array<string, mixed> $item */
 				$subValues = $this->readFromData($item, $listIndex);
 				$values[] = $this->fillMissingFromFields($subValues, $item, $listIndex);
 			}

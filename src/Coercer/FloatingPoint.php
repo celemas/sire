@@ -66,6 +66,7 @@ final class FloatingPoint implements Contract\Coercer
 			: null;
 	}
 
+	/** @psalm-assert-if-true int|float|numeric-string $value */
 	private static function isFloatCastable(mixed $value): bool
 	{
 		return is_int($value) || is_float($value) || is_string($value) && is_numeric($value);

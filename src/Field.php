@@ -189,7 +189,7 @@ final class Field
 		return is_string($this->type) ? $this->type : 'shape';
 	}
 
-	/** @param array<string, mixed> $data */
+	/** @param array<array-key, mixed> $data */
 	public function applyPreparation(mixed $value, array $data): mixed
 	{
 		foreach ($this->preparers as $prepare) {

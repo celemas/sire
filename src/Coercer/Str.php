@@ -54,6 +54,7 @@ final class Str implements Contract\Coercer
 		);
 	}
 
+	/** @psalm-assert-if-true string|int|float|Stringable|null $value */
 	private static function isCoercible(mixed $value): bool
 	{
 		return (
@@ -65,7 +66,7 @@ final class Str implements Contract\Coercer
 		);
 	}
 
-	private static function toString(mixed $value): ?string
+	private static function toString(string|int|float|Stringable|null $value): ?string
 	{
 		return $value === null ? null : (string) $value;
 	}

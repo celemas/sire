@@ -74,6 +74,7 @@ final class Number implements Contract\Coercer
 			: null;
 	}
 
+	/** @psalm-assert-if-true numeric-string $value */
 	private static function isNumericString(mixed $value): bool
 	{
 		return is_string($value) && is_numeric($value);
