@@ -293,16 +293,11 @@ final class ValidationRun
 			);
 		}
 
-		$type = $definition->type();
-
-		if ($type === 'shape') {
-			$shape = $definition->type;
-			assert($shape instanceof Contract\Validator, 'Expected shape field type to be a shape instance');
-
-			return $this->toSubValues($value, $definition, $shape);
+		if ($definition->type instanceof Contract\Validator) {
+			return $this->toSubValues($value, $definition, $definition->type);
 		}
 
-		$coercer = $this->shape->coercers->get($type);
+		$coercer = $this->shape->coercers->get($definition->type);
 
 		if ($coercer === null) {
 			throw new ValueError('Wrong shape type');

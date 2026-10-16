@@ -453,6 +453,16 @@ class ShapeTest extends TestCase
 		$shape->validate(['invalid_field' => false]);
 	}
 
+	public function testShapeAsTypeNameIsUnknown(): void
+	{
+		$this->expectException(ValueError::class);
+		$this->expectExceptionMessage('Wrong shape type');
+
+		$shape = new Shape();
+		$shape->add('field', 'shape');
+		$shape->validate(['field' => ['name' => 'value']]);
+	}
+
 	public function testUnknownRule(): void
 	{
 		$this->expectException(ValueError::class);
