@@ -10,7 +10,7 @@ This guide shows how to install Sire in an application and how to set up a local
 
 Before you install Sire, make sure your environment matches the supported runtime and tooling versions.
 
-- PHP `^8.5`
+- PHP `^8.5` with the `mbstring` extension
 - Composer
 
 ## Install in an application
