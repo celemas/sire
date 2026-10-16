@@ -18,6 +18,6 @@ final class Minimum implements Contract\Rule
 	#[Override]
 	public function validate(Contract\Value $value, string ...$args): Contract\Validation
 	{
-		return Validation::from((float) $value->value >= (float) ($args[0] ?? null));
+		return Validation::from(is_numeric($value->value) && (float) $value->value >= (float) ($args[0] ?? null));
 	}
 }

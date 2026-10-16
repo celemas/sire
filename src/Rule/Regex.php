@@ -27,6 +27,6 @@ final class Regex implements Contract\Rule
 			return Validation::invalid();
 		}
 
-		return Validation::from(preg_match($pattern, $value->value) === 1);
+		return Validation::from(is_string($value->value) && preg_match($pattern, $value->value) === 1);
 	}
 }

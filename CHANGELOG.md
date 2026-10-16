@@ -6,6 +6,10 @@
 
 - Declared `array<array-key, mixed>` as the input type of `Contract\Validator::validate()` and `Contract\Parser::parse()`, so static analysis no longer reports missing array value types in implementations.
 
+### Fixed
+
+- Made the `minlen`, `maxlen`, `regex`, and `email` rules reject non-string values and the `min` and `max` rules reject non-numeric values instead of throwing a `TypeError` or comparing cast values.
+
 ## [0.5.0](https://codefloe.com/celema/sire/src/tag/0.5.0) (2026-07-18)
 
 ### Changed

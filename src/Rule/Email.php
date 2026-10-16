@@ -18,8 +18,12 @@ final class Email implements Contract\Rule
 	#[Override]
 	public function validate(Contract\Value $value, string ...$args): Contract\Validation
 	{
+		if (!is_string($value->value)) {
+			return Validation::invalid();
+		}
+
 		$email = filter_var(
-			trim((string) $value->value),
+			trim($value->value),
 			\FILTER_VALIDATE_EMAIL,
 		);
 

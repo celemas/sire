@@ -1095,6 +1095,40 @@ class ShapeTest extends TestCase
 		$this->assertSame('invalid has an invalid format', $result->first('invalid'));
 	}
 
+	public function testBuiltInRulesRejectValuesOfOtherTypes(): void
+	{
+		$shape = new Shape();
+		$shape->add('minlen', 'list')->rules('minlen:1');
+		$shape->add('maxlen', 'int')->rules('maxlen:10');
+		$shape->add('regex', 'bool')->rules('regex:/1/');
+		$shape->add('email', 'list')->rules('email');
+		$shape->add('min', 'string')->rules('min:-1');
+		$shape->add('max', 'string')->rules('max:10');
+
+		$result = $shape->validate([
+			'minlen' => ['a'],
+			'maxlen' => 5,
+			'regex' => true,
+			'email' => ['valid@email.com'],
+			'min' => 'abc',
+			'max' => 'abc',
+		]);
+
+		$this->assertSame(
+			[['minlen'], ['maxlen'], ['regex'], ['email'], ['min'], ['max']],
+			array_map(static fn($issue): array => $issue->path, $result->issues()),
+		);
+	}
+
+	public function testNumericRulesAcceptNumericStrings(): void
+	{
+		$shape = new Shape();
+		$shape->add('min', 'string')->rules('min:10');
+		$shape->add('max', 'string')->rules('max:10');
+
+		$this->assertTrue($shape->validate(['min' => '10.5', 'max' => '9'])->valid());
+	}
+
 	public function testInRule(): void
 	{
 		$testData = [
