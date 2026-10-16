@@ -16,18 +16,12 @@ final readonly class Failure
 
 	public static function key(string $key, mixed ...$args): self
 	{
-		/** @var list<mixed> $list */
-		$list = $args;
-
-		return new self($key, $list);
+		return new self($key, array_values($args));
 	}
 
 	public static function invalid(?string $fallback = null, mixed ...$args): self
 	{
-		/** @var list<mixed> $list */
-		$list = $args;
-
-		return new self(args: $list, fallback: $fallback);
+		return new self(args: array_values($args), fallback: $fallback);
 	}
 
 	public static function message(string $message): self

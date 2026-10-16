@@ -17,6 +17,12 @@ class FailureTest extends TestCase
 		$this->assertNull($failure->fallback);
 	}
 
+	public function testFactoriesListNamedArguments(): void
+	{
+		$this->assertSame([1, 2], Failure::key('type.custom', min: 1, max: 2)->args);
+		$this->assertSame([1, 2], Failure::invalid('Invalid', min: 1, max: 2)->args);
+	}
+
 	public function testMessageFactory(): void
 	{
 		$failure = Failure::message('Invalid value');
