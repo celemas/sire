@@ -11,6 +11,7 @@
 - Made the `minlen`, `maxlen`, `regex`, and `email` rules reject non-string values and the `min` and `max` rules reject non-numeric values instead of throwing a `TypeError` or comparing cast values.
 - Made `Failure::key()` and `Failure::invalid()` list named arguments in order; they previously broke message rendering.
 - Made a field declared with the type name `shape` throw the regular unknown-type `ValueError` instead of an `AssertionError` or `TypeError`.
+- Allowed `0` as a field name in `Shape::add()`; it was rejected as empty.
 
 ## [0.5.0](https://codefloe.com/celema/sire/src/tag/0.5.0) (2026-07-18)
 

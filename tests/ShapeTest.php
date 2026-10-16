@@ -1878,6 +1878,14 @@ class ShapeTest extends TestCase
 		$shape->add('', 'Int')->rules('int');
 	}
 
+	public function testZeroFieldName(): void
+	{
+		$shape = new Shape();
+		$shape->add('0', 'string');
+
+		$this->assertSame([0 => 'value'], $shape->parse(['0' => 'value']));
+	}
+
 	public function testEmptyArraySkipsRegularRule(): void
 	{
 		$testData = [

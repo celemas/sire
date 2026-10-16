@@ -120,7 +120,7 @@ final class Shape implements Contract\Shape
 		string $field,
 		string|Contract\Validator $type,
 	): Field {
-		if (!$field) {
+		if ($field === '') {
 			throw new ValueError(
 				'Shape definition error: field must not be empty',
 			);
