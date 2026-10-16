@@ -6,6 +6,8 @@ namespace Celema\Sire\Tests;
 
 use Celema\Sire\Failure;
 use Celema\Sire\MessageFormatter;
+use Override;
+use Stringable;
 
 class MessageFormatterTest extends TestCase
 {
@@ -91,6 +93,37 @@ class MessageFormatterTest extends TestCase
 		$message = $formatter->format(Failure::key('type.int', 5, 1.5), 'Age', 'age', 'raw');
 
 		$this->assertSame('5 and 1.5', $message);
+	}
+
+	public function testFormatsStringableValuesAndArguments(): void
+	{
+		$formatter = new MessageFormatter([
+			'positional' => '%3$s and %4$s',
+			'named' => '{value} and {arg1}',
+		]);
+		$text = new class implements Stringable {
+			#[Override]
+			public function __toString(): string
+			{
+				return 'text';
+			}
+		};
+
+		$this->assertSame('text and text', $formatter->format(Failure::key('positional', $text), 'Age', 'age', $text));
+		$this->assertSame('text and text', $formatter->format(Failure::key('named', $text), 'Age', 'age', $text));
+	}
+
+	public function testFormatsArgumentsAlikeInBothTemplateStyles(): void
+	{
+		$formatter = new MessageFormatter([
+			'positional' => '%4$s',
+			'named' => '{arg1}',
+		]);
+
+		$this->assertSame(
+			$formatter->format(Failure::key('named', ['a']), 'Age', 'age', 'raw'),
+			$formatter->format(Failure::key('positional', ['a']), 'Age', 'age', 'raw'),
+		);
 	}
 
 	public function testEscapesNamedBraces(): void

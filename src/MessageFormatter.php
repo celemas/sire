@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Celema\Sire;
 
+use Stringable;
+
 /** @api */
 final readonly class MessageFormatter
 {
@@ -68,20 +70,17 @@ final readonly class MessageFormatter
 		mixed $pristine,
 		array $args,
 	): string {
+		$value = self::stringify($pristine);
+		$args = array_map(self::stringify(...), $args);
+
 		if (self::usesNamedTemplate($template)) {
 			return self::renderNamed(
 				$template,
-				self::placeholders($label, $field, $pristine, $args),
+				self::placeholders($label, $field, $value, $args),
 			);
 		}
 
-		return sprintf(
-			$template,
-			$label,
-			$field,
-			self::stringify($pristine),
-			...$args,
-		);
+		return sprintf($template, $label, $field, $value, ...$args);
 	}
 
 	/** @param array<string, string> $values */
@@ -105,22 +104,22 @@ final readonly class MessageFormatter
 	}
 
 	/**
-	 * @param list<mixed> $args
+	 * @param list<string> $args
 	 * @return array<string, string>
 	 */
 	private static function placeholders(
 		string $label,
 		string $field,
-		mixed $pristine,
+		string $value,
 		array $args,
 	): array {
 		$values = [
 			'label' => $label,
 			'field' => $field,
-			'value' => self::stringify($pristine),
+			'value' => $value,
 		];
 
-		foreach (array_map(self::stringify(...), $args) as $index => $arg) {
+		foreach ($args as $index => $arg) {
 			$values['arg' . ($index + 1)] = $arg;
 		}
 
@@ -129,7 +128,7 @@ final readonly class MessageFormatter
 
 	private static function stringify(mixed $value): string
 	{
-		return print_r($value, true);
+		return $value instanceof Stringable ? (string) $value : print_r($value, true);
 	}
 
 	private static function usesNamedTemplate(string $template): bool
