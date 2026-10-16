@@ -147,8 +147,11 @@ final class ValidationRun
 			}
 
 			$value = $values[$field];
-			$finalValue = $definition->applyFinalization($value->value, $itemValues);
-			$values[$field] = new \Celema\Sire\Value($finalValue, $value->pristine, $value->empty);
+			$values[$field] = new \Celema\Sire\Value(
+				$definition->applyFinalization($value->value, $itemValues),
+				$value->pristine,
+				$value->empty,
+			);
 		}
 
 		return $values;
@@ -183,6 +186,7 @@ final class ValidationRun
 	{
 		$values = [];
 
+		/** @var mixed $value */
 		foreach ($data as $field => $value) {
 			$field = (string) $field;
 			$definition = $this->shape->fields[$field] ?? null;
@@ -206,6 +210,7 @@ final class ValidationRun
 		array $data,
 		string|int|null $listIndex,
 	): ?Value {
+		/** @var mixed $value */
 		$value = $definition->applyPreparation($value, $data);
 
 		if ($definition->isBlank($value)) {
@@ -248,8 +253,10 @@ final class ValidationRun
 		array $data,
 		string|int|null $listIndex,
 	): Value {
-		$value = $definition->applyPreparation($definition->defaultValue(), $data);
-		$read = $this->readKnownValue($definition, $value);
+		$read = $this->readKnownValue(
+			$definition,
+			$definition->applyPreparation($definition->defaultValue(), $data),
+		);
 		$this->addReadErrors($field, $read, $listIndex);
 
 		return $read->value;
@@ -604,12 +611,9 @@ final class ValidationRun
 	 */
 	private static function params(array $args): array
 	{
-		$params = [];
-
-		foreach ($args as $index => $arg) {
-			$params['arg' . ($index + 1)] = $arg;
-		}
-
-		return $params;
+		return array_combine(
+			array_map(static fn(int $index): string => 'arg' . ($index + 1), array_keys($args)),
+			$args,
+		);
 	}
 }

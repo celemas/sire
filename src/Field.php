@@ -192,22 +192,24 @@ final class Field
 	/** @param array<array-key, mixed> $data */
 	public function applyPreparation(mixed $value, array $data): mixed
 	{
-		foreach ($this->preparers as $prepare) {
-			$value = $prepare($value, $data);
-		}
-
-		return $value;
+		return array_reduce(
+			$this->preparers,
+			static fn(mixed $value, callable $prepare): mixed => $prepare($value, $data),
+			$value,
+		);
 	}
 
 	/** @param array<string, mixed> $values */
 	public function applyFinalization(mixed $value, array $values): mixed
 	{
-		foreach ($this->finalizers as $finalize) {
-			$values[$this->field] = $value;
-			$value = $finalize($value, $values);
-		}
-
-		return $value;
+		return array_reduce(
+			$this->finalizers,
+			fn(mixed $value, callable $finalize): mixed => $finalize(
+				$value,
+				array_replace($values, [$this->field => $value]),
+			),
+			$value,
+		);
 	}
 
 	private function matchesEmpty(Blank $empty, mixed $value): bool

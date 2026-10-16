@@ -2,8 +2,6 @@
 <psalm
 	errorLevel="1"
 	resolveFromConfigFile="true"
-	allowStringToStandInForClass="true"
-	reportMixedIssues="false"
 	findUnusedPsalmSuppress="true"
 	findUnusedBaselineEntry="true"
 	findUnusedCode="true"

@@ -120,8 +120,8 @@ final readonly class MessageFormatter
 			'value' => self::stringify($pristine),
 		];
 
-		foreach ($args as $index => $arg) {
-			$values['arg' . ($index + 1)] = self::stringify($arg);
+		foreach (array_map(self::stringify(...), $args) as $index => $arg) {
+			$values['arg' . ($index + 1)] = $arg;
 		}
 
 		return $values;
