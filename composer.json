@@ -63,7 +63,7 @@
 		"mutation": [
 			"Composer\\Config::disableProcessTimeout",
 			"@putenv XDEBUG_MODE=coverage",
-			"@php vendor/bin/infection --threads=max"
+			"@php vendor/bin/infection --threads=max --log-verbosity=all"
 		]
 	},
 	"config": {
