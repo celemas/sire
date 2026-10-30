@@ -414,7 +414,7 @@ $shape
 
 In field messages, `type` means the field's own type, `missing` and `null` mean field presence errors, and rule names such as `max`, `required`, or `email` mean that rule. Explicit keys such as `type.int` and `rule.max` also work.
 
-Message templates can use named placeholders:
+Message templates use named placeholders:
 
 - `{label}` is the field label, or the field name when no label is set.
 - `{field}` is the field name.
@@ -422,7 +422,7 @@ Message templates can use named placeholders:
 - `{min}` and `{max}` are the arguments of the built-in `minlen`, `maxlen`, `min`, and `max` rules. Custom rules can name their arguments the same way; see [Extend rules and coercers](#extend-rules-and-coercers).
 - `{arg1}`, `{arg2}`, and later values come from custom `Failure` arguments for coercers or unnamed rule DSL arguments for rules. Rule arguments keep their position: in `min:18:years`, `years` is `{arg2}`.
 
-Use `{{` and `}}` for literal braces. Do not mix named and `sprintf()` placeholders in one template. Existing `sprintf()` templates still work, with `%1$s`, `%2$s`, and `%3$s` mapping to `{label}`, `{field}`, and `{value}`, and `%4$s` onward to the arguments in order.
+Use `{{` and `}}` for literal braces. Other text, including `%`, stays as written, and a placeholder without a value is left in place.
 
 When no field or shape-level message is configured, Sire uses the coercer or rule's `message` property.
 

@@ -14,7 +14,7 @@ class MessageFormatterTest extends TestCase
 	public function testFormatsConfiguredMessage(): void
 	{
 		$formatter = new MessageFormatter([
-			'type.int' => '%1$s/%2$s/%3$s/%4$s',
+			'type.int' => '{label}/{field}/{value}/{arg1}',
 		]);
 
 		$message = $formatter->format(
@@ -43,7 +43,7 @@ class MessageFormatterTest extends TestCase
 		$this->assertSame('Age must be at least 18 years, got 12', $message);
 	}
 
-	public function testDetectsTemplatesUsingOnlyNamedArguments(): void
+	public function testKeepsPercentSignsLiteral(): void
 	{
 		$formatter = new MessageFormatter([]);
 
@@ -72,36 +72,6 @@ class MessageFormatterTest extends TestCase
 		);
 
 		$this->assertSame('Age age raw', $message);
-	}
-
-	public function testPositionalTemplatesReceiveNamedArgumentsInOrder(): void
-	{
-		$formatter = new MessageFormatter([]);
-
-		$message = $formatter->format(Failure::invalid(), 'Age', 'age', 'raw', fallback: '%1$s: %4$s to %5$s', args: [
-			'min' => '1',
-			'max' => '9',
-		]);
-
-		$this->assertSame('Age: 1 to 9', $message);
-	}
-
-	public function testPositionalTemplatesKeepBracedWordsContainingArgumentNames(): void
-	{
-		$formatter = new MessageFormatter([]);
-
-		$message = $formatter->format(
-			Failure::invalid(),
-			'Age',
-			'age',
-			'raw',
-			fallback: '%1$s {minimum} {admin} %4$s',
-			args: [
-				'min' => '5',
-			],
-		);
-
-		$this->assertSame('Age {minimum} {admin} 5', $message);
 	}
 
 	public function testUsesLocalFailureMessageKey(): void
@@ -175,7 +145,6 @@ class MessageFormatterTest extends TestCase
 	public function testFormatsStringableValuesAndArguments(): void
 	{
 		$formatter = new MessageFormatter([
-			'positional' => '%3$s and %4$s',
 			'named' => '{value} and {arg1}',
 		]);
 		$text = new class implements Stringable {
@@ -186,21 +155,7 @@ class MessageFormatterTest extends TestCase
 			}
 		};
 
-		$this->assertSame('text and text', $formatter->format(Failure::key('positional', $text), 'Age', 'age', $text));
 		$this->assertSame('text and text', $formatter->format(Failure::key('named', $text), 'Age', 'age', $text));
-	}
-
-	public function testFormatsArgumentsAlikeInBothTemplateStyles(): void
-	{
-		$formatter = new MessageFormatter([
-			'positional' => '%4$s',
-			'named' => '{arg1}',
-		]);
-
-		$this->assertSame(
-			$formatter->format(Failure::key('named', ['a']), 'Age', 'age', 'raw'),
-			$formatter->format(Failure::key('positional', ['a']), 'Age', 'age', 'raw'),
-		);
 	}
 
 	public function testEscapesNamedBraces(): void
@@ -252,26 +207,10 @@ class MessageFormatterTest extends TestCase
 		$this->assertSame('Unknown {missing} {arg2}', $message);
 	}
 
-	public function testFormatsSprintfMessageWithUnknownBraces(): void
-	{
-		$formatter = new MessageFormatter([
-			'type.int' => '%1$s must match {a,b}',
-		]);
-
-		$message = $formatter->format(
-			new Failure('type.int'),
-			'Age',
-			'age',
-			'raw',
-		);
-
-		$this->assertSame('Age must match {a,b}', $message);
-	}
-
 	public function testUsesDefaultMessageKey(): void
 	{
 		$formatter = new MessageFormatter([
-			'type.int' => '%1$s must be numeric',
+			'type.int' => '{label} must be numeric',
 		]);
 
 		$message = $formatter->format(

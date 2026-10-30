@@ -15,8 +15,8 @@ final readonly class MessageFormatter
 	) {}
 
 	/**
-	 * Message templates receive label, field, pristine value, then failure or rule arguments.
-	 * Named arguments render as their own placeholder, positional ones as `{argN}`.
+	 * Templates use `{label}`, `{field}`, `{value}`, and the failure or rule
+	 * arguments: named ones by their name, positional ones as `{argN}`.
 	 *
 	 * @param array<array-key, mixed> $args
 	 * @param array<string, string> $messages
@@ -71,20 +71,12 @@ final readonly class MessageFormatter
 		mixed $pristine,
 		array $args,
 	): string {
-		$value = self::stringify($pristine);
-		$args = array_map(self::stringify(...), $args);
-		$placeholders = self::placeholders($label, $field, $value, $args);
-
-		if (self::usesNamedTemplate($template, $placeholders)) {
-			return self::renderNamed($template, $placeholders);
-		}
-
-		return sprintf($template, $label, $field, $value, ...array_values($args));
-	}
-
-	/** @param array<string, string> $values */
-	private static function renderNamed(string $template, array $values): string
-	{
+		$values = self::placeholders(
+			$label,
+			$field,
+			self::stringify($pristine),
+			array_map(self::stringify(...), $args),
+		);
 		$rendered = preg_replace_callback(
 			'/{{|}}|{([^{}]+)}/',
 			static function (array $matches) use ($values): string {
@@ -125,25 +117,5 @@ final readonly class MessageFormatter
 	private static function stringify(mixed $value): string
 	{
 		return $value instanceof Stringable ? (string) $value : print_r($value, true);
-	}
-
-	/** @param array<string, string> $placeholders */
-	private static function usesNamedTemplate(string $template, array $placeholders): bool
-	{
-		if (
-			str_contains($template, '{{')
-			|| str_contains($template, '}}')
-			|| preg_match('/{arg[1-9][0-9]*}/', $template) === 1
-		) {
-			return true;
-		}
-
-		foreach (array_keys($placeholders) as $name) {
-			if (str_contains($template, '{' . $name . '}')) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 }

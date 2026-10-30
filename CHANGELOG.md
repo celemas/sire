@@ -12,6 +12,10 @@
 - The `minlen`, `maxlen`, `min`, and `max` rules name their argument: messages use `{min}` or `{max}`, and issue params hold `min` or `max` instead of `arg1`. Message overrides for these rules that use `{arg1}` must switch to the new placeholder; further arguments keep their position, as `{arg2}` and so on.
 - `Contract\RuleRegistry` and `Contract\CoercerRegistry` require an `all()` method that lists every rule or coercer by name. Custom registry implementations must add it.
 
+### Removed
+
+- Removed `sprintf()`-style message templates such as `%1$s must be numeric`; templates use only named placeholders like `{label}`. A `%` in a template is now plain text.
+
 ## [0.6.0](https://codefloe.com/celema/sire/src/tag/0.6.0) (2026-10-16)
 
 ### Changed

@@ -59,7 +59,7 @@ class ShapeTest extends TestCase
 	public function testCustomTypeMessages(): void
 	{
 		$shape = new Shape()->messages([
-			'type.bool' => '%1$s must be yes or no',
+			'type.bool' => '{label} must be yes or no',
 		]);
 		$shape->add('enabled', 'bool')->label('Enabled');
 
@@ -2019,7 +2019,7 @@ class ShapeTest extends TestCase
 	{
 		return new class implements Rule {
 			public string $message {
-				get => 'Must start with %4$s';
+				get => 'Must start with {arg1}';
 			}
 
 			#[Override]
