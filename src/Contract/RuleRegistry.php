@@ -8,4 +8,7 @@ namespace Celema\Sire\Contract;
 interface RuleRegistry
 {
 	public function get(string $name): ?Rule;
+
+	/** @return array<string, Rule> Every rule the registry resolves, by name. */
+	public function all(): array;
 }

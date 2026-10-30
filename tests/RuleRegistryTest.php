@@ -66,6 +66,29 @@ class RuleRegistryTest extends TestCase
 		$this->assertNull($registry->get('unknown'));
 	}
 
+	public function testWithDefaultsListsBuiltInRules(): void
+	{
+		$registry = RuleRegistry::withDefaults();
+		$required = $registry->get('required');
+		$rules = $registry->all();
+
+		$this->assertSame(['required', 'email', 'minlen', 'maxlen', 'min', 'max', 'regex', 'in'], array_keys($rules));
+		$this->assertSame($required, $rules['required']);
+		$this->assertSame($rules['email'], $registry->get('email'));
+	}
+
+	public function testListsLocalRulesOverFallback(): void
+	{
+		$required = self::stringRule();
+		$custom = self::stringRule();
+		$rules = RuleRegistry::withDefaults()->with('required', $required)->with('starts_with', $custom)->all();
+
+		$this->assertSame($required, $rules['required']);
+		$this->assertSame($custom, $rules['starts_with']);
+		$this->assertArrayHasKey('email', $rules);
+		$this->assertSame(['starts_with' => $custom], new RuleRegistry(['starts_with' => $custom])->all());
+	}
+
 	public function testCustomRuleShadowsDefaults(): void
 	{
 		$rule = self::stringRule();
@@ -79,6 +102,12 @@ class RuleRegistryTest extends TestCase
 		$fallback = new class implements Contract\RuleRegistry {
 			#[Override]
 			public function get(string $name): ?Contract\Rule
+			{
+				throw new RuntimeException('Fallback should not be queried');
+			}
+
+			#[Override]
+			public function all(): array
 			{
 				throw new RuntimeException('Fallback should not be queried');
 			}

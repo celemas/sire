@@ -94,6 +94,17 @@ final class Shape implements Contract\Shape
 		return $this;
 	}
 
+	/**
+	 * Every message key the shape's rules and types can produce, with its
+	 * default template before any override, sorted by key.
+	 *
+	 * @return array<string, string>
+	 */
+	public function defaultMessages(): array
+	{
+		return $this->config->defaultMessages();
+	}
+
 	public function types(Contract\CoercerRegistry $registry): self
 	{
 		$this->config->coercers($registry);

@@ -8,4 +8,7 @@ namespace Celema\Sire\Contract;
 interface CoercerRegistry
 {
 	public function get(string $name): ?Coercer;
+
+	/** @return array<string, Coercer> Every coercer the registry resolves, by type name. */
+	public function all(): array;
 }

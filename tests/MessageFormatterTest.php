@@ -27,6 +27,83 @@ class MessageFormatterTest extends TestCase
 		$this->assertSame('Age/age/raw/extra', $message);
 	}
 
+	public function testFormatsNamedArguments(): void
+	{
+		$formatter = new MessageFormatter([]);
+
+		$message = $formatter->format(
+			Failure::invalid(),
+			'Age',
+			'age',
+			'12',
+			fallback: '{label} must be at least {min} {arg2}, got {value}',
+			args: ['min' => '18', 1 => 'years'],
+		);
+
+		$this->assertSame('Age must be at least 18 years, got 12', $message);
+	}
+
+	public function testDetectsTemplatesUsingOnlyNamedArguments(): void
+	{
+		$formatter = new MessageFormatter([]);
+
+		$message = $formatter->format(Failure::invalid(), 'Age', 'age', 'raw', fallback: '{min}% or more', args: [
+			'min' => '50',
+		]);
+
+		$this->assertSame('50% or more', $message);
+	}
+
+	public function testBuiltInPlaceholdersWinOverNamedArguments(): void
+	{
+		$formatter = new MessageFormatter([]);
+
+		$message = $formatter->format(
+			Failure::invalid(),
+			'Age',
+			'age',
+			'raw',
+			fallback: '{label} {field} {value}',
+			args: [
+				'label' => 'x',
+				'field' => 'y',
+				'value' => 'z',
+			],
+		);
+
+		$this->assertSame('Age age raw', $message);
+	}
+
+	public function testPositionalTemplatesReceiveNamedArgumentsInOrder(): void
+	{
+		$formatter = new MessageFormatter([]);
+
+		$message = $formatter->format(Failure::invalid(), 'Age', 'age', 'raw', fallback: '%1$s: %4$s to %5$s', args: [
+			'min' => '1',
+			'max' => '9',
+		]);
+
+		$this->assertSame('Age: 1 to 9', $message);
+	}
+
+	public function testPositionalTemplatesKeepBracedWordsContainingArgumentNames(): void
+	{
+		$formatter = new MessageFormatter([]);
+
+		$message = $formatter->format(
+			Failure::invalid(),
+			'Age',
+			'age',
+			'raw',
+			fallback: '%1$s {minimum} {admin} %4$s',
+			args: [
+				'min' => '5',
+			],
+		);
+
+		$this->assertSame('Age {minimum} {admin} 5', $message);
+	}
+
 	public function testUsesLocalFailureMessageKey(): void
 	{
 		$formatter = new MessageFormatter([

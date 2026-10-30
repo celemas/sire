@@ -352,7 +352,7 @@ If a finalize callback throws, the exception is not caught by Sire.
 The `Result` object is the primary output of validation. Use it as your source of truth when you call `validate()`. Use `Shape::parse()` when you want valid values directly or a `ValidationError` exception.
 
 - `valid()` returns `true` when no issues exist.
-- `issues()` returns typed `Issue` objects with `path`, `code`, `message`, and `params`.
+- `issues()` returns typed `Issue` objects with `path`, `code`, `message`, and `params`. `params` holds the failure or rule arguments by placeholder name, such as `min` or `arg1`.
 - `messages($path)` returns all messages for one exact path.
 - `first($path)` returns the first message for one exact path, or `null`.
 - `has($path)` returns whether one exact path has messages.
@@ -364,7 +364,19 @@ Paths can be dot strings such as `address.zip` or arrays such as `[0, 'email']` 
 
 ## Customize messages
 
-Use `message()` or `messages()` to override coercion and rule errors for a shape. Built-in type keys are `type.string`, `type.int`, `type.float`, `type.number`, `type.bool`, and `type.list`. Field presence keys are `missing` and `null`. Built-in rule keys use the rule name, for example `rule.required`, `rule.email`, `rule.min`, and `rule.max`. Custom coercers and rules use their registered names, for example `type.slug` and `rule.starts_with`.
+Use `message()` or `messages()` to override coercion and rule errors for a shape. Built-in type keys are `type.string`, `type.int`, `type.float`, `type.number`, `type.bool`, and `type.list`; `type.shape` reports a nested shape that did not receive an array. Field presence keys are `missing` and `null`, and `extra` reports a forbidden extra field. Built-in rule keys use the rule name, for example `rule.required`, `rule.email`, `rule.min`, and `rule.max`. Custom coercers and rules use their registered names, for example `type.slug` and `rule.starts_with`.
+
+`defaultMessages()` returns every key a shape can produce with its default template, including custom rules and types, sorted by key. Use it to translate all messages, or to check that a translation covers every key:
+
+```php
+<?php
+
+use Celema\Sire\Shape;
+
+$defaults = new Shape()->defaultMessages();
+// ['extra' => 'Field "{field}" is not allowed', 'missing' => '{label} is required', ...,
+//  'rule.minlen' => '{label} must be at least {min} characters', ...]
+```
 
 ```php
 <?php
@@ -396,7 +408,7 @@ $shape
     ->label('Age')
     ->messages([
         'type' => '{label} must be a whole number',
-        'max' => '{label} must be at most {arg1}',
+        'max' => '{label} must be at most {max}',
     ]);
 ```
 
@@ -407,9 +419,10 @@ Message templates can use named placeholders:
 - `{label}` is the field label, or the field name when no label is set.
 - `{field}` is the field name.
 - `{value}` is the pristine value that reached validation.
-- `{arg1}`, `{arg2}`, and later values come from custom `Failure` arguments for coercers or rule DSL arguments for rules.
+- `{min}` and `{max}` are the arguments of the built-in `minlen`, `maxlen`, `min`, and `max` rules. Custom rules can name their arguments the same way; see [Extend rules and coercers](#extend-rules-and-coercers).
+- `{arg1}`, `{arg2}`, and later values come from custom `Failure` arguments for coercers or unnamed rule DSL arguments for rules. Rule arguments keep their position: in `min:18:years`, `years` is `{arg2}`.
 
-Use `{{` and `}}` for literal braces. Do not mix named and `sprintf()` placeholders in one template. Existing `sprintf()` templates still work, with `%1$s`, `%2$s`, `%3$s`, and `%4$s` mapping to `{label}`, `{field}`, `{value}`, and `{arg1}`.
+Use `{{` and `}}` for literal braces. Do not mix named and `sprintf()` placeholders in one template. Existing `sprintf()` templates still work, with `%1$s`, `%2$s`, and `%3$s` mapping to `{label}`, `{field}`, and `{value}`, and `%4$s` onward to the arguments in order.
 
 When no field or shape-level message is configured, Sire uses the coercer or rule's `message` property.
 
@@ -514,6 +527,8 @@ Configure a shape fluently when you need project-specific rules, coercion behavi
 
 Custom rules implement `Celema\Sire\Contract\Rule`, expose a default `message`, and return `Celema\Sire\Contract\Validation`; use `Celema\Sire\Validation` when the default immutable result object is enough. Rules do not run after failed type handling or failed nested validation. Rules also skip values where `Contract\Value::$empty` is `true` by default; implement `Celema\Sire\Contract\ValidatesEmpty` when a rule must run for successfully typed empty values. Custom coercers implement `Celema\Sire\Contract\Coercer`, expose a default `message`, and return `Celema\Sire\Contract\Coercion`; use `Celema\Sire\Coercion` when the default immutable result object is enough. Sire passes the resolved `Celema\Sire\CoercionMode` to `coerce()`, but custom coercers must honor it themselves; shape strict mode cannot make a custom coercer strict if it ignores the mode. Pass `empty: true` to `Coercion` when the coerced value has no meaningful content for its type. Return `Failure::invalid()` when a coercer or rule cannot produce a valid value. Use `Failure::key()` only when one coercer or rule has multiple distinct failure modes.
 
+A rule can name its DSL arguments for messages and issue params by implementing `Celema\Sire\Contract\NamedArguments` instead of `Contract\Rule`. Its `arguments` property lists the names in DSL order: with `['prefix']`, `starts_with:ab` fills `{prefix}` and the issue param `prefix`. Arguments beyond the list keep their positional `{arg2}`, `{arg3}`, and so on. A custom rule or coercer registry implements `get()` and `all()`, which lists every rule or coercer by name for `defaultMessages()`.
+
 ```php
 <?php
 
@@ -528,9 +543,13 @@ use Override;
 $shape = new Shape();
 $shape->rule(
     'starts_with',
-    new class implements Contract\Rule {
+    new class implements Contract\NamedArguments {
         public string $message {
-            get => 'Must start with {arg1}';
+            get => 'Must start with {prefix}';
+        }
+
+        public array $arguments {
+            get => ['prefix'];
         }
 
         #[Override]

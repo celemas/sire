@@ -8,32 +8,38 @@ use Override;
 
 final class DefaultRules implements Contract\RuleRegistry
 {
+	private const array RULES = [
+		'required' => Rule\Required::class,
+		'email' => Rule\Email::class,
+		'minlen' => Rule\MinLength::class,
+		'maxlen' => Rule\MaxLength::class,
+		'min' => Rule\Minimum::class,
+		'max' => Rule\Maximum::class,
+		'regex' => Rule\Regex::class,
+		'in' => Rule\Allowed::class,
+	];
+
 	/** @var array<string, Contract\Rule> */
 	private array $loaded = [];
 
 	#[Override]
 	public function get(string $name): ?Contract\Rule
 	{
-		if (array_key_exists($name, $this->loaded)) {
-			return $this->loaded[$name];
+		$class = self::RULES[$name] ?? null;
+
+		return $class === null ? null : ($this->loaded[$name] ??= new $class());
+	}
+
+	#[Override]
+	public function all(): array
+	{
+		$rules = [];
+
+		foreach (self::RULES as $name => $class) {
+			$this->loaded[$name] ??= new $class();
+			$rules[$name] = $this->loaded[$name];
 		}
 
-		$rule = match ($name) {
-			'required' => new Rule\Required(),
-			'email' => new Rule\Email(),
-			'minlen' => new Rule\MinLength(),
-			'maxlen' => new Rule\MaxLength(),
-			'min' => new Rule\Minimum(),
-			'max' => new Rule\Maximum(),
-			'regex' => new Rule\Regex(),
-			'in' => new Rule\Allowed(),
-			default => null,
-		};
-
-		if ($rule !== null) {
-			$this->loaded[$name] = $rule;
-		}
-
-		return $rule;
+		return $rules;
 	}
 }

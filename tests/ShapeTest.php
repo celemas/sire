@@ -9,6 +9,7 @@ use Celema\Sire\CoercerRegistry;
 use Celema\Sire\Coercion;
 use Celema\Sire\CoercionMode;
 use Celema\Sire\Contract\Coercer;
+use Celema\Sire\Contract\NamedArguments;
 use Celema\Sire\Contract\Parser;
 use Celema\Sire\Contract\Rule;
 use Celema\Sire\Contract\RuleParser;
@@ -95,7 +96,7 @@ class ShapeTest extends TestCase
 
 	public function testCustomRuleMessageWithArgs(): void
 	{
-		$shape = new Shape()->message('rule.min', '{label} must be at least {arg1}, got {value}');
+		$shape = new Shape()->message('rule.min', '{label} must be at least {min}, got {value}');
 		$shape->add('age', 'int')->rules('min:18')->label('Age');
 
 		$result = $shape->validate(['age' => '12']);
@@ -133,10 +134,10 @@ class ShapeTest extends TestCase
 
 	public function testFieldRuleMessageOverridesShapeMessage(): void
 	{
-		$shape = new Shape()->message('rule.max', 'Global max {arg1}');
+		$shape = new Shape()->message('rule.max', 'Global max {max}');
 		$shape->add('age', 'int')->rules('max:120')->message(
 			'max',
-			'Age must be at most {arg1}, got {value}',
+			'Age must be at most {max}, got {value}',
 		);
 		$shape->add('score', 'int')->rules('max:10');
 
@@ -158,7 +159,7 @@ class ShapeTest extends TestCase
 			->rules('max:120')
 			->messages([
 				'type.int' => 'Age must be numeric',
-				'rule.max' => 'Age must be at most {arg1}',
+				'rule.max' => 'Age must be at most {max}',
 			]);
 
 		$result = $shape->validate(['age' => 'old']);
@@ -923,6 +924,107 @@ class ShapeTest extends TestCase
 		$this->assertSame('invalid_4 is required', $result->first('invalid_4'));
 	}
 
+	public function testDefaultMessagesListEveryKeyWithItsTemplate(): void
+	{
+		$messages = new Shape()
+			->message('rule.required', 'Overridden')
+			->defaultMessages();
+
+		$this->assertSame(
+			[
+				'extra',
+				'missing',
+				'null',
+				'rule.email',
+				'rule.in',
+				'rule.max',
+				'rule.maxlen',
+				'rule.min',
+				'rule.minlen',
+				'rule.regex',
+				'rule.required',
+				'type.bool',
+				'type.float',
+				'type.int',
+				'type.list',
+				'type.number',
+				'type.shape',
+				'type.string',
+			],
+			array_keys($messages),
+		);
+		$this->assertSame('{label} is required', $messages['rule.required']);
+		$this->assertSame('{label} must be at least {min} characters', $messages['rule.minlen']);
+		$this->assertSame('{label} must be a whole number', $messages['type.int']);
+	}
+
+	public function testDefaultMessagesFollowConfiguredRulesAndTypes(): void
+	{
+		$rule = new class implements Rule {
+			public string $message {
+				get => '{label} must start with {arg1}';
+			}
+
+			#[Override]
+			public function validate(Value $value, string ...$args): Validation
+			{
+				return Validation::valid();
+			}
+		};
+		$coercer = new class implements Coercer {
+			public string $message {
+				get => '{label} must be a slug';
+			}
+
+			#[Override]
+			public function coerce(mixed $pristine, CoercionMode $mode): Coercion
+			{
+				return new Coercion($pristine, $pristine);
+			}
+		};
+
+		$messages = new Shape()
+			->rule('starts_with', $rule)
+			->rule('email', $rule)
+			->type('slug', $coercer)
+			->defaultMessages();
+		$replaced = new Shape()
+			->rules(new RuleRegistry(['starts_with' => $rule]))
+			->defaultMessages();
+
+		$this->assertSame('{label} must start with {arg1}', $messages['rule.starts_with']);
+		$this->assertSame('{label} must start with {arg1}', $messages['rule.email']);
+		$this->assertSame('{label} must be a slug', $messages['type.slug']);
+		$this->assertSame('{label} is required', $messages['rule.required']);
+		$this->assertArrayHasKey('rule.starts_with', $replaced);
+		$this->assertArrayNotHasKey('rule.required', $replaced);
+	}
+
+	public function testRulesNameTheirArguments(): void
+	{
+		$shape = new Shape()->rule('starts_with', new class implements NamedArguments {
+			public string $message {
+				get => '{label} must start with {prefix}, not {value}';
+			}
+
+			public array $arguments {
+				get => ['prefix'];
+			}
+
+			#[Override]
+			public function validate(Value $value, string ...$args): Validation
+			{
+				return Validation::from(str_starts_with((string) $value->value, $args[0] ?? ''));
+			}
+		});
+		$shape->add('code', 'string')->rules('starts_with:AB:strict')->label('Code');
+
+		$issue = $shape->validate(['code' => 'XY'])->issues()[0];
+
+		$this->assertSame('Code must start with AB, not XY', $issue->message);
+		$this->assertSame(['prefix' => 'AB', 'arg2' => 'strict'], $issue->params);
+	}
+
 	public function testRuleFailureExposesAllArguments(): void
 	{
 		$shape = new Shape();
@@ -930,7 +1032,7 @@ class ShapeTest extends TestCase
 
 		$result = $shape->validate(['age' => '12']);
 
-		$this->assertSame(['arg1' => '18', 'arg2' => 'years'], $result->issues()[0]->params);
+		$this->assertSame(['min' => '18', 'arg2' => 'years'], $result->issues()[0]->params);
 	}
 
 	public function testEmailRule(): void
@@ -1880,7 +1982,7 @@ class ShapeTest extends TestCase
 		$this->assertSame('missing', $issues[0]->code);
 		$this->assertSame([3, 'list_shape', 0, 'inner_int'], $issues[5]->path);
 		$this->assertSame('type.int', $issues[5]->code);
-		$this->assertSame(['arg1' => '10'], $issues[8]->params);
+		$this->assertSame(['min' => '10'], $issues[8]->params);
 	}
 
 	public function testEmptyFieldName(): void

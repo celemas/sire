@@ -16,8 +16,9 @@ final readonly class MessageFormatter
 
 	/**
 	 * Message templates receive label, field, pristine value, then failure or rule arguments.
+	 * Named arguments render as their own placeholder, positional ones as `{argN}`.
 	 *
-	 * @param list<mixed> $args
+	 * @param array<array-key, mixed> $args
 	 * @param array<string, string> $messages
 	 */
 	public function format(
@@ -62,7 +63,7 @@ final readonly class MessageFormatter
 		return $failure->fallback ?? $fallback;
 	}
 
-	/** @param list<mixed> $args */
+	/** @param array<array-key, mixed> $args */
 	private static function render(
 		string $template,
 		string $label,
@@ -72,15 +73,13 @@ final readonly class MessageFormatter
 	): string {
 		$value = self::stringify($pristine);
 		$args = array_map(self::stringify(...), $args);
+		$placeholders = self::placeholders($label, $field, $value, $args);
 
-		if (self::usesNamedTemplate($template)) {
-			return self::renderNamed(
-				$template,
-				self::placeholders($label, $field, $value, $args),
-			);
+		if (self::usesNamedTemplate($template, $placeholders)) {
+			return self::renderNamed($template, $placeholders);
 		}
 
-		return sprintf($template, $label, $field, $value, ...$args);
+		return sprintf($template, $label, $field, $value, ...array_values($args));
 	}
 
 	/** @param array<string, string> $values */
@@ -104,7 +103,9 @@ final readonly class MessageFormatter
 	}
 
 	/**
-	 * @param list<string> $args
+	 * Label, field, and value win over arguments of the same name.
+	 *
+	 * @param array<array-key, string> $args
 	 * @return array<string, string>
 	 */
 	private static function placeholders(
@@ -113,17 +114,12 @@ final readonly class MessageFormatter
 		string $value,
 		array $args,
 	): array {
-		$values = [
+		return [
+			...Arguments::keyed($args),
 			'label' => $label,
 			'field' => $field,
 			'value' => $value,
 		];
-
-		foreach ($args as $index => $arg) {
-			$values['arg' . ($index + 1)] = $arg;
-		}
-
-		return $values;
 	}
 
 	private static function stringify(mixed $value): string
@@ -131,12 +127,23 @@ final readonly class MessageFormatter
 		return $value instanceof Stringable ? (string) $value : print_r($value, true);
 	}
 
-	private static function usesNamedTemplate(string $template): bool
+	/** @param array<string, string> $placeholders */
+	private static function usesNamedTemplate(string $template, array $placeholders): bool
 	{
-		return (
+		if (
 			str_contains($template, '{{')
-				|| str_contains($template, '}}')
-				|| preg_match('/{(?:label|field|value|arg[1-9][0-9]*)}/', $template) === 1
-		);
+			|| str_contains($template, '}}')
+			|| preg_match('/{arg[1-9][0-9]*}/', $template) === 1
+		) {
+			return true;
+		}
+
+		foreach (array_keys($placeholders) as $name) {
+			if (str_contains($template, '{' . $name . '}')) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

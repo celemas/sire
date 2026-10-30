@@ -109,6 +109,12 @@ final class Config
 		);
 	}
 
+	/** @return array<string, string> */
+	public function defaultMessages(): array
+	{
+		return Messages::defaults($this->resolvedRuleRegistry(), $this->resolvedCoercerRegistry());
+	}
+
 	private function messageFormatter(): MessageFormatter
 	{
 		return new MessageFormatter($this->messages);

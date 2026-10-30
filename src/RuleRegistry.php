@@ -49,4 +49,10 @@ final class RuleRegistry implements Contract\RuleRegistry
 
 		return $this->fallback?->get($name);
 	}
+
+	#[Override]
+	public function all(): array
+	{
+		return array_replace($this->fallback?->all() ?? [], $this->rules);
+	}
 }

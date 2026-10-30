@@ -8,30 +8,36 @@ use Override;
 
 final class DefaultCoercers implements Contract\CoercerRegistry
 {
+	private const array COERCERS = [
+		'string' => Coercer\Str::class,
+		'bool' => Coercer\Boolean::class,
+		'list' => Coercer\ListArray::class,
+		'float' => Coercer\FloatingPoint::class,
+		'int' => Coercer\Integer::class,
+		'number' => Coercer\Number::class,
+	];
+
 	/** @var array<string, Contract\Coercer> */
 	private array $loaded = [];
 
 	#[Override]
 	public function get(string $name): ?Contract\Coercer
 	{
-		if (array_key_exists($name, $this->loaded)) {
-			return $this->loaded[$name];
+		$class = self::COERCERS[$name] ?? null;
+
+		return $class === null ? null : ($this->loaded[$name] ??= new $class());
+	}
+
+	#[Override]
+	public function all(): array
+	{
+		$coercers = [];
+
+		foreach (self::COERCERS as $name => $class) {
+			$this->loaded[$name] ??= new $class();
+			$coercers[$name] = $this->loaded[$name];
 		}
 
-		$coercer = match ($name) {
-			'string' => new Coercer\Str(),
-			'bool' => new Coercer\Boolean(),
-			'list' => new Coercer\ListArray(),
-			'float' => new Coercer\FloatingPoint(),
-			'int' => new Coercer\Integer(),
-			'number' => new Coercer\Number(),
-			default => null,
-		};
-
-		if ($coercer !== null) {
-			$this->loaded[$name] = $coercer;
-		}
-
-		return $coercer;
+		return $coercers;
 	}
 }

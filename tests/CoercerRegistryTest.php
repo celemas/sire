@@ -58,6 +58,29 @@ class CoercerRegistryTest extends TestCase
 		$this->assertNull($registry->get('unknown'));
 	}
 
+	public function testWithDefaultsListsBuiltInCoercers(): void
+	{
+		$registry = CoercerRegistry::withDefaults();
+		$string = $registry->get('string');
+		$coercers = $registry->all();
+
+		$this->assertSame(['string', 'bool', 'list', 'float', 'int', 'number'], array_keys($coercers));
+		$this->assertSame($string, $coercers['string']);
+		$this->assertSame($coercers['int'], $registry->get('int'));
+	}
+
+	public function testListsLocalCoercersOverFallback(): void
+	{
+		$string = self::coercer(static fn(mixed $pristine): string => (string) $pristine);
+		$slug = self::coercer(static fn(mixed $pristine): string => (string) $pristine);
+		$coercers = CoercerRegistry::withDefaults()->with('string', $string)->with('slug', $slug)->all();
+
+		$this->assertSame($string, $coercers['string']);
+		$this->assertSame($slug, $coercers['slug']);
+		$this->assertArrayHasKey('int', $coercers);
+		$this->assertSame(['slug' => $slug], new CoercerRegistry(['slug' => $slug])->all());
+	}
+
 	public function testCustomCoercerShadowsDefaults(): void
 	{
 		$coercer = self::coercer(static fn(mixed $pristine): string => (string) $pristine);
@@ -71,6 +94,12 @@ class CoercerRegistryTest extends TestCase
 		$fallback = new class implements Contract\CoercerRegistry {
 			#[Override]
 			public function get(string $name): ?Coercer
+			{
+				throw new RuntimeException('Fallback should not be queried');
+			}
+
+			#[Override]
+			public function all(): array
 			{
 				throw new RuntimeException('Fallback should not be queried');
 			}

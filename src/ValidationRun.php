@@ -105,7 +105,9 @@ final class ValidationRun
 					$value->pristine,
 					'rule.' . $ruleName,
 					$rule->message,
-					$ruleArgs,
+					$rule instanceof Contract\NamedArguments
+						? Arguments::named($ruleArgs, $rule->arguments)
+						: $ruleArgs,
 					$definition->messageOverrides(),
 				),
 			);
@@ -329,7 +331,7 @@ final class ValidationRun
 			$field,
 			$value,
 			'extra',
-			'Field "{field}" is not allowed',
+			Messages::EXTRA,
 		);
 	}
 
@@ -341,7 +343,7 @@ final class ValidationRun
 			$definition->field,
 			null,
 			'null',
-			'{label} must not be null',
+			Messages::NULL,
 			messages: $definition->messageOverrides(),
 		);
 	}
@@ -354,7 +356,7 @@ final class ValidationRun
 			$definition->field,
 			null,
 			'missing',
-			'{label} is required',
+			Messages::MISSING,
 			messages: $definition->messageOverrides(),
 		);
 	}
@@ -387,13 +389,13 @@ final class ValidationRun
 			$definition->field,
 			$value,
 			'type.shape',
-			'{label} must be an array',
+			Messages::SHAPE,
 			messages: $definition->messageOverrides(),
 		);
 	}
 
 	/**
-	 * @param list<mixed> $args
+	 * @param array<array-key, mixed> $args
 	 * @param array<string, string> $messages
 	 */
 	private function formatFailure(
@@ -421,7 +423,7 @@ final class ValidationRun
 				$args,
 				$messages,
 			),
-			self::params($args),
+			Arguments::keyed($args),
 		);
 	}
 
@@ -603,17 +605,5 @@ final class ValidationRun
 	private static function isRawEmptyValue(mixed $value): bool
 	{
 		return $value === null || $value === [] || $value === '';
-	}
-
-	/**
-	 * @param list<mixed> $args
-	 * @return array<string, mixed>
-	 */
-	private static function params(array $args): array
-	{
-		return array_combine(
-			array_map(static fn(int $index): string => 'arg' . ($index + 1), array_keys($args)),
-			$args,
-		);
 	}
 }

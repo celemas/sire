@@ -9,10 +9,14 @@ use Celema\Sire\Validation;
 use Override;
 
 /** @api */
-final class Maximum implements Contract\Rule
+final class Maximum implements Contract\NamedArguments
 {
 	public string $message {
-		get => '{label} must be at most {arg1}';
+		get => '{label} must be at most {max}';
+	}
+
+	public array $arguments {
+		get => ['max'];
 	}
 
 	#[Override]

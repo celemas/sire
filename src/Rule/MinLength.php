@@ -9,10 +9,14 @@ use Celema\Sire\Validation;
 use Override;
 
 /** @api */
-final class MinLength implements Contract\Rule
+final class MinLength implements Contract\NamedArguments
 {
 	public string $message {
-		get => '{label} must be at least {arg1} characters';
+		get => '{label} must be at least {min} characters';
+	}
+
+	public array $arguments {
+		get => ['min'];
 	}
 
 	#[Override]

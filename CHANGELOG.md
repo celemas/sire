@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://codefloe.com/celema/sire/compare/0.6.0...HEAD)
 
-No notable changes since the last release.
+### Added
+
+- Added `Shape::defaultMessages()`, which lists every message key a shape can produce with its default template, including custom rules and types, for translating messages or checking a translation for completeness.
+- Added `Contract\NamedArguments`, with which a rule names its DSL arguments for message placeholders and issue params, like `{min}` instead of `{arg1}`.
+
+### Changed
+
+- The `minlen`, `maxlen`, `min`, and `max` rules name their argument: messages use `{min}` or `{max}`, and issue params hold `min` or `max` instead of `arg1`. Message overrides for these rules that use `{arg1}` must switch to the new placeholder; further arguments keep their position, as `{arg2}` and so on.
+- `Contract\RuleRegistry` and `Contract\CoercerRegistry` require an `all()` method that lists every rule or coercer by name. Custom registry implementations must add it.
 
 ## [0.6.0](https://codefloe.com/celema/sire/src/tag/0.6.0) (2026-10-16)
 

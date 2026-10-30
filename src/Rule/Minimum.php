@@ -9,10 +9,14 @@ use Celema\Sire\Validation;
 use Override;
 
 /** @api */
-final class Minimum implements Contract\Rule
+final class Minimum implements Contract\NamedArguments
 {
 	public string $message {
-		get => '{label} must be at least {arg1}';
+		get => '{label} must be at least {min}';
+	}
+
+	public array $arguments {
+		get => ['min'];
 	}
 
 	#[Override]
