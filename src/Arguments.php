@@ -11,11 +11,11 @@ final class Arguments
 	 * Gives rule arguments the names their rule declares, by position.
 	 *
 	 * @param list<string> $args
-	 * @param list<non-empty-string> $names
 	 * @return array<array-key, string>
 	 */
-	public static function named(array $args, array $names): array
+	public static function named(array $args, Contract\NamedArguments $rule): array
 	{
+		$names = $rule->arguments;
 		$named = [];
 
 		foreach ($args as $index => $arg) {

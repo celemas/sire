@@ -9,7 +9,7 @@ use Celema\Sire\Validation;
 use Override;
 
 /** @api */
-final class MaxLength implements Contract\NamedArguments
+final class MaxLength implements Contract\Rule, Contract\NamedArguments
 {
 	public string $message {
 		get => '{label} must be at most {max} characters';

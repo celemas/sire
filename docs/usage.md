@@ -525,9 +525,9 @@ Configure a shape fluently when you need project-specific rules, coercion behavi
 - Use `messages()` to override many type, rule, or extra-field messages.
 - Use `ruleParser()` if you need a different DSL split strategy.
 
-Custom rules implement `Celema\Sire\Contract\Rule`, expose a default `message`, and return `Celema\Sire\Contract\Validation`; use `Celema\Sire\Validation` when the default immutable result object is enough. Rules do not run after failed type handling or failed nested validation. Rules also skip values where `Contract\Value::$empty` is `true` by default; implement `Celema\Sire\Contract\ValidatesEmpty` when a rule must run for successfully typed empty values. Custom coercers implement `Celema\Sire\Contract\Coercer`, expose a default `message`, and return `Celema\Sire\Contract\Coercion`; use `Celema\Sire\Coercion` when the default immutable result object is enough. Sire passes the resolved `Celema\Sire\CoercionMode` to `coerce()`, but custom coercers must honor it themselves; shape strict mode cannot make a custom coercer strict if it ignores the mode. Pass `empty: true` to `Coercion` when the coerced value has no meaningful content for its type. Return `Failure::invalid()` when a coercer or rule cannot produce a valid value. Use `Failure::key()` only when one coercer or rule has multiple distinct failure modes.
+Custom rules implement `Celema\Sire\Contract\Rule`, expose a default `message`, and return `Celema\Sire\Contract\Validation`; use `Celema\Sire\Validation` when the default immutable result object is enough. Rules do not run after failed type handling or failed nested validation. Rules also skip values where `Contract\Value::$empty` is `true` by default; also implement `Celema\Sire\Contract\ValidatesEmpty` when a rule must run for successfully typed empty values. Custom coercers implement `Celema\Sire\Contract\Coercer`, expose a default `message`, and return `Celema\Sire\Contract\Coercion`; use `Celema\Sire\Coercion` when the default immutable result object is enough. Sire passes the resolved `Celema\Sire\CoercionMode` to `coerce()`, but custom coercers must honor it themselves; shape strict mode cannot make a custom coercer strict if it ignores the mode. Pass `empty: true` to `Coercion` when the coerced value has no meaningful content for its type. Return `Failure::invalid()` when a coercer or rule cannot produce a valid value. Use `Failure::key()` only when one coercer or rule has multiple distinct failure modes.
 
-A rule can name its DSL arguments for messages and issue params by implementing `Celema\Sire\Contract\NamedArguments` instead of `Contract\Rule`. Its `arguments` property lists the names in DSL order: with `['prefix']`, `starts_with:ab` fills `{prefix}` and the issue param `prefix`. Arguments beyond the list keep their positional `{arg2}`, `{arg3}`, and so on. A custom rule or coercer registry implements `get()` and `all()`, which lists every rule or coercer by name for `defaultMessages()`.
+A rule can name its DSL arguments for messages and issue params by also implementing `Celema\Sire\Contract\NamedArguments`. Its `arguments` property lists the names in DSL order: with `['prefix']`, `starts_with:ab` fills `{prefix}` and the issue param `prefix`. Arguments beyond the list keep their positional `{arg2}`, `{arg3}`, and so on. A custom rule or coercer registry implements `get()` and `all()`, which lists every rule or coercer by name for `defaultMessages()`.
 
 ```php
 <?php
@@ -543,7 +543,7 @@ use Override;
 $shape = new Shape();
 $shape->rule(
     'starts_with',
-    new class implements Contract\NamedArguments {
+    new class implements Contract\Rule, Contract\NamedArguments {
         public string $message {
             get => 'Must start with {prefix}';
         }

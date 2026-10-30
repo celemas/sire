@@ -106,7 +106,7 @@ final class ValidationRun
 					'rule.' . $ruleName,
 					$rule->message,
 					$rule instanceof Contract\NamedArguments
-						? Arguments::named($ruleArgs, $rule->arguments)
+						? Arguments::named($ruleArgs, $rule)
 						: $ruleArgs,
 					$definition->messageOverrides(),
 				),

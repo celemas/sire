@@ -1002,7 +1002,7 @@ class ShapeTest extends TestCase
 
 	public function testRulesNameTheirArguments(): void
 	{
-		$shape = new Shape()->rule('starts_with', new class implements NamedArguments {
+		$shape = new Shape()->rule('starts_with', new class implements Rule, NamedArguments {
 			public string $message {
 				get => '{label} must start with {prefix}, not {value}';
 			}

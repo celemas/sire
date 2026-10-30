@@ -9,7 +9,7 @@ use Celema\Sire\Validation;
 use Override;
 
 /** @api */
-final class Required implements Contract\ValidatesEmpty
+final class Required implements Contract\Rule, Contract\ValidatesEmpty
 {
 	public string $message {
 		get => '{label} is required';

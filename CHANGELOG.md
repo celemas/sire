@@ -5,12 +5,13 @@
 ### Added
 
 - Added `Shape::defaultMessages()`, which lists every message key a shape can produce with its default template, including custom rules and types, for translating messages or checking a translation for completeness.
-- Added `Contract\NamedArguments`, with which a rule names its DSL arguments for message placeholders and issue params, like `{min}` instead of `{arg1}`.
+- Added `Contract\NamedArguments`, which a rule implements next to `Contract\Rule` to name its DSL arguments for message placeholders and issue params, like `{min}` instead of `{arg1}`.
 
 ### Changed
 
 - The `minlen`, `maxlen`, `min`, and `max` rules name their argument: messages use `{min}` or `{max}`, and issue params hold `min` or `max` instead of `arg1`. Message overrides for these rules that use `{arg1}` must switch to the new placeholder; further arguments keep their position, as `{arg2}` and so on.
 - `Contract\RuleRegistry` and `Contract\CoercerRegistry` require an `all()` method that lists every rule or coercer by name. Custom registry implementations must add it.
+- `Contract\ValidatesEmpty` no longer extends `Contract\Rule`, so a rule names both: `implements Contract\Rule, Contract\ValidatesEmpty`. A rule that implements only `ValidatesEmpty` must add `Contract\Rule`.
 
 ### Removed
 

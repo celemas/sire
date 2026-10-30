@@ -9,7 +9,7 @@ use Celema\Sire\Validation;
 use Override;
 
 /** @api */
-final class MinLength implements Contract\NamedArguments
+final class MinLength implements Contract\Rule, Contract\NamedArguments
 {
 	public string $message {
 		get => '{label} must be at least {min} characters';
